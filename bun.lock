@@ -20,6 +20,15 @@
         "typescript": "^5",
       },
     },
+    "packages/database": {
+      "name": "@ignisia/database-adapter",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
     "packages/mongodb": {
       "name": "@ignisia/mongodb-adapter",
       "devDependencies": {
@@ -121,6 +130,8 @@
     "@humanwhocodes/module-importer": ["@humanwhocodes/module-importer@1.0.1", "", {}, "sha512-bxveV4V8v5Yb4ncFTT3rPSgZBOpCkjfK0y4oVVVJwIuDVBRMDXrPyXRL988i5ap9m9bnyEEjWfm5WkBmtffLfA=="],
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.2", "", {}, "sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ=="],
+
+    "@ignisia/database-adapter": ["@ignisia/database-adapter@workspace:packages/database"],
 
     "@ignisia/mongodb-adapter": ["@ignisia/mongodb-adapter@workspace:packages/mongodb"],
 
