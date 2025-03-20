@@ -43,3 +43,10 @@ export const AggregationFunction = {
   MAX: 'MAX',
   AVG: 'AVG',
 } as const;
+
+export const AcceptedJoin = {
+  INNER: 'INNER',
+  LEFT: 'LEFT',
+  RIGHT: 'RIGHT',
+  NATURAL: 'NATURAL',
+} as const;

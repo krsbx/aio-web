@@ -34,7 +34,9 @@ export class Column<
     : // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       ColumnValue = ColumnValue,
-  Definition extends Partial<ColumnDefinition<Value, Dialect>> = object,
+  Definition extends Partial<
+    ColumnDefinition<Value, Dialect>
+  > = NonNullable<unknown>,
 > {
   public readonly definition: Definition;
   public readonly type: Options['type'];

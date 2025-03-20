@@ -2,8 +2,6 @@ import { Column } from '../column';
 import { QueryBuilder } from '../query';
 import type { TableOptions, TimestampOptions } from './types';
 
-type Columns = Record<string, Column>;
-
 const defaultCreatedAt = new Column({
   type: 'DATETIME',
 }).default('CURRENT_TIMESTAMP');
@@ -16,13 +14,16 @@ const defaultDeletedAt = new Column({
   type: 'DATETIME',
 });
 
-export class Table<T extends string, U extends Columns> {
-  public readonly name: T;
-  public readonly columns: U;
+export class Table<
+  TableName extends string,
+  Columns extends Record<string, Column>,
+> {
+  public readonly name: TableName;
+  public readonly columns: Columns;
   public readonly paranoid: string | null;
   public readonly timestamp: TimestampOptions | null;
 
-  constructor(options: TableOptions<T, U>) {
+  constructor(options: TableOptions<TableName, Columns>) {
     this.name = options.name;
     this.columns = options.columns;
 
@@ -34,7 +35,8 @@ export class Table<T extends string, U extends Columns> {
         typeof options.paranoid === 'boolean' ? 'deletedAt' : options.paranoid;
 
       if (this.paranoid && !this.columns[this.paranoid]) {
-        (this.columns as Columns)[this.paranoid] = defaultDeletedAt;
+        (this.columns as Record<string, Column>)[this.paranoid] =
+          defaultDeletedAt;
       }
     }
 
@@ -55,11 +57,13 @@ export class Table<T extends string, U extends Columns> {
       }
 
       if (this.timestamp.createdAt && !this.columns[this.timestamp.createdAt]) {
-        (this.columns as Columns)[this.timestamp.createdAt] = defaultCreatedAt;
+        (this.columns as Record<string, Column>)[this.timestamp.createdAt] =
+          defaultCreatedAt;
       }
 
       if (this.timestamp.updatedAt && !this.columns[this.timestamp.updatedAt]) {
-        (this.columns as Columns)[this.timestamp.updatedAt] = defaultUpdatedAt;
+        (this.columns as Record<string, Column>)[this.timestamp.updatedAt] =
+          defaultUpdatedAt;
       }
     }
 
@@ -70,6 +74,6 @@ export class Table<T extends string, U extends Columns> {
   }
 
   public query() {
-    return new QueryBuilder(this);
+    return new QueryBuilder(this).alias(this.name);
   }
 }

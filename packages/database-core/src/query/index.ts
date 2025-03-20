@@ -1,6 +1,7 @@
-import type { Column } from '../column';
-import type { Table } from '../table';
+import { Column } from '../column';
+import { Table } from '../table';
 import {
+  AcceptedJoin as AcceptedJoinValue,
   AcceptedOperator as AcceptedOperatorValue,
   AggregationFunction as AggregationFunctionValue,
   ConditionClause as ConditionClauseValue,
@@ -9,10 +10,12 @@ import {
 } from './constants';
 import type {
   AcceptedInsertValues,
+  AcceptedJoin,
   AcceptedOperator,
   AcceptedOrderBy,
   AcceptedUpdateValues,
   AggregationFunction,
+  ColumnSelector,
   ConditionClause,
   LogicalOperator,
   QueryType,
@@ -20,27 +23,55 @@ import type {
 } from './types';
 import { getCondition } from './utilities';
 
-export interface QueryDefinition<Columns extends Record<string, Column>> {
+interface QueryDefinition<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<
+    string,
+    Table<string, Record<string, Column>>
+  > = NonNullable<unknown>,
+  AllowedColumn extends ColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  > = ColumnSelector<Alias, TableRef, JoinedTables>,
+> {
   queryType: QueryType | null;
-  select: (keyof Columns)[] | null;
+  select: AllowedColumn[] | null;
   where: string[] | null;
   having: string[] | null;
   params: unknown[] | null;
   limit: number | null;
   offset: number | null;
-  groupBy: (keyof Columns)[] | null;
-  insertValues: AcceptedInsertValues<Columns> | null;
-  updateValues: AcceptedUpdateValues<Columns> | null;
-  orderBy: AcceptedOrderBy<Columns> | null;
+  groupBy: AllowedColumn[] | null;
+  insertValues: AcceptedInsertValues<TableRef['columns']> | null;
+  updateValues: AcceptedUpdateValues<TableRef['columns']> | null;
+  orderBy: AcceptedOrderBy<AllowedColumn>[] | null;
   aggregate: {
-    column: keyof Columns;
+    column: AllowedColumn;
     fn: AggregationFunction;
   } | null;
+  distinct: boolean | null;
+  joins: string[] | null;
+  baseAlias: Alias | null;
+  joinedTables: JoinedTables | null;
 }
 
 export class QueryBuilder<
+  Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
-  Definition extends Partial<QueryDefinition<TableRef['columns']>> = object,
+  JoinedTables extends Record<
+    string,
+    Table<string, Record<string, Column>>
+  > = NonNullable<unknown>,
+  Definition extends Partial<
+    QueryDefinition<Alias, TableRef, JoinedTables>
+  > = NonNullable<unknown>,
+  AllowedColumn extends ColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  > = ColumnSelector<Alias, TableRef, JoinedTables>,
 > {
   public readonly table: TableRef;
   public readonly definition: Definition;
@@ -60,13 +91,32 @@ export class QueryBuilder<
       updateValues: null,
       orderBy: null,
       aggregate: null,
+      joins: null,
+      distinct: null,
+      baseAlias: null,
+      joinedTables: null,
     } as Definition;
+  }
+
+  public alias<NewAlias extends string>(alias: NewAlias) {
+    this.definition.baseAlias = alias as unknown as Alias;
+
+    return this as unknown as QueryBuilder<
+      NewAlias,
+      TableRef,
+      JoinedTables,
+      Definition & { baseAlias: NewAlias }
+    >;
   }
 
   private addCondition<
     Clause extends ConditionClause,
-    ColName extends keyof TableRef['columns'],
-    Col extends TableRef['columns'][ColName],
+    ColName extends AllowedColumn,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? TableRef['columns'][TableColumn]
+        : JoinedTables[TableAlias]['columns'][TableColumn]
+      : never,
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
     Logical extends LogicalOperator,
@@ -108,8 +158,12 @@ export class QueryBuilder<
   }
 
   public where<
-    ColName extends keyof TableRef['columns'],
-    Col extends TableRef['columns'][ColName],
+    ColName extends AllowedColumn,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? TableRef['columns'][TableColumn]
+        : JoinedTables[TableAlias]['columns'][TableColumn]
+      : never,
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
@@ -125,8 +179,12 @@ export class QueryBuilder<
   }
 
   public having<
-    ColName extends keyof TableRef['columns'],
-    Col extends TableRef['columns'][ColName],
+    ColName extends AllowedColumn,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? TableRef['columns'][TableColumn]
+        : JoinedTables[TableAlias]['columns'][TableColumn]
+      : never,
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
@@ -142,8 +200,12 @@ export class QueryBuilder<
   }
 
   public and<
-    ColName extends keyof TableRef['columns'],
-    Col extends TableRef['columns'][ColName],
+    ColName extends AllowedColumn,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? TableRef['columns'][TableColumn]
+        : JoinedTables[TableAlias]['columns'][TableColumn]
+      : never,
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
@@ -159,8 +221,12 @@ export class QueryBuilder<
   }
 
   public or<
-    ColName extends keyof TableRef['columns'],
-    Col extends TableRef['columns'][ColName],
+    ColName extends AllowedColumn,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? TableRef['columns'][TableColumn]
+        : JoinedTables[TableAlias]['columns'][TableColumn]
+      : never,
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
@@ -175,48 +241,61 @@ export class QueryBuilder<
     return this;
   }
 
+  public distinct() {
+    this.definition.distinct = true;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { distinct: true }
+    >;
+  }
+
   public aggregate<
-    ColName extends keyof TableRef['columns'],
+    ColName extends AllowedColumn,
     Fn extends AggregationFunction,
-  >(column: ColName, fn: Fn) {
+  >(column: AllowedColumn, fn: Fn) {
     this.definition.aggregate = {
       column,
       fn,
     };
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { aggregate: { column: ColName; fn: Fn } }
     >;
   }
 
-  public count<ColName extends keyof TableRef['columns']>(column: ColName) {
+  public count<ColName extends AllowedColumn>(column: ColName) {
     return this.aggregate(column, AggregationFunctionValue.COUNT);
   }
 
-  public sum<ColName extends keyof TableRef['columns']>(column: ColName) {
+  public sum<ColName extends AllowedColumn>(column: ColName) {
     return this.aggregate(column, AggregationFunctionValue.SUM);
   }
 
-  public min<ColName extends keyof TableRef['columns']>(column: ColName) {
+  public min<ColName extends AllowedColumn>(column: ColName) {
     return this.aggregate(column, AggregationFunctionValue.MIN);
   }
 
-  public max<ColName extends keyof TableRef['columns']>(column: ColName) {
+  public max<ColName extends AllowedColumn>(column: ColName) {
     return this.aggregate(column, AggregationFunctionValue.MAX);
   }
 
-  public avg<ColName extends keyof TableRef['columns']>(column: ColName) {
+  public avg<ColName extends AllowedColumn>(column: ColName) {
     return this.aggregate(column, AggregationFunctionValue.AVG);
   }
 
-  public groupBy<Columns extends (keyof TableRef['columns'])[]>(
-    columns: Columns
-  ) {
+  public groupBy<Columns extends AllowedColumn[]>(...columns: Columns) {
     this.definition.groupBy = columns;
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { groupBy: Columns }
     >;
   }
@@ -225,7 +304,9 @@ export class QueryBuilder<
     this.definition.limit = limit;
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { limit: Limit }
     >;
   }
@@ -234,35 +315,36 @@ export class QueryBuilder<
     this.definition.offset = offset;
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { offset: Offset }
     >;
   }
 
-  public orderBy<OrderBy extends AcceptedOrderBy<TableRef['columns']>>(
-    orderBy: OrderBy
+  public orderBy<OrderBy extends AcceptedOrderBy<AllowedColumn>>(
+    ...orderBy: OrderBy[]
   ) {
-    if (!this.definition.orderBy) this.definition.orderBy = {};
+    if (!this.definition.orderBy) this.definition.orderBy = [];
 
-    this.definition.orderBy = {
-      ...this.definition.orderBy,
-      ...orderBy,
-    };
+    this.definition.orderBy.push(...orderBy);
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { orderBy: OrderBy }
     >;
   }
 
-  public select<Columns extends (keyof TableRef['columns'])[]>(
-    columns: Columns
-  ) {
+  public select<Columns extends AllowedColumn[]>(...columns: Columns) {
     this.definition.select = columns;
     this.definition.queryType = QueryTypeValue.SELECT;
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { queryType: typeof QueryTypeValue.SELECT; select: Columns }
     >;
   }
@@ -271,13 +353,20 @@ export class QueryBuilder<
     Columns extends TableRef['columns'],
     Values extends {
       [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
-    }[],
-  >(values: Values) {
+    },
+  >(...values: Values[]) {
     this.definition.queryType = QueryTypeValue.INSERT;
-    this.definition.insertValues = values;
+
+    if (!this.definition.insertValues) {
+      this.definition.insertValues = [];
+    }
+
+    this.definition.insertValues.push(...values);
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { queryType: typeof QueryTypeValue.INSERT }
     >;
   }
@@ -292,7 +381,9 @@ export class QueryBuilder<
     this.definition.updateValues = values;
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { queryType: typeof QueryTypeValue.UPDATE }
     >;
   }
@@ -301,14 +392,20 @@ export class QueryBuilder<
     this.definition.queryType = QueryTypeValue.DELETE;
 
     return this as unknown as QueryBuilder<
+      Alias,
       TableRef,
+      JoinedTables,
       Definition & { queryType: typeof QueryTypeValue.DELETE }
     >;
   }
 
   private buildSelectQuery() {
+    const from = this.definition.baseAlias
+      ? `${this.table.name} AS ${this.definition.baseAlias}`
+      : this.table.name;
+
     if (this.definition.aggregate) {
-      return `SELECT ${this.definition.aggregate.fn}(${this.definition.aggregate.column as string}) FROM ${this.table.name}`;
+      return `SELECT ${this.definition.aggregate.fn}(${this.definition.aggregate.column as string}) FROM ${from}`;
     }
 
     const columns =
@@ -316,7 +413,11 @@ export class QueryBuilder<
         ? '*'
         : this.definition.select.join(', ');
 
-    return `SELECT ${columns} FROM ${this.table.name}`;
+    if (this.definition.distinct) {
+      return `SELECT DISTINCT ${columns} FROM ${from}`;
+    }
+
+    return `SELECT ${columns} FROM ${from}`;
   }
 
   private buildInsertQuery() {
@@ -355,6 +456,128 @@ export class QueryBuilder<
     return `UPDATE ${this.table.name} SET ${keys.map((key) => `${key as string} = ?`.trim()).join(', ')}`;
   }
 
+  private addJoin<
+    JoinTable extends Table<string, Record<string, Column>>,
+    JoinAlias extends string,
+    BaseColName extends keyof TableRef['columns'],
+    JoinColName extends keyof JoinTable['columns'],
+  >(
+    joinType: AcceptedJoin,
+    joinTable: JoinTable,
+    baseColumn: BaseColName,
+    joinColumn: JoinColName,
+    alias: JoinAlias
+  ) {
+    if (!this.definition.joins) this.definition.joins = [];
+
+    this.definition.joins.push(
+      `${joinType} JOIN ${joinTable.name} AS ${alias} ON ${this.definition.baseAlias}.${String(
+        baseColumn
+      )} = ${alias}.${String(joinColumn)}`
+    );
+
+    if (!this.definition.joinedTables) {
+      this.definition.joinedTables = {} as JoinedTables;
+    }
+
+    this.definition.joinedTables = {
+      ...this.definition.joinedTables,
+      [alias]: joinTable,
+    };
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables & { [K in JoinAlias]: JoinTable },
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      Definition & {
+        joins: string[];
+        joinedTables: JoinedTables & { [K in JoinAlias]: JoinTable };
+      }
+    >;
+  }
+
+  public leftJoin<
+    JoinTable extends Table<string, Record<string, Column>>,
+    JoinAlias extends string,
+    BaseColName extends keyof TableRef['columns'],
+    JoinColName extends keyof JoinTable['columns'],
+  >(
+    joinTable: JoinTable,
+    baseColumn: BaseColName,
+    joinColumn: JoinColName,
+    alias: JoinAlias
+  ) {
+    return this.addJoin(
+      AcceptedJoinValue.LEFT,
+      joinTable,
+      baseColumn,
+      joinColumn,
+      alias
+    );
+  }
+
+  public rightJoin<
+    JoinTable extends Table<string, Record<string, Column>>,
+    JoinAlias extends string,
+    BaseColName extends keyof TableRef['columns'],
+    JoinColName extends keyof JoinTable['columns'],
+  >(
+    joinTable: JoinTable,
+    baseColumn: BaseColName,
+    joinColumn: JoinColName,
+    alias: JoinAlias
+  ) {
+    return this.addJoin(
+      AcceptedJoinValue.RIGHT,
+      joinTable,
+      baseColumn,
+      joinColumn,
+      alias
+    );
+  }
+
+  public innerJoin<
+    JoinTable extends Table<string, Record<string, Column>>,
+    JoinAlias extends string,
+    BaseColName extends keyof TableRef['columns'],
+    JoinColName extends keyof JoinTable['columns'],
+  >(
+    joinTable: JoinTable,
+    baseColumn: BaseColName,
+    joinColumn: JoinColName,
+    alias: JoinAlias
+  ) {
+    return this.addJoin(
+      AcceptedJoinValue.INNER,
+      joinTable,
+      baseColumn,
+      joinColumn,
+      alias
+    );
+  }
+
+  public naturalJoin<
+    JoinTable extends Table<string, Record<string, Column>>,
+    JoinAlias extends string,
+    BaseColName extends keyof TableRef['columns'],
+    JoinColName extends keyof JoinTable['columns'],
+  >(
+    joinTable: JoinTable,
+    baseColumn: BaseColName,
+    joinColumn: JoinColName,
+    alias: JoinAlias
+  ) {
+    return this.addJoin(
+      AcceptedJoinValue.NATURAL,
+      joinTable,
+      baseColumn,
+      joinColumn,
+      alias
+    );
+  }
+
   public toQuery() {
     let sql = '';
 
@@ -379,28 +602,62 @@ export class QueryBuilder<
         throw new Error('No query type defined');
     }
 
+    if (this.definition.joins?.length) {
+      sql += ` ${this.definition.joins.join(' ')}`;
+    }
+
     if (this.definition.where?.length) {
       sql += ` WHERE ${this.definition.where.join(' ')}`;
     }
 
     if (this.definition.groupBy?.length) {
-      sql += ` GROUP BY ${this.definition.groupBy.join(', ')}`;
+      sql += ' GROUP BY';
+
+      const placeholders = this.definition.groupBy.map(() => '?').join(', ');
+
+      const params = this.definition.groupBy.map((group) => group);
+
+      sql += ` ${placeholders}`;
+
+      if (!this.definition.params) this.definition.params = [];
+
+      this.definition.params.push(...params);
     }
 
     if (this.definition.having?.length) {
       sql += ` HAVING ${this.definition.having.join(' ')}`;
     }
 
-    if (this.definition.orderBy) {
-      sql += ` ORDER BY ${this.definition.orderBy}`;
+    if (this.definition.orderBy && this.definition.orderBy.length) {
+      sql += ' ORDER BY';
+
+      const placeholders = this.definition.orderBy.map(() => '? ?').join(', ');
+
+      const params = this.definition.orderBy
+        .map((order) => [order.column, order.direction])
+        .flat(1);
+
+      sql += ` ${placeholders}`;
+
+      if (!this.definition.params) this.definition.params = [];
+
+      this.definition.params.push(...params);
     }
 
     if (this.definition.limit !== null) {
-      sql += ` LIMIT ${this.definition.limit}`;
+      sql += ` LIMIT ?`;
+
+      if (!this.definition.params) this.definition.params = [];
+
+      this.definition.params.push(this.definition.limit);
     }
 
     if (this.definition.offset !== null) {
-      sql += ` OFFSET ${this.definition.offset}`;
+      sql += ` OFFSET ?`;
+
+      if (!this.definition.params) this.definition.params = [];
+
+      this.definition.params.push(this.definition.offset);
     }
 
     return { query: sql + ';', params: this.definition.params };

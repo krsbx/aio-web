@@ -1,5 +1,7 @@
 import type { Column } from '../column';
+import type { Table } from '../table';
 import type {
+  AcceptedJoin,
   AcceptedOperator,
   AggregationFunction,
   ConditionClause,
@@ -21,6 +23,21 @@ export type QueryType = (typeof QueryType)[keyof typeof QueryType];
 
 export type OrderBy = (typeof OrderBy)[keyof typeof OrderBy];
 
+export type AcceptedJoin = (typeof AcceptedJoin)[keyof typeof AcceptedJoin];
+
+export type ColumnSelector<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+> =
+  | `${Alias}.${Extract<keyof TableRef['columns'], string>}`
+  | {
+      [A in keyof JoinedTables]: `${A & string}.${Extract<
+        keyof JoinedTables[A]['columns'],
+        string
+      >}`;
+    }[keyof JoinedTables];
+
 export type WhereValue<T extends Column> = {
   [K in AcceptedOperator]: K extends
     | typeof AcceptedOperator.BETWEEN
@@ -35,8 +52,9 @@ export type WhereValue<T extends Column> = {
         : ReturnType<T['infer']>;
 };
 
-export type AcceptedOrderBy<Columns extends Record<string, Column>> = {
-  [ColName in keyof Columns]?: OrderBy;
+export type AcceptedOrderBy<Columns extends string> = {
+  column: Columns;
+  direction: OrderBy;
 };
 
 export type AcceptedInsertValues<Columns extends Record<string, Column>> = {
