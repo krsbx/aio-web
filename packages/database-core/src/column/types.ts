@@ -1,38 +1,38 @@
-import type { ACCEPTED_COLUMN_TYPE } from './constants';
+import type { AcceptedColumnTypes } from './constants';
 
-// Extract allowed column types from ACCEPTED_COLUMN_TYPE
+// Extract allowed column types from AcceptedColumnTypes
 export type AcceptedColumnTypes =
-  (typeof ACCEPTED_COLUMN_TYPE)[keyof typeof ACCEPTED_COLUMN_TYPE];
+  (typeof AcceptedColumnTypes)[keyof typeof AcceptedColumnTypes];
 
 // Define TypeScript equivalent types for each SQL column type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AcceptedColumnTypeMap<T = any> = {
   [K in AcceptedColumnTypes]: K extends
-    | typeof ACCEPTED_COLUMN_TYPE.INTEGER
-    | typeof ACCEPTED_COLUMN_TYPE.BIGINT
-    | typeof ACCEPTED_COLUMN_TYPE.FLOAT
-    | typeof ACCEPTED_COLUMN_TYPE.DOUBLE
-    | typeof ACCEPTED_COLUMN_TYPE.DECIMAL
+    | typeof AcceptedColumnTypes.INTEGER
+    | typeof AcceptedColumnTypes.BIGINT
+    | typeof AcceptedColumnTypes.FLOAT
+    | typeof AcceptedColumnTypes.DOUBLE
+    | typeof AcceptedColumnTypes.DECIMAL
     ? number
     : K extends
-          | typeof ACCEPTED_COLUMN_TYPE.STRING
-          | typeof ACCEPTED_COLUMN_TYPE.TEXT
-          | typeof ACCEPTED_COLUMN_TYPE.VARCHAR
+          | typeof AcceptedColumnTypes.STRING
+          | typeof AcceptedColumnTypes.TEXT
+          | typeof AcceptedColumnTypes.VARCHAR
       ? string
-      : K extends typeof ACCEPTED_COLUMN_TYPE.BOOLEAN
+      : K extends typeof AcceptedColumnTypes.BOOLEAN
         ? boolean
         : K extends
-              | typeof ACCEPTED_COLUMN_TYPE.DATE
-              | typeof ACCEPTED_COLUMN_TYPE.TIME
-              | typeof ACCEPTED_COLUMN_TYPE.TIMESTAMP
-              | typeof ACCEPTED_COLUMN_TYPE.DATETIME
-              | typeof ACCEPTED_COLUMN_TYPE.DATEONLY
+              | typeof AcceptedColumnTypes.DATE
+              | typeof AcceptedColumnTypes.TIME
+              | typeof AcceptedColumnTypes.TIMESTAMP
+              | typeof AcceptedColumnTypes.DATETIME
+              | typeof AcceptedColumnTypes.DATEONLY
           ? Date // Corrected to `Date` type
-          : K extends typeof ACCEPTED_COLUMN_TYPE.JSON
+          : K extends typeof AcceptedColumnTypes.JSON
             ? object
-            : K extends typeof ACCEPTED_COLUMN_TYPE.BLOB
+            : K extends typeof AcceptedColumnTypes.BLOB
               ? Buffer
-              : K extends typeof ACCEPTED_COLUMN_TYPE.ENUM
+              : K extends typeof AcceptedColumnTypes.ENUM
                 ? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                   // @ts-expect-error
                   T[number][]
@@ -41,46 +41,46 @@ export type AcceptedColumnTypeMap<T = any> = {
 
 export type DateOptions = {
   type:
-    | typeof ACCEPTED_COLUMN_TYPE.DATE
-    | typeof ACCEPTED_COLUMN_TYPE.TIME
-    | typeof ACCEPTED_COLUMN_TYPE.TIMESTAMP
-    | typeof ACCEPTED_COLUMN_TYPE.DATETIME
-    | typeof ACCEPTED_COLUMN_TYPE.DATEONLY;
+    | typeof AcceptedColumnTypes.DATE
+    | typeof AcceptedColumnTypes.TIME
+    | typeof AcceptedColumnTypes.TIMESTAMP
+    | typeof AcceptedColumnTypes.DATETIME
+    | typeof AcceptedColumnTypes.DATEONLY;
 };
 
 export type NumberOptions<Length extends number = number> = {
   type:
-    | typeof ACCEPTED_COLUMN_TYPE.INTEGER
-    | typeof ACCEPTED_COLUMN_TYPE.BIGINT
-    | typeof ACCEPTED_COLUMN_TYPE.FLOAT
-    | typeof ACCEPTED_COLUMN_TYPE.DECIMAL
-    | typeof ACCEPTED_COLUMN_TYPE.DOUBLE;
+    | typeof AcceptedColumnTypes.INTEGER
+    | typeof AcceptedColumnTypes.BIGINT
+    | typeof AcceptedColumnTypes.FLOAT
+    | typeof AcceptedColumnTypes.DECIMAL
+    | typeof AcceptedColumnTypes.DOUBLE;
   length?: Length;
 };
 
 export type StringOptions<Length extends number = number> = {
   type:
-    | typeof ACCEPTED_COLUMN_TYPE.STRING
-    | typeof ACCEPTED_COLUMN_TYPE.VARCHAR
-    | typeof ACCEPTED_COLUMN_TYPE.TEXT;
+    | typeof AcceptedColumnTypes.STRING
+    | typeof AcceptedColumnTypes.VARCHAR
+    | typeof AcceptedColumnTypes.TEXT;
   length?: Length;
 };
 
 export type EnumOptions<Values extends readonly string[]> = {
-  type: typeof ACCEPTED_COLUMN_TYPE.ENUM;
+  type: typeof AcceptedColumnTypes.ENUM;
   values: Values;
 };
 
 export type BooleanOptions = {
-  type: typeof ACCEPTED_COLUMN_TYPE.BOOLEAN;
+  type: typeof AcceptedColumnTypes.BOOLEAN;
 };
 
 export type JsonOptions = {
-  type: typeof ACCEPTED_COLUMN_TYPE.JSON;
+  type: typeof AcceptedColumnTypes.JSON;
 };
 
 export type BlobOptions = {
-  type: typeof ACCEPTED_COLUMN_TYPE.BLOB;
+  type: typeof AcceptedColumnTypes.BLOB;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
