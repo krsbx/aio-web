@@ -21,7 +21,7 @@ type ValueSelector<
     | Partial<ColumnDefinition<Value, Dialect>>
     | ColumnDefinition<Value, Dialect>,
   Value,
-> = Definition['notNull'] extends true ? Value : Value | null;
+> = Definition['notNull'] extends true ? Value | string : Value | string | null;
 
 export class Column<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -169,7 +169,7 @@ export class Column<
     return sqls.join(' ');
   }
 
-  infer(): ValueSelector<Definition, Value> {
+  public infer(): ValueSelector<Definition, Value> {
     return null as never;
   }
 }
