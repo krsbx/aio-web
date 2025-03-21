@@ -1,10 +1,23 @@
+import type { Dialect } from '../table/constants';
 import type { AcceptedColumnTypes } from './constants';
 
-// Extract allowed column types from AcceptedColumnTypes
-export type AcceptedColumnTypes =
-  (typeof AcceptedColumnTypes)[keyof typeof AcceptedColumnTypes];
+export interface ColumnDefinition<T, U extends Dialect | null = null> {
+  primaryKey: boolean;
+  autoIncrement: boolean;
+  notNull: boolean;
+  unique: boolean;
+  comment: string | null;
+  default: T | undefined;
+  dialect: U | null;
+}
 
-// Define TypeScript equivalent types for each SQL column type
+export type ValueSelector<
+  Definition extends
+    | Partial<ColumnDefinition<Value, Dialect>>
+    | ColumnDefinition<Value, Dialect>,
+  Value,
+> = Definition['notNull'] extends true ? Value | string : Value | string | null;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AcceptedColumnTypeMap<T = any> = {
   [K in AcceptedColumnTypes]: K extends

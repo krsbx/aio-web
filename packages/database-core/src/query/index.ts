@@ -1,61 +1,20 @@
 import { Column } from '../column';
 import { Table } from '../table';
 import {
-  AcceptedJoin as AcceptedJoinValue,
-  AcceptedOperator as AcceptedOperatorValue,
-  AggregationFunction as AggregationFunctionValue,
-  ConditionClause as ConditionClauseValue,
-  LogicalOperator as LogicalOperatorValue,
-  QueryType as QueryTypeValue,
-} from './constants';
-import type {
-  AcceptedInsertValues,
   AcceptedJoin,
   AcceptedOperator,
-  AcceptedOrderBy,
-  AcceptedUpdateValues,
   AggregationFunction,
-  ColumnSelector,
   ConditionClause,
   LogicalOperator,
   QueryType,
+} from './constants';
+import type {
+  AcceptedOrderBy,
+  ColumnSelector,
+  QueryDefinition,
   WhereValue,
 } from './types';
 import { getCondition } from './utilities';
-
-interface QueryDefinition<
-  Alias extends string,
-  TableRef extends Table<string, Record<string, Column>>,
-  JoinedTables extends Record<
-    string,
-    Table<string, Record<string, Column>>
-  > = NonNullable<unknown>,
-  AllowedColumn extends ColumnSelector<
-    Alias,
-    TableRef,
-    JoinedTables
-  > = ColumnSelector<Alias, TableRef, JoinedTables>,
-> {
-  queryType: QueryType | null;
-  select: AllowedColumn[] | null;
-  where: string[] | null;
-  having: string[] | null;
-  params: unknown[] | null;
-  limit: number | null;
-  offset: number | null;
-  groupBy: AllowedColumn[] | null;
-  insertValues: AcceptedInsertValues<TableRef['columns']> | null;
-  updateValues: AcceptedUpdateValues<TableRef['columns']> | null;
-  orderBy: AcceptedOrderBy<AllowedColumn>[] | null;
-  aggregate: {
-    column: AllowedColumn;
-    fn: AggregationFunction;
-  } | null;
-  distinct: boolean | null;
-  joins: string[] | null;
-  baseAlias: Alias | null;
-  joinedTables: JoinedTables | null;
-}
 
 export class QueryBuilder<
   Alias extends string,
@@ -105,7 +64,7 @@ export class QueryBuilder<
       NewAlias,
       TableRef,
       JoinedTables,
-      Definition & { baseAlias: NewAlias }
+      Omit<Definition, 'baseAlias'> & { baseAlias: NewAlias }
     >;
   }
 
@@ -142,8 +101,8 @@ export class QueryBuilder<
     this.definition[validClause].push(`${logicalPrefix} ${condition}`.trim());
 
     if (
-      operator === AcceptedOperatorValue.IS_NULL ||
-      operator === AcceptedOperatorValue.IS_NOT_NULL
+      operator === AcceptedOperator.IS_NULL ||
+      operator === AcceptedOperator.IS_NOT_NULL
     ) {
       return;
     }
@@ -168,11 +127,11 @@ export class QueryBuilder<
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
     this.addCondition(
-      ConditionClauseValue.WHERE,
+      ConditionClause.WHERE,
       column,
       operator,
       value,
-      LogicalOperatorValue.AND
+      LogicalOperator.AND
     );
 
     return this;
@@ -189,11 +148,11 @@ export class QueryBuilder<
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
     this.addCondition(
-      ConditionClauseValue.HAVING,
+      ConditionClause.HAVING,
       column,
       operator,
       value,
-      LogicalOperatorValue.AND
+      LogicalOperator.AND
     );
 
     return this;
@@ -210,11 +169,11 @@ export class QueryBuilder<
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
     this.addCondition(
-      ConditionClauseValue.WHERE,
+      ConditionClause.WHERE,
       column,
       operator,
       value,
-      LogicalOperatorValue.AND
+      LogicalOperator.AND
     );
 
     return this;
@@ -231,11 +190,11 @@ export class QueryBuilder<
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
     this.addCondition(
-      ConditionClauseValue.WHERE,
+      ConditionClause.WHERE,
       column,
       operator,
       value,
-      LogicalOperatorValue.OR
+      LogicalOperator.OR
     );
 
     return this;
@@ -255,7 +214,7 @@ export class QueryBuilder<
   public aggregate<
     ColName extends AllowedColumn,
     Fn extends AggregationFunction,
-  >(column: AllowedColumn, fn: Fn) {
+  >(column: ColName, fn: Fn) {
     this.definition.aggregate = {
       column,
       fn,
@@ -270,23 +229,23 @@ export class QueryBuilder<
   }
 
   public count<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunctionValue.COUNT);
+    return this.aggregate(column, AggregationFunction.COUNT);
   }
 
   public sum<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunctionValue.SUM);
+    return this.aggregate(column, AggregationFunction.SUM);
   }
 
   public min<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunctionValue.MIN);
+    return this.aggregate(column, AggregationFunction.MIN);
   }
 
   public max<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunctionValue.MAX);
+    return this.aggregate(column, AggregationFunction.MAX);
   }
 
   public avg<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunctionValue.AVG);
+    return this.aggregate(column, AggregationFunction.AVG);
   }
 
   public groupBy<Columns extends AllowedColumn[]>(...columns: Columns) {
@@ -337,15 +296,45 @@ export class QueryBuilder<
     >;
   }
 
+  public select<
+    Base extends Definition['baseAlias'] extends string
+      ? Definition['baseAlias']
+      : TableRef['name'],
+    Columns extends TableRef['columns'],
+  >(): QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition & {
+      queryType: typeof QueryType.SELECT;
+      select: Array<`${Base}.${keyof Columns & string}`>;
+    }
+  >;
+  public select<Columns extends AllowedColumn[]>(
+    ...columns: Columns
+  ): QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition & { queryType: typeof QueryType.SELECT; select: Columns }
+  >;
   public select<Columns extends AllowedColumn[]>(...columns: Columns) {
-    this.definition.select = columns;
-    this.definition.queryType = QueryTypeValue.SELECT;
+    const base = this.definition.baseAlias ?? this.table.name;
+
+    const finalColumns: Columns = columns.length
+      ? columns
+      : (Object.keys(this.table.columns).map(
+          (colName) => `${base}.${colName}`
+        ) as Columns);
+
+    this.definition.select = finalColumns;
+    this.definition.queryType = QueryType.SELECT;
 
     return this as unknown as QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Definition & { queryType: typeof QueryTypeValue.SELECT; select: Columns }
+      Definition & { queryType: typeof QueryType.SELECT; select: Columns }
     >;
   }
 
@@ -355,7 +344,7 @@ export class QueryBuilder<
       [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
     },
   >(...values: Values[]) {
-    this.definition.queryType = QueryTypeValue.INSERT;
+    this.definition.queryType = QueryType.INSERT;
 
     if (!this.definition.insertValues) {
       this.definition.insertValues = [];
@@ -367,7 +356,7 @@ export class QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Definition & { queryType: typeof QueryTypeValue.INSERT }
+      Definition & { queryType: typeof QueryType.INSERT }
     >;
   }
 
@@ -377,25 +366,25 @@ export class QueryBuilder<
       [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
     },
   >(values: Values) {
-    this.definition.queryType = QueryTypeValue.UPDATE;
+    this.definition.queryType = QueryType.UPDATE;
     this.definition.updateValues = values;
 
     return this as unknown as QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Definition & { queryType: typeof QueryTypeValue.UPDATE }
+      Definition & { queryType: typeof QueryType.UPDATE }
     >;
   }
 
   public delete() {
-    this.definition.queryType = QueryTypeValue.DELETE;
+    this.definition.queryType = QueryType.DELETE;
 
     return this as unknown as QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Definition & { queryType: typeof QueryTypeValue.DELETE }
+      Definition & { queryType: typeof QueryType.DELETE }
     >;
   }
 
@@ -456,6 +445,10 @@ export class QueryBuilder<
     return `UPDATE ${this.table.name} SET ${keys.map((key) => `${key as string} = ?`.trim()).join(', ')}`;
   }
 
+  private buildDeleteQuery() {
+    return `DELETE FROM ${this.table.name}`;
+  }
+
   private addJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
@@ -510,7 +503,7 @@ export class QueryBuilder<
     alias: JoinAlias
   ) {
     return this.addJoin(
-      AcceptedJoinValue.LEFT,
+      AcceptedJoin.LEFT,
       joinTable,
       baseColumn,
       joinColumn,
@@ -530,7 +523,7 @@ export class QueryBuilder<
     alias: JoinAlias
   ) {
     return this.addJoin(
-      AcceptedJoinValue.RIGHT,
+      AcceptedJoin.RIGHT,
       joinTable,
       baseColumn,
       joinColumn,
@@ -550,7 +543,7 @@ export class QueryBuilder<
     alias: JoinAlias
   ) {
     return this.addJoin(
-      AcceptedJoinValue.INNER,
+      AcceptedJoin.INNER,
       joinTable,
       baseColumn,
       joinColumn,
@@ -570,7 +563,7 @@ export class QueryBuilder<
     alias: JoinAlias
   ) {
     return this.addJoin(
-      AcceptedJoinValue.NATURAL,
+      AcceptedJoin.NATURAL,
       joinTable,
       baseColumn,
       joinColumn,
@@ -582,20 +575,20 @@ export class QueryBuilder<
     let sql = '';
 
     switch (this.definition.queryType) {
-      case QueryTypeValue.SELECT:
+      case QueryType.SELECT:
         sql = this.buildSelectQuery();
         break;
 
-      case QueryTypeValue.INSERT:
+      case QueryType.INSERT:
         sql = this.buildInsertQuery();
         break;
 
-      case QueryTypeValue.UPDATE:
+      case QueryType.UPDATE:
         sql = this.buildUpdateQuery();
         break;
 
-      case QueryTypeValue.DELETE:
-        sql = `DELETE FROM ${this.table.name}`;
+      case QueryType.DELETE:
+        sql = this.buildDeleteQuery();
         break;
 
       default:

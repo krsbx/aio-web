@@ -1,7 +1,5 @@
-import { Column } from '../column';
+import type { Column } from '../column';
 import type { Dialect } from './constants';
-
-export type Dialect = (typeof Dialect)[keyof typeof Dialect];
 
 export type TimestampOptions = {
   createdAt?: string;

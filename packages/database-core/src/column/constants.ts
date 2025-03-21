@@ -20,6 +20,9 @@ export const AcceptedColumnTypes = {
   ENUM: 'ENUM',
 } as const;
 
+export type AcceptedColumnTypes =
+  (typeof AcceptedColumnTypes)[keyof typeof AcceptedColumnTypes];
+
 export const ColumnTypeMapping = {
   [AcceptedColumnTypes.INTEGER]: {
     [Dialect.SQLITE]: 'INTEGER',

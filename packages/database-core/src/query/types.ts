@@ -1,41 +1,21 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
 import type {
-  AcceptedJoin,
   AcceptedOperator,
   AggregationFunction,
-  ConditionClause,
-  LogicalOperator,
   OrderBy,
   QueryType,
 } from './constants';
-
-export type AcceptedOperator =
-  (typeof AcceptedOperator)[keyof typeof AcceptedOperator];
-
-export type LogicalOperator =
-  (typeof LogicalOperator)[keyof typeof LogicalOperator];
-
-export type ConditionClause =
-  (typeof ConditionClause)[keyof typeof ConditionClause];
-
-export type QueryType = (typeof QueryType)[keyof typeof QueryType];
-
-export type OrderBy = (typeof OrderBy)[keyof typeof OrderBy];
-
-export type AcceptedJoin = (typeof AcceptedJoin)[keyof typeof AcceptedJoin];
 
 export type ColumnSelector<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
 > =
-  | `${Alias}.${Extract<keyof TableRef['columns'], string>}`
+  | `${Alias}.${keyof TableRef['columns'] & string}`
   | {
-      [A in keyof JoinedTables]: `${A & string}.${Extract<
-        keyof JoinedTables[A]['columns'],
-        string
-      >}`;
+      [A in keyof JoinedTables]: `${A & string}.${keyof JoinedTables[A]['columns'] &
+        string}`;
     }[keyof JoinedTables];
 
 export type WhereValue<T extends Column> = {
@@ -65,5 +45,36 @@ export type AcceptedUpdateValues<Columns extends Record<string, Column>> = {
   [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
 };
 
-export type AggregationFunction =
-  (typeof AggregationFunction)[keyof typeof AggregationFunction];
+export interface QueryDefinition<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<
+    string,
+    Table<string, Record<string, Column>>
+  > = NonNullable<unknown>,
+  AllowedColumn extends ColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  > = ColumnSelector<Alias, TableRef, JoinedTables>,
+> {
+  queryType: QueryType | null;
+  select: AllowedColumn[] | null;
+  where: string[] | null;
+  having: string[] | null;
+  params: unknown[] | null;
+  limit: number | null;
+  offset: number | null;
+  groupBy: AllowedColumn[] | null;
+  insertValues: AcceptedInsertValues<TableRef['columns']> | null;
+  updateValues: AcceptedUpdateValues<TableRef['columns']> | null;
+  orderBy: AcceptedOrderBy<AllowedColumn>[] | null;
+  aggregate: {
+    column: AllowedColumn;
+    fn: AggregationFunction;
+  } | null;
+  distinct: boolean | null;
+  joins: string[] | null;
+  baseAlias: Alias | null;
+  joinedTables: JoinedTables | null;
+}

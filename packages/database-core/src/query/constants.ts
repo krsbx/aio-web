@@ -3,10 +3,16 @@ export const LogicalOperator = {
   OR: 'OR',
 } as const;
 
+export type LogicalOperator =
+  (typeof LogicalOperator)[keyof typeof LogicalOperator];
+
 export const ConditionClause = {
   WHERE: 'WHERE',
   HAVING: 'HAVING',
 } as const;
+
+export type ConditionClause =
+  (typeof ConditionClause)[keyof typeof ConditionClause];
 
 export const AcceptedOperator = {
   EQ: 'eq',
@@ -24,6 +30,9 @@ export const AcceptedOperator = {
   NOT_BETWEEN: 'notBetween',
 } as const;
 
+export type AcceptedOperator =
+  (typeof AcceptedOperator)[keyof typeof AcceptedOperator];
+
 export const QueryType = {
   SELECT: 'SELECT',
   INSERT: 'INSERT',
@@ -31,10 +40,14 @@ export const QueryType = {
   DELETE: 'DELETE',
 } as const;
 
+export type QueryType = (typeof QueryType)[keyof typeof QueryType];
+
 export const OrderBy = {
   ASC: 'ASC',
   DESC: 'DESC',
 } as const;
+
+export type OrderBy = (typeof OrderBy)[keyof typeof OrderBy];
 
 export const AggregationFunction = {
   COUNT: 'COUNT',
@@ -44,9 +57,14 @@ export const AggregationFunction = {
   AVG: 'AVG',
 } as const;
 
+export type AggregationFunction =
+  (typeof AggregationFunction)[keyof typeof AggregationFunction];
+
 export const AcceptedJoin = {
   INNER: 'INNER',
   LEFT: 'LEFT',
   RIGHT: 'RIGHT',
   NATURAL: 'NATURAL',
 } as const;
+
+export type AcceptedJoin = (typeof AcceptedJoin)[keyof typeof AcceptedJoin];

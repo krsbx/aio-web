@@ -1,27 +1,12 @@
-import type { Dialect } from '../table/types';
+import type { Dialect } from '../table/constants';
 import { ColumnTypeMapping } from './constants';
 import type {
   AcceptedColumnTypeMap,
+  ColumnDefinition,
   ColumnOptions,
   EnumOptions,
+  ValueSelector,
 } from './types';
-
-interface ColumnDefinition<T, U extends Dialect | null = null> {
-  primaryKey: boolean;
-  autoIncrement: boolean;
-  notNull: boolean;
-  unique: boolean;
-  comment: string | null;
-  default: T | undefined;
-  dialect: U | null;
-}
-
-type ValueSelector<
-  Definition extends
-    | Partial<ColumnDefinition<Value, Dialect>>
-    | ColumnDefinition<Value, Dialect>,
-  Value,
-> = Definition['notNull'] extends true ? Value | string : Value | string | null;
 
 export class Column<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -133,31 +118,30 @@ export class Column<
     >;
   }
 
-  public toString(): string {
+  public toQuery() {
     if (!this.definition.dialect) {
       throw new Error('No DB Dialect defined');
     }
 
     const correctType = ColumnTypeMapping[this.type][this.definition.dialect];
 
-    const sqls = [
-      correctType + (this.length !== undefined ? `(${this.length})` : ''),
-    ];
+    let sql =
+      correctType + (this.length !== undefined ? `(${this.length})` : '');
 
     if (this.definition.primaryKey) {
-      sqls.push('PRIMARY KEY');
+      sql += 'PRIMARY KEY';
     }
 
     if (this.definition.autoIncrement) {
-      sqls.push('AUTOINCREMENT');
+      sql += 'AUTOINCREMENT';
     }
 
     if (this.definition.notNull) {
-      sqls.push('NOT NULL');
+      sql += 'NOT NULL';
     }
 
     if (this.definition.unique) {
-      sqls.push('UNIQUE');
+      sql += 'UNIQUE';
     }
 
     if (this.definition.default !== undefined) {
@@ -165,10 +149,14 @@ export class Column<
       const isString = typeof this.definition.default === 'string';
       const finalValue = isString ? `'${value}'` : value;
 
-      sqls.push(`DEFAULT ${finalValue}`);
+      sql += `DEFAULT ${finalValue}`;
     }
 
-    return sqls.join(' ');
+    return { query: sql + ';', params: [] };
+  }
+
+  public toString() {
+    return this.toQuery().query;
   }
 
   public infer(): ValueSelector<Definition, Value> {
