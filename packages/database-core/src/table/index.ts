@@ -1,71 +1,42 @@
 import { Column } from '../column';
 import { QueryBuilder } from '../query';
+import type { Dialect } from './constants';
 import type { TableOptions, TimestampOptions } from './types';
-
-const defaultCreatedAt = new Column({
-  type: 'DATETIME',
-}).default('CURRENT_TIMESTAMP');
-
-const defaultUpdatedAt = new Column({
-  type: 'DATETIME',
-});
-
-const defaultDeletedAt = new Column({
-  type: 'DATETIME',
-});
+import { defineColumns } from './utilities';
 
 export class Table<
   TableName extends string,
   Columns extends Record<string, Column>,
+  DbDialect extends Dialect = Dialect,
+  CreatedAt extends string = string,
+  UpdatedAt extends string = string,
+  Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean =
+    | TimestampOptions<CreatedAt, UpdatedAt>
+    | boolean,
+  Paranoid extends string | boolean = string | boolean,
 > {
+  public readonly dialect: DbDialect;
   public readonly name: TableName;
   public readonly columns: Columns;
-  public readonly paranoid: string | null;
-  public readonly timestamp: TimestampOptions | null;
+  public readonly timestamp: Timestamp | null;
+  public readonly paranoid: Paranoid | null;
 
-  constructor(options: TableOptions<TableName, Columns>) {
+  private constructor(
+    options: TableOptions<
+      TableName,
+      Columns,
+      DbDialect,
+      CreatedAt,
+      UpdatedAt,
+      Timestamp,
+      Paranoid
+    >
+  ) {
+    this.dialect = options.dialect;
     this.name = options.name;
     this.columns = options.columns;
-
-    if (!options.paranoid) {
-      // Hard delete by default
-      this.paranoid = null;
-    } else {
-      this.paranoid =
-        typeof options.paranoid === 'boolean' ? 'deletedAt' : options.paranoid;
-
-      if (this.paranoid && !this.columns[this.paranoid]) {
-        (this.columns as Record<string, Column>)[this.paranoid] =
-          defaultDeletedAt;
-      }
-    }
-
-    // No timestamp by default
-    if (!options.timestamp) {
-      this.timestamp = null;
-    } else {
-      if (typeof options.timestamp !== 'boolean') {
-        this.timestamp = {
-          createdAt: options.timestamp?.createdAt ?? 'createdAt',
-          updatedAt: options.timestamp?.updatedAt ?? 'updatedAt',
-        };
-      } else {
-        this.timestamp = {
-          createdAt: 'createdAt',
-          updatedAt: 'updatedAt',
-        };
-      }
-
-      if (this.timestamp.createdAt && !this.columns[this.timestamp.createdAt]) {
-        (this.columns as Record<string, Column>)[this.timestamp.createdAt] =
-          defaultCreatedAt;
-      }
-
-      if (this.timestamp.updatedAt && !this.columns[this.timestamp.updatedAt]) {
-        (this.columns as Record<string, Column>)[this.timestamp.updatedAt] =
-          defaultUpdatedAt;
-      }
-    }
+    this.paranoid = options.paranoid || null;
+    this.timestamp = options.timestamp || null;
 
     for (const column of Object.values(this.columns)) {
       // Set dialect for each column
@@ -75,5 +46,32 @@ export class Table<
 
   public query() {
     return new QueryBuilder(this).alias(this.name);
+  }
+
+  static define<
+    DbDialect extends Dialect,
+    TableName extends string,
+    Columns extends Record<string, Column>,
+    CreatedAt extends string,
+    UpdatedAt extends string,
+    Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
+    Paranoid extends string | boolean,
+  >(
+    options: TableOptions<
+      TableName,
+      Columns,
+      DbDialect,
+      CreatedAt,
+      UpdatedAt,
+      Timestamp,
+      Paranoid
+    >
+  ) {
+    const columns = defineColumns(options);
+
+    return new Table({
+      ...options,
+      columns,
+    });
   }
 }
