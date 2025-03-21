@@ -50,6 +50,17 @@ export class Column<
     } as Definition;
   }
 
+  public autoIncrement() {
+    this.definition.autoIncrement = true;
+    return this as Column<
+      Values,
+      Options,
+      ColumnValue,
+      Value,
+      Definition & { autoIncrement: true }
+    >;
+  }
+
   public primaryKey() {
     this.definition.primaryKey = true;
     return this as Column<
