@@ -45,6 +45,20 @@ export type AcceptedUpdateValues<Columns extends Record<string, Column>> = {
   [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
 };
 
+export type RawColumn<AllowedColumn extends string> = AllowedColumn;
+
+export type AliasedColumn<
+  Allowed extends string,
+  Alias extends string = string,
+> = {
+  column: Allowed;
+  as: Alias;
+};
+
+export type SelectableColumn<Allowed extends string> =
+  | RawColumn<Allowed>
+  | AliasedColumn<Allowed>;
+
 export interface QueryDefinition<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
@@ -59,7 +73,7 @@ export interface QueryDefinition<
   > = ColumnSelector<Alias, TableRef, JoinedTables>,
 > {
   queryType: QueryType | null;
-  select: AllowedColumn[] | null;
+  select: SelectableColumn<AllowedColumn>[] | null;
   where: string[] | null;
   having: string[] | null;
   params: unknown[] | null;

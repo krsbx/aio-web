@@ -1,5 +1,6 @@
-import { Column } from '../column';
-import { Table } from '../table';
+import type { Column } from '../column';
+import type { Table } from '../table';
+import { deepClone } from '../utilities';
 import {
   AcceptedJoin,
   AcceptedOperator,
@@ -10,11 +11,24 @@ import {
 } from './constants';
 import type {
   AcceptedOrderBy,
+  AliasedColumn,
   ColumnSelector,
   QueryDefinition,
+  RawColumn,
   WhereValue,
 } from './types';
 import { getCondition } from './utilities';
+
+export function col<
+  AllowedColumn extends string,
+  ColName extends AllowedColumn = AllowedColumn,
+  ColAlias extends string = string,
+>(column: ColName, alias: ColAlias) {
+  return {
+    column,
+    as: alias,
+  } as const;
+}
 
 export class QueryBuilder<
   Alias extends string,
@@ -200,255 +214,6 @@ export class QueryBuilder<
     return this;
   }
 
-  public distinct() {
-    this.definition.distinct = true;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { distinct: true }
-    >;
-  }
-
-  public aggregate<
-    ColName extends AllowedColumn,
-    Fn extends AggregationFunction,
-  >(column: ColName, fn: Fn) {
-    this.definition.aggregate = {
-      column,
-      fn,
-    };
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { aggregate: { column: ColName; fn: Fn } }
-    >;
-  }
-
-  public count<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.COUNT);
-  }
-
-  public sum<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.SUM);
-  }
-
-  public min<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.MIN);
-  }
-
-  public max<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.MAX);
-  }
-
-  public avg<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.AVG);
-  }
-
-  public groupBy<Columns extends AllowedColumn[]>(...columns: Columns) {
-    this.definition.groupBy = columns;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { groupBy: Columns }
-    >;
-  }
-
-  public limit<Limit extends number | null>(limit: Limit) {
-    this.definition.limit = limit;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { limit: Limit }
-    >;
-  }
-
-  public offset<Offset extends number | null>(offset: Offset) {
-    this.definition.offset = offset;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { offset: Offset }
-    >;
-  }
-
-  public orderBy<OrderBy extends AcceptedOrderBy<AllowedColumn>>(
-    ...orderBy: OrderBy[]
-  ) {
-    if (!this.definition.orderBy) this.definition.orderBy = [];
-
-    this.definition.orderBy.push(...orderBy);
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { orderBy: OrderBy }
-    >;
-  }
-
-  public select<
-    Base extends Definition['baseAlias'] extends string
-      ? Definition['baseAlias']
-      : TableRef['name'],
-    Columns extends TableRef['columns'],
-  >(): QueryBuilder<
-    Alias,
-    TableRef,
-    JoinedTables,
-    Definition & {
-      queryType: typeof QueryType.SELECT;
-      select: Array<`${Base}.${keyof Columns & string}`>;
-    }
-  >;
-  public select<Columns extends AllowedColumn[]>(
-    ...columns: Columns
-  ): QueryBuilder<
-    Alias,
-    TableRef,
-    JoinedTables,
-    Definition & { queryType: typeof QueryType.SELECT; select: Columns }
-  >;
-  public select<Columns extends AllowedColumn[]>(...columns: Columns) {
-    const base = this.definition.baseAlias ?? this.table.name;
-
-    const finalColumns: Columns = columns.length
-      ? columns
-      : (Object.keys(this.table.columns).map(
-          (colName) => `${base}.${colName}`
-        ) as Columns);
-
-    this.definition.select = finalColumns;
-    this.definition.queryType = QueryType.SELECT;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { queryType: typeof QueryType.SELECT; select: Columns }
-    >;
-  }
-
-  public insert<
-    Columns extends TableRef['columns'],
-    Values extends {
-      [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
-    },
-  >(...values: Values[]) {
-    this.definition.queryType = QueryType.INSERT;
-
-    if (!this.definition.insertValues) {
-      this.definition.insertValues = [];
-    }
-
-    this.definition.insertValues.push(...values);
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { queryType: typeof QueryType.INSERT }
-    >;
-  }
-
-  public update<
-    Columns extends TableRef['columns'],
-    Values extends {
-      [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
-    },
-  >(values: Values) {
-    this.definition.queryType = QueryType.UPDATE;
-    this.definition.updateValues = values;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { queryType: typeof QueryType.UPDATE }
-    >;
-  }
-
-  public delete() {
-    this.definition.queryType = QueryType.DELETE;
-
-    return this as unknown as QueryBuilder<
-      Alias,
-      TableRef,
-      JoinedTables,
-      Definition & { queryType: typeof QueryType.DELETE }
-    >;
-  }
-
-  private buildSelectQuery() {
-    const from = this.definition.baseAlias
-      ? `${this.table.name} AS ${this.definition.baseAlias}`
-      : this.table.name;
-
-    if (this.definition.aggregate) {
-      return `SELECT ${this.definition.aggregate.fn}(${this.definition.aggregate.column as string}) FROM ${from}`;
-    }
-
-    const columns =
-      !this.definition.select || !this.definition.select.length
-        ? '*'
-        : this.definition.select.join(', ');
-
-    if (this.definition.distinct) {
-      return `SELECT DISTINCT ${columns} FROM ${from}`;
-    }
-
-    return `SELECT ${columns} FROM ${from}`;
-  }
-
-  private buildInsertQuery() {
-    if (!this.definition.insertValues || !this.definition.insertValues.length) {
-      throw new Error(`INSERT requires values`);
-    }
-
-    const keys = Object.keys(
-      this.definition.insertValues[0]
-    ) as (keyof TableRef['columns'])[];
-    const placeholders = keys.map(() => '?').join(', ');
-
-    this.definition.params = this.definition.insertValues.flatMap((row) =>
-      keys.map((key) => row[key])
-    );
-
-    return `INSERT INTO ${this.table.name} (${keys.join(', ')}) VALUES (${placeholders})`;
-  }
-
-  private buildUpdateQuery() {
-    if (!this.definition.updateValues || !this.definition.updateValues.length) {
-      throw new Error(`UPDATE requires values`);
-    }
-
-    const keys = Object.keys(
-      this.definition.updateValues
-    ) as (keyof TableRef['columns'])[];
-    const updateParams = keys.map((key) => this.definition.updateValues![key]);
-
-    if (this.definition.params) {
-      this.definition.params = [...updateParams, ...this.definition.params];
-    } else {
-      this.definition.params = updateParams;
-    }
-
-    return `UPDATE ${this.table.name} SET ${keys.map((key) => `${key as string} = ?`.trim()).join(', ')}`;
-  }
-
-  private buildDeleteQuery() {
-    return `DELETE FROM ${this.table.name}`;
-  }
-
   private addJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
@@ -571,6 +336,311 @@ export class QueryBuilder<
     );
   }
 
+  public distinct() {
+    this.definition.distinct = true;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { distinct: true }
+    >;
+  }
+
+  public aggregate<
+    ColName extends AllowedColumn,
+    Fn extends AggregationFunction,
+  >(column: ColName, fn: Fn) {
+    this.definition.aggregate = {
+      column,
+      fn,
+    };
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { aggregate: { column: ColName; fn: Fn } }
+    >;
+  }
+
+  public count<ColName extends AllowedColumn>(column: ColName) {
+    return this.aggregate(column, AggregationFunction.COUNT);
+  }
+
+  public sum<ColName extends AllowedColumn>(column: ColName) {
+    return this.aggregate(column, AggregationFunction.SUM);
+  }
+
+  public min<ColName extends AllowedColumn>(column: ColName) {
+    return this.aggregate(column, AggregationFunction.MIN);
+  }
+
+  public max<ColName extends AllowedColumn>(column: ColName) {
+    return this.aggregate(column, AggregationFunction.MAX);
+  }
+
+  public avg<ColName extends AllowedColumn>(column: ColName) {
+    return this.aggregate(column, AggregationFunction.AVG);
+  }
+
+  public groupBy<
+    Groupable extends NonNullable<Definition['select']>,
+    Columns extends Groupable extends readonly (infer Col)[]
+      ? Col extends RawColumn<AllowedColumn>
+        ? Col[]
+        : Col extends AliasedColumn<AllowedColumn, infer Alias>
+          ? Alias[]
+          : AllowedColumn[]
+      : AllowedColumn[],
+  >(...columns: Columns) {
+    this.definition.groupBy = columns as Columns;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { groupBy: Columns }
+    >;
+  }
+
+  public limit<Limit extends number | null>(limit: Limit) {
+    this.definition.limit = limit;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { limit: Limit }
+    >;
+  }
+
+  public offset<Offset extends number | null>(offset: Offset) {
+    this.definition.offset = offset;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { offset: Offset }
+    >;
+  }
+
+  public orderBy<OrderBy extends AcceptedOrderBy<AllowedColumn>>(
+    ...orderBy: OrderBy[]
+  ) {
+    if (!this.definition.orderBy) this.definition.orderBy = [];
+
+    this.definition.orderBy.push(...orderBy);
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { orderBy: OrderBy }
+    >;
+  }
+
+  public clone() {
+    const query = new QueryBuilder<Alias, TableRef, JoinedTables>(this.table);
+
+    Object.assign(query.definition, deepClone(this.definition));
+
+    return query;
+  }
+
+  public select<
+    Base extends Definition['baseAlias'] extends string
+      ? Definition['baseAlias']
+      : TableRef['name'],
+    Columns extends TableRef['columns'],
+  >(): QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Omit<Definition, 'queryType' | 'select'> & {
+      queryType: typeof QueryType.SELECT;
+      select: Array<`${Base}.${keyof Columns & string}`>;
+    }
+  >;
+  public select<Columns extends RawColumn<AllowedColumn>[]>(
+    ...columns: Columns
+  ): QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Omit<Definition, 'queryType' | 'select'> & {
+      queryType: typeof QueryType.SELECT;
+      select: Columns;
+    }
+  >;
+  public select<
+    T extends readonly ((
+      col: <C extends AllowedColumn, A extends string>(
+        column: C,
+        alias: A
+      ) => AliasedColumn<C, A>
+    ) => AliasedColumn<AllowedColumn, string>)[],
+  >(
+    ...columns: T
+  ): QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    Omit<Definition, 'queryType' | 'select'> & {
+      queryType: typeof QueryType.SELECT;
+      select: {
+        [K in keyof T]: T[K] extends (col: never) => infer R ? R : never;
+      };
+    }
+  >;
+  public select(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...columns: any[]
+  ) {
+    if (!columns.length) {
+      const base = this.definition.baseAlias ?? this.table.name;
+
+      columns = Object.keys(this.table.columns).map(
+        (colName) => `${base}.${colName}`
+      );
+    } else {
+      columns = columns.map((column) => {
+        if (typeof column === 'function') {
+          return column(col);
+        }
+
+        return column;
+      });
+    }
+
+    this.definition.select = columns;
+    this.definition.queryType = QueryType.SELECT;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this as any;
+  }
+
+  public insert<
+    Columns extends TableRef['columns'],
+    Values extends {
+      [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
+    },
+  >(...values: Values[]) {
+    this.definition.queryType = QueryType.INSERT;
+
+    if (!this.definition.insertValues) {
+      this.definition.insertValues = [];
+    }
+
+    this.definition.insertValues.push(...values);
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Omit<Definition, 'queryType'> & { queryType: typeof QueryType.INSERT }
+    >;
+  }
+
+  public update<
+    Columns extends TableRef['columns'],
+    Values extends {
+      [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
+    },
+  >(values: Values) {
+    this.definition.queryType = QueryType.UPDATE;
+    this.definition.updateValues = values;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Omit<Definition, 'queryType'> & { queryType: typeof QueryType.UPDATE }
+    >;
+  }
+
+  public delete() {
+    this.definition.queryType = QueryType.DELETE;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Omit<Definition, 'queryType'> & { queryType: typeof QueryType.DELETE }
+    >;
+  }
+
+  private buildSelectQuery() {
+    const from = this.definition.baseAlias
+      ? `${this.table.name} AS ${this.definition.baseAlias}`
+      : this.table.name;
+
+    if (this.definition?.aggregate) {
+      return `SELECT ${this.definition.aggregate.fn}(${this.definition.aggregate.column}) FROM ${from}`;
+    }
+
+    let columns = '*';
+
+    if (this.definition?.select?.length) {
+      columns = this.definition.select
+        .map((col) => {
+          if (typeof col === 'object') {
+            return `${col.column} AS ${col.as}`;
+          }
+
+          return col;
+        })
+        .join(', ');
+    }
+
+    const distinct = this.definition.distinct ? 'DISTINCT ' : '';
+
+    return `SELECT ${distinct}${columns} FROM ${from}`;
+  }
+
+  private buildInsertQuery() {
+    if (!this.definition?.insertValues?.length) {
+      throw new Error(`INSERT requires values`);
+    }
+
+    const keys = Object.keys(
+      this.definition.insertValues[0]
+    ) as (keyof TableRef['columns'])[];
+    const placeholders = keys.map(() => '?').join(', ');
+
+    this.definition.params = this.definition.insertValues.flatMap((row) =>
+      keys.map((key) => row[key])
+    );
+
+    return `INSERT INTO ${this.table.name} (${keys.join(', ')}) VALUES (${placeholders})`;
+  }
+
+  private buildUpdateQuery() {
+    if (!this.definition?.updateValues?.length) {
+      throw new Error(`UPDATE requires values`);
+    }
+
+    const keys = Object.keys(
+      this.definition.updateValues
+    ) as (keyof TableRef['columns'])[];
+    const updateParams = keys.map((key) => this.definition.updateValues![key]);
+
+    if (this.definition?.params) {
+      this.definition.params = [...updateParams, ...this.definition.params];
+    } else {
+      this.definition.params = updateParams;
+    }
+
+    return `UPDATE ${this.table.name} SET ${keys.map((key) => `${key as string} = ?`.trim()).join(', ')}`;
+  }
+
+  private buildDeleteQuery() {
+    return `DELETE FROM ${this.table.name}`;
+  }
+
   public toQuery() {
     let sql = '';
 
@@ -595,15 +665,15 @@ export class QueryBuilder<
         throw new Error('No query type defined');
     }
 
-    if (this.definition.joins?.length) {
+    if (this.definition?.joins?.length) {
       sql += ` ${this.definition.joins.join(' ')}`;
     }
 
-    if (this.definition.where?.length) {
+    if (this.definition?.where?.length) {
       sql += ` WHERE ${this.definition.where.join(' ')}`;
     }
 
-    if (this.definition.groupBy?.length) {
+    if (this.definition?.groupBy?.length) {
       sql += ' GROUP BY';
 
       const placeholders = this.definition.groupBy.map(() => '?').join(', ');
@@ -617,11 +687,11 @@ export class QueryBuilder<
       this.definition.params.push(...params);
     }
 
-    if (this.definition.having?.length) {
+    if (this.definition?.having?.length) {
       sql += ` HAVING ${this.definition.having.join(' ')}`;
     }
 
-    if (this.definition.orderBy && this.definition.orderBy.length) {
+    if (this.definition?.orderBy?.length) {
       sql += ' ORDER BY';
 
       const placeholders = this.definition.orderBy.map(() => '? ?').join(', ');
@@ -637,7 +707,7 @@ export class QueryBuilder<
       this.definition.params.push(...params);
     }
 
-    if (this.definition.limit !== null) {
+    if (this.definition?.limit !== null) {
       sql += ` LIMIT ?`;
 
       if (!this.definition.params) this.definition.params = [];
@@ -645,7 +715,7 @@ export class QueryBuilder<
       this.definition.params.push(this.definition.limit);
     }
 
-    if (this.definition.offset !== null) {
+    if (this.definition?.offset !== null) {
       sql += ` OFFSET ?`;
 
       if (!this.definition.params) this.definition.params = [];
