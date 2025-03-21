@@ -19,17 +19,6 @@ import type {
 } from './types';
 import { getCondition } from './utilities';
 
-export function col<
-  AllowedColumn extends string,
-  ColName extends AllowedColumn = AllowedColumn,
-  ColAlias extends string = string,
->(column: ColName, alias: ColAlias) {
-  return {
-    column,
-    as: alias,
-  } as const;
-}
-
 export class QueryBuilder<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
@@ -82,6 +71,108 @@ export class QueryBuilder<
     >;
   }
 
+  public col<ColName extends AllowedColumn, ColAlias extends string>(
+    column: ColName,
+    alias: ColAlias
+  ) {
+    return {
+      column,
+      as: alias,
+    } as const;
+  }
+
+  public rawCol<ColName extends AllowedColumn>(column: ColName) {
+    return column;
+  }
+
+  private addRawCondition<
+    Clause extends ConditionClause,
+    Logical extends LogicalOperator,
+  >(
+    clause: Clause,
+    column: (col: this['rawCol']) => string,
+    logical: Logical,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any
+  ) {
+    const validClause = clause.toLowerCase() as Lowercase<ConditionClause>;
+
+    if (!this.definition[validClause]) this.definition[validClause] = [];
+
+    const condition = column(this.rawCol);
+
+    const logicalPrefix =
+      this.definition[validClause].length > 0 ? logical : '';
+
+    this.definition[validClause].push(`${logicalPrefix} ${condition}`.trim());
+
+    if (!this.definition.params) this.definition.params = [];
+
+    if (typeof params === 'undefined') {
+      return this;
+    }
+
+    if (Array.isArray(params)) {
+      this.definition.params.push(...params);
+    } else {
+      this.definition.params.push(params);
+    }
+
+    return this;
+  }
+
+  public rawWhere(
+    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any
+  ) {
+    return this.addRawCondition(
+      ConditionClause.WHERE,
+      column,
+      LogicalOperator.AND,
+      params
+    );
+  }
+
+  public rawHaving(
+    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any
+  ) {
+    return this.addRawCondition(
+      ConditionClause.HAVING,
+      column,
+      LogicalOperator.AND,
+      params
+    );
+  }
+
+  public rawAnd(
+    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any
+  ) {
+    return this.addRawCondition(
+      ConditionClause.WHERE,
+      column,
+      LogicalOperator.AND,
+      params
+    );
+  }
+
+  public rawOr(
+    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any
+  ) {
+    return this.addRawCondition(
+      ConditionClause.WHERE,
+      column,
+      LogicalOperator.OR,
+      params
+    );
+  }
+
   private addCondition<
     Clause extends ConditionClause,
     ColName extends AllowedColumn,
@@ -118,7 +209,12 @@ export class QueryBuilder<
       operator === AcceptedOperator.IS_NULL ||
       operator === AcceptedOperator.IS_NOT_NULL
     ) {
-      return;
+      return this as unknown as QueryBuilder<
+        Alias,
+        TableRef,
+        JoinedTables,
+        Definition & { [Key in typeof validClause]: string[] }
+      >;
     }
 
     if (!this.definition.params) this.definition.params = [];
@@ -128,6 +224,17 @@ export class QueryBuilder<
     } else {
       this.definition.params.push(value);
     }
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & {
+        [Key in typeof validClause]: string[];
+      } & {
+        params: unknown[];
+      }
+    >;
   }
 
   public where<
@@ -140,15 +247,13 @@ export class QueryBuilder<
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
-    this.addCondition(
+    return this.addCondition(
       ConditionClause.WHERE,
       column,
       operator,
       value,
       LogicalOperator.AND
     );
-
-    return this;
   }
 
   public having<
@@ -161,15 +266,13 @@ export class QueryBuilder<
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
-    this.addCondition(
+    return this.addCondition(
       ConditionClause.HAVING,
       column,
       operator,
       value,
       LogicalOperator.AND
     );
-
-    return this;
   }
 
   public and<
@@ -182,15 +285,13 @@ export class QueryBuilder<
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
-    this.addCondition(
+    return this.addCondition(
       ConditionClause.WHERE,
       column,
       operator,
       value,
       LogicalOperator.AND
     );
-
-    return this;
   }
 
   public or<
@@ -203,15 +304,13 @@ export class QueryBuilder<
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(column: ColName, operator: Operator, value: Value) {
-    this.addCondition(
+    return this.addCondition(
       ConditionClause.WHERE,
       column,
       operator,
       value,
       LogicalOperator.OR
     );
-
-    return this;
   }
 
   private addJoin<
@@ -463,26 +562,13 @@ export class QueryBuilder<
       select: Array<`${Base}.${keyof Columns & string}`>;
     }
   >;
-  public select<Columns extends RawColumn<AllowedColumn>[]>(
-    ...columns: Columns
-  ): QueryBuilder<
-    Alias,
-    TableRef,
-    JoinedTables,
-    Omit<Definition, 'queryType' | 'select'> & {
-      queryType: typeof QueryType.SELECT;
-      select: Columns;
-    }
-  >;
   public select<
-    T extends readonly ((
-      col: <C extends AllowedColumn, A extends string>(
-        column: C,
-        alias: A
-      ) => AliasedColumn<C, A>
-    ) => AliasedColumn<AllowedColumn, string>)[],
+    Columns extends Array<
+      | RawColumn<AllowedColumn>
+      | ((col: this['col']) => AliasedColumn<AllowedColumn, string>)
+    >,
   >(
-    ...columns: T
+    ...columns: Columns
   ): QueryBuilder<
     Alias,
     TableRef,
@@ -492,7 +578,9 @@ export class QueryBuilder<
     Omit<Definition, 'queryType' | 'select'> & {
       queryType: typeof QueryType.SELECT;
       select: {
-        [K in keyof T]: T[K] extends (col: never) => infer R ? R : never;
+        [K in keyof Columns]: Columns[K] extends (col: never) => infer R
+          ? R
+          : Columns[K];
       };
     }
   >;
@@ -509,7 +597,7 @@ export class QueryBuilder<
     } else {
       columns = columns.map((column) => {
         if (typeof column === 'function') {
-          return column(col);
+          return column(this.col);
         }
 
         return column;
