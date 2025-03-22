@@ -37,9 +37,41 @@ export type AcceptedOrderBy<Columns extends string> = {
   direction: OrderBy;
 };
 
-export type AcceptedInsertValues<Columns extends Record<string, Column>> = {
-  [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
-}[];
+type InsertValuesParser<Columns extends Record<string, Column>> = {
+  [ColName in keyof Columns]: {
+    infer: ReturnType<Columns[ColName]['infer']>;
+    required: Columns[ColName]['definition'] extends { default: unknown }
+      ? false
+      : Columns[ColName]['definition'] extends { notNull: true }
+        ? true
+        : false;
+  };
+};
+
+type InsertValuesParserRequired<
+  Parsed extends InsertValuesParser<Record<string, Column>>,
+> = {
+  [ColName in keyof Parsed as Parsed[ColName]['required'] extends true
+    ? ColName
+    : never]: Parsed[ColName]['infer'];
+};
+
+type InsertValuesParserOptional<
+  Parsed extends InsertValuesParser<Record<string, Column>>,
+> = {
+  [ColName in keyof Parsed as Parsed[ColName]['required'] extends false
+    ? ColName
+    : never]?: Parsed[ColName]['infer'];
+};
+
+export type AcceptedInsertValues<
+  Columns extends Record<string, Column>,
+  Parsed extends InsertValuesParser<Columns> = InsertValuesParser<Columns>,
+  Required extends
+    InsertValuesParserRequired<Parsed> = InsertValuesParserRequired<Parsed>,
+  Optional extends
+    InsertValuesParserOptional<Parsed> = InsertValuesParserOptional<Parsed>,
+> = Array<Required & Optional>;
 
 export type AcceptedUpdateValues<Columns extends Record<string, Column>> = {
   [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;

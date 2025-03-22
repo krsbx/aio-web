@@ -10,7 +10,9 @@ import {
   QueryType,
 } from './constants';
 import type {
+  AcceptedInsertValues,
   AcceptedOrderBy,
+  AcceptedUpdateValues,
   AliasedColumn,
   ColumnSelector,
   QueryDefinition,
@@ -611,17 +613,12 @@ export class QueryBuilder<
     return this as any;
   }
 
-  public insert<
-    Columns extends TableRef['columns'],
-    Values extends {
-      [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
-    },
-  >(...values: Values[]) {
+  public insert<Values extends AcceptedInsertValues<TableRef['columns']>>(
+    ...values: Values
+  ) {
     this.definition.queryType = QueryType.INSERT;
 
-    if (!this.definition.insertValues) {
-      this.definition.insertValues = [];
-    }
+    if (!this.definition.insertValues) this.definition.insertValues = [];
 
     this.definition.insertValues.push(...values);
 
@@ -629,16 +626,16 @@ export class QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Omit<Definition, 'queryType'> & { queryType: typeof QueryType.INSERT }
+      Omit<Definition, 'queryType' | 'insertValues'> & {
+        queryType: typeof QueryType.INSERT;
+        insertValues: Values;
+      }
     >;
   }
 
-  public update<
-    Columns extends TableRef['columns'],
-    Values extends {
-      [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
-    },
-  >(values: Values) {
+  public update<Values extends AcceptedUpdateValues<TableRef['columns']>>(
+    values: Values
+  ) {
     this.definition.queryType = QueryType.UPDATE;
     this.definition.updateValues = values;
 
@@ -646,7 +643,10 @@ export class QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Omit<Definition, 'queryType'> & { queryType: typeof QueryType.UPDATE }
+      Omit<Definition, 'queryType' | 'updateValues'> & {
+        queryType: typeof QueryType.UPDATE;
+        updateValues: Values;
+      }
     >;
   }
 
