@@ -1,8 +1,9 @@
+import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
 import { Dialect } from '../table/constants';
 import { AcceptedOperator } from './constants';
-import type { WhereValue } from './types';
+import type { ColumnSelector, QueryDefinition, WhereValue } from './types';
 
 export function getCondition<
   DbDialect extends Dialect,
@@ -71,4 +72,86 @@ export function getCondition<
     default:
       throw new Error('Invalid operator');
   }
+}
+
+export function getTimestamp<
+  TableRef extends Table<string, Record<string, Column>>,
+>(table: TableRef) {
+  const isWithTimestamp = !!table.timestamp;
+  const timestamp = new Date();
+  let createdAt = 'createdAt';
+  let updatedAt = 'updatedAt';
+
+  if (isWithTimestamp) {
+    const isCustomTimestamp = typeof table.timestamp === 'object';
+
+    if (isCustomTimestamp && table.timestamp.createdAt) {
+      createdAt = table.timestamp.createdAt;
+    }
+
+    if (isCustomTimestamp && table.timestamp.updatedAt) {
+      updatedAt = table.timestamp.updatedAt;
+    }
+  }
+
+  return {
+    isWithTimestamp,
+    timestamp,
+    createdAt,
+    updatedAt,
+  };
+}
+
+export function getParanoid<
+  TableRef extends Table<string, Record<string, Column>>,
+>(table: TableRef) {
+  const isWithParanoid = !!table.paranoid;
+  const timestamp = new Date();
+  let deletedAt = 'deletedAt';
+
+  if (isWithParanoid) {
+    if (typeof table.paranoid === 'string') {
+      deletedAt = table.paranoid;
+    }
+  }
+
+  return {
+    isWithParanoid,
+    timestamp,
+    deletedAt,
+  };
+}
+
+export function getWhereConditions<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  Query extends QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn
+  >,
+>(q: Query) {
+  const conditions: string[] = [];
+
+  const base = q.definition.baseAlias ?? q.table.name;
+  const { isWithParanoid, deletedAt } = getParanoid(q.table);
+  const withDeleted = !!q.definition.withDeleted;
+  const isHasConditions = !!q.definition.where?.length;
+
+  if (!withDeleted && isWithParanoid) {
+    const suffix = isHasConditions ? ' AND ' : '';
+
+    conditions.unshift(`${base}.${deletedAt} IS NULL${suffix}`);
+  }
+
+  if (q.definition.where?.length) {
+    conditions.push(...q.definition.where);
+  }
+
+  return conditions;
 }

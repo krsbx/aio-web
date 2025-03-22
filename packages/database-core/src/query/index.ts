@@ -9,6 +9,7 @@ import {
   LogicalOperator,
   QueryType,
 } from './constants';
+import { toQuery } from './sql';
 import type {
   AcceptedInsertValues,
   AcceptedOrderBy,
@@ -19,7 +20,7 @@ import type {
   RawColumn,
   WhereValue,
 } from './types';
-import { getCondition } from './utilities';
+import { getCondition, getParanoid, getTimestamp } from './utilities';
 
 export class QueryBuilder<
   Alias extends string,
@@ -40,6 +41,12 @@ export class QueryBuilder<
   public readonly table: TableRef;
   public readonly definition: Definition;
 
+  public toQuery: () => {
+    query: string;
+    params: Definition['params'];
+  };
+  public toString: () => string;
+
   constructor(table: TableRef) {
     this.table = table;
     this.definition = {
@@ -59,7 +66,11 @@ export class QueryBuilder<
       distinct: null,
       baseAlias: null,
       joinedTables: null,
+      withDeleted: null,
     } as Definition;
+
+    this.toQuery = toQuery.bind(this);
+    this.toString = toString.bind(this);
   }
 
   public alias<NewAlias extends string>(alias: NewAlias) {
@@ -73,7 +84,7 @@ export class QueryBuilder<
     >;
   }
 
-  public col<ColName extends AllowedColumn, ColAlias extends string>(
+  private col<ColName extends AllowedColumn, ColAlias extends string>(
     column: ColName,
     alias: ColAlias
   ) {
@@ -83,7 +94,7 @@ export class QueryBuilder<
     } as const;
   }
 
-  public rawCol<ColName extends AllowedColumn>(column: ColName) {
+  private rawCol<ColName extends AllowedColumn>(column: ColName) {
     return column;
   }
 
@@ -92,7 +103,9 @@ export class QueryBuilder<
     Logical extends LogicalOperator,
   >(
     clause: Clause,
-    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    column: (c: this['rawCol']) => string,
     logical: Logical,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params?: any
@@ -124,7 +137,9 @@ export class QueryBuilder<
   }
 
   public rawWhere(
-    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    column: (c: this['rawCol']) => string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params?: any
   ) {
@@ -137,7 +152,9 @@ export class QueryBuilder<
   }
 
   public rawHaving(
-    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    column: (c: this['rawCol']) => string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params?: any
   ) {
@@ -150,7 +167,9 @@ export class QueryBuilder<
   }
 
   public rawAnd(
-    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    column: (c: this['rawCol']) => string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params?: any
   ) {
@@ -163,7 +182,9 @@ export class QueryBuilder<
   }
 
   public rawOr(
-    column: (col: this['rawCol']) => string,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    column: (c: this['rawCol']) => string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     params?: any
   ) {
@@ -194,11 +215,7 @@ export class QueryBuilder<
     logical: Logical
   ) {
     const validClause = clause.toLowerCase() as Lowercase<ConditionClause>;
-    const condition = getCondition<TableRef, ColName, Operator, Value>(
-      column,
-      operator,
-      value
-    );
+    const condition = getCondition(this.table.dialect, column, operator, value);
 
     if (!this.definition[validClause]) this.definition[validClause] = [];
 
@@ -215,7 +232,9 @@ export class QueryBuilder<
         Alias,
         TableRef,
         JoinedTables,
-        Definition & { [Key in typeof validClause]: string[] }
+        Omit<Definition, typeof validClause> & {
+          [Key in typeof validClause]: string[];
+        }
       >;
     }
 
@@ -231,7 +250,7 @@ export class QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Definition & {
+      Omit<Definition, typeof validClause | 'params'> & {
         [Key in typeof validClause]: string[];
       } & {
         params: unknown[];
@@ -448,7 +467,7 @@ export class QueryBuilder<
     >;
   }
 
-  public aggregate<
+  private aggregate<
     ColName extends AllowedColumn,
     Fn extends AggregationFunction,
   >(column: ColName, fn: Fn) {
@@ -461,7 +480,7 @@ export class QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Definition & { aggregate: { column: ColName; fn: Fn } }
+      Omit<Definition, 'aggregate'> & { aggregate: { column: ColName; fn: Fn } }
     >;
   }
 
@@ -542,6 +561,17 @@ export class QueryBuilder<
     >;
   }
 
+  public withDeleted() {
+    this.definition.withDeleted = true;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      TableRef,
+      JoinedTables,
+      Definition & { withDeleted: true }
+    >;
+  }
+
   public clone() {
     const query = new QueryBuilder<Alias, TableRef, JoinedTables>(this.table);
 
@@ -567,7 +597,9 @@ export class QueryBuilder<
   public select<
     Columns extends Array<
       | RawColumn<AllowedColumn>
-      | ((col: this['col']) => AliasedColumn<AllowedColumn, string>)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      | ((c: this['col']) => AliasedColumn<AllowedColumn, string>)
     >,
   >(
     ...columns: Columns
@@ -620,6 +652,18 @@ export class QueryBuilder<
 
     if (!this.definition.insertValues) this.definition.insertValues = [];
 
+    const { isWithTimestamp, createdAt, updatedAt, timestamp } = getTimestamp(
+      this.table
+    );
+
+    if (isWithTimestamp) {
+      values = values.map((row) => ({
+        ...row,
+        [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
+        [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
+      })) as Values;
+    }
+
     this.definition.insertValues.push(...values);
 
     return this as unknown as QueryBuilder<
@@ -636,6 +680,15 @@ export class QueryBuilder<
   public update<Values extends AcceptedUpdateValues<TableRef['columns']>>(
     values: Values
   ) {
+    const { isWithTimestamp, updatedAt, timestamp } = getTimestamp(this.table);
+
+    if (isWithTimestamp) {
+      values = {
+        ...values,
+        [updatedAt]: values[updatedAt as keyof typeof values] ?? timestamp,
+      };
+    }
+
     this.definition.queryType = QueryType.UPDATE;
     this.definition.updateValues = values;
 
@@ -651,6 +704,14 @@ export class QueryBuilder<
   }
 
   public delete() {
+    const { isWithParanoid, deletedAt, timestamp } = getParanoid(this.table);
+
+    if (isWithParanoid) {
+      return this.update({
+        [deletedAt]: timestamp,
+      } as AcceptedUpdateValues<TableRef['columns']>);
+    }
+
     this.definition.queryType = QueryType.DELETE;
 
     return this as unknown as QueryBuilder<
@@ -659,164 +720,5 @@ export class QueryBuilder<
       JoinedTables,
       Omit<Definition, 'queryType'> & { queryType: typeof QueryType.DELETE }
     >;
-  }
-
-  private buildSelectQuery() {
-    const from = this.definition.baseAlias
-      ? `${this.table.name} AS ${this.definition.baseAlias}`
-      : this.table.name;
-
-    if (this.definition?.aggregate) {
-      return `SELECT ${this.definition.aggregate.fn}(${this.definition.aggregate.column}) FROM ${from}`;
-    }
-
-    let columns = '*';
-
-    if (this.definition?.select?.length) {
-      columns = this.definition.select
-        .map((col) => {
-          if (typeof col === 'object') {
-            return `${col.column} AS ${col.as}`;
-          }
-
-          return col;
-        })
-        .join(', ');
-    }
-
-    const distinct = this.definition.distinct ? 'DISTINCT ' : '';
-
-    return `SELECT ${distinct}${columns} FROM ${from}`;
-  }
-
-  private buildInsertQuery() {
-    const rows = this.definition?.insertValues;
-
-    if (!rows?.length) {
-      throw new Error(`INSERT requires values`);
-    }
-
-    const keys = Object.keys(rows[0]);
-    const columns = keys.join(', ');
-    const rowPlaceholders = `(${keys.map(() => '?').join(', ')})`;
-    const placeholders = rows.map(() => rowPlaceholders).join(', ');
-
-    this.definition.params = rows.flatMap((row) =>
-      keys.map((key) => (row as TableRef['columns'])[key])
-    );
-
-    return `INSERT INTO ${this.table.name} (${columns}) VALUES ${placeholders}`;
-  }
-
-  private buildUpdateQuery() {
-    if (!this.definition?.updateValues?.length) {
-      throw new Error(`UPDATE requires values`);
-    }
-
-    const keys = Object.keys(
-      this.definition.updateValues
-    ) as (keyof TableRef['columns'])[];
-    const updateParams = keys.map((key) => this.definition.updateValues![key]);
-
-    if (this.definition?.params) {
-      this.definition.params = [...updateParams, ...this.definition.params];
-    } else {
-      this.definition.params = updateParams;
-    }
-
-    return `UPDATE ${this.table.name} SET ${keys.map((key) => `${key as string} = ?`.trim()).join(', ')}`;
-  }
-
-  private buildDeleteQuery() {
-    return `DELETE FROM ${this.table.name}`;
-  }
-
-  public toQuery() {
-    let sql = '';
-
-    switch (this.definition.queryType) {
-      case QueryType.SELECT:
-        sql = this.buildSelectQuery();
-        break;
-
-      case QueryType.INSERT:
-        sql = this.buildInsertQuery();
-        break;
-
-      case QueryType.UPDATE:
-        sql = this.buildUpdateQuery();
-        break;
-
-      case QueryType.DELETE:
-        sql = this.buildDeleteQuery();
-        break;
-
-      default:
-        throw new Error('No query type defined');
-    }
-
-    if (this.definition?.joins?.length) {
-      sql += ` ${this.definition.joins.join(' ')}`;
-    }
-
-    if (this.definition?.where?.length) {
-      sql += ` WHERE ${this.definition.where.join(' ')}`;
-    }
-
-    if (this.definition?.groupBy?.length) {
-      sql += ' GROUP BY';
-
-      const placeholders = this.definition.groupBy.map(() => '?').join(', ');
-
-      const params = this.definition.groupBy.map((group) => group);
-
-      sql += ` ${placeholders}`;
-
-      if (!this.definition.params) this.definition.params = [];
-
-      this.definition.params.push(...params);
-    }
-
-    if (this.definition?.having?.length) {
-      sql += ` HAVING ${this.definition.having.join(' ')}`;
-    }
-
-    if (this.definition?.orderBy?.length) {
-      sql += ' ORDER BY';
-
-      const placeholders = this.definition.orderBy.map(() => '? ?').join(', ');
-
-      const params = this.definition.orderBy
-        .map((order) => [order.column, order.direction])
-        .flat(1);
-
-      sql += ` ${placeholders}`;
-
-      if (!this.definition.params) this.definition.params = [];
-
-      this.definition.params.push(...params);
-    }
-
-    if (this.definition?.limit !== null) {
-      sql += ` LIMIT ?`;
-
-      if (!this.definition.params) this.definition.params = [];
-
-      this.definition.params.push(this.definition.limit);
-    }
-
-    if (this.definition?.offset !== null) {
-      sql += ` OFFSET ?`;
-
-      if (!this.definition.params) this.definition.params = [];
-
-      this.definition.params.push(this.definition.offset);
-    }
-
-    return { query: sql + ';', params: this.definition.params };
-  }
-
-  public toString() {
-    return this.toQuery().query;
   }
 }

@@ -122,5 +122,6 @@ export interface QueryDefinition<
   distinct: boolean | null;
   joins: string[] | null;
   baseAlias: Alias | null;
+  withDeleted: boolean | null;
   joinedTables: JoinedTables | null;
 }
