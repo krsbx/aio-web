@@ -690,20 +690,22 @@ export class QueryBuilder<
   }
 
   private buildInsertQuery() {
-    if (!this.definition?.insertValues?.length) {
+    const rows = this.definition?.insertValues;
+
+    if (!rows?.length) {
       throw new Error(`INSERT requires values`);
     }
 
-    const keys = Object.keys(
-      this.definition.insertValues[0]
-    ) as (keyof TableRef['columns'])[];
-    const placeholders = keys.map(() => '?').join(', ');
+    const keys = Object.keys(rows[0]);
+    const columns = keys.join(', ');
+    const rowPlaceholders = `(${keys.map(() => '?').join(', ')})`;
+    const placeholders = rows.map(() => rowPlaceholders).join(', ');
 
-    this.definition.params = this.definition.insertValues.flatMap((row) =>
-      keys.map((key) => row[key])
+    this.definition.params = rows.flatMap((row) =>
+      keys.map((key) => (row as TableRef['columns'])[key])
     );
 
-    return `INSERT INTO ${this.table.name} (${keys.join(', ')}) VALUES (${placeholders})`;
+    return `INSERT INTO ${this.table.name} (${columns}) VALUES ${placeholders}`;
   }
 
   private buildUpdateQuery() {
