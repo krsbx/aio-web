@@ -6,15 +6,15 @@ import type {
   TimestampOptions,
 } from './types';
 
-export const defaultCreatedAt = new Column({
+export const createdAt = Column.define({
   type: 'DATETIME',
 }).default('CURRENT_TIMESTAMP');
 
-export const defaultUpdatedAt = new Column({
+export const updatedAt = Column.define({
   type: 'DATETIME',
 });
 
-export const defaultDeletedAt = new Column({
+export const deletedAt = Column.define({
   type: 'DATETIME',
 });
 
@@ -70,11 +70,11 @@ export function defineColumns<
     }
 
     if (!columns[timestamp.createdAt]) {
-      columns[timestamp.createdAt] = defaultCreatedAt;
+      columns[timestamp.createdAt] = createdAt;
     }
 
     if (!columns[timestamp.updatedAt]) {
-      columns[timestamp.updatedAt] = defaultUpdatedAt;
+      columns[timestamp.updatedAt] = updatedAt;
     }
   }
 
@@ -84,7 +84,7 @@ export function defineColumns<
     }
 
     if (!columns[tracker.deletedAt]) {
-      columns[tracker.deletedAt] = defaultDeletedAt;
+      columns[tracker.deletedAt] = deletedAt;
     }
   }
 

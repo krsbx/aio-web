@@ -1,4 +1,4 @@
-import { Column } from '../column';
+import type { Column } from '../column';
 import { QueryBuilder } from '../query';
 import type { Dialect } from './constants';
 import type { TableOptions, TimestampOptions } from './types';
@@ -48,10 +48,10 @@ export class Table<
     return new QueryBuilder(this).alias(this.name);
   }
 
-  static define<
-    DbDialect extends Dialect,
+  public static define<
     TableName extends string,
     Columns extends Record<string, Column>,
+    DbDialect extends Dialect,
     CreatedAt extends string,
     UpdatedAt extends string,
     Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,

@@ -1,8 +1,4 @@
-import type {
-  defaultCreatedAt,
-  defaultDeletedAt,
-  defaultUpdatedAt,
-} from './utilities';
+import type { createdAt, deletedAt, updatedAt } from './utilities';
 import type { Column } from '../column';
 import type { Dialect } from './constants';
 
@@ -41,31 +37,31 @@ export type MergeTimestampParanoid<
 > = Columns &
   (Timestamp extends true
     ? {
-        createdAt: typeof defaultCreatedAt;
-        updatedAt: typeof defaultUpdatedAt;
+        createdAt: typeof createdAt;
+        updatedAt: typeof updatedAt;
       }
     : Timestamp extends TimestampOptions<CreatedAt, UpdatedAt>
       ? (Timestamp['createdAt'] extends CreatedAt
           ? {
-              [K in Timestamp['createdAt']]: typeof defaultCreatedAt;
+              [K in Timestamp['createdAt']]: typeof createdAt;
             }
           : {
-              createdAt: typeof defaultCreatedAt;
+              createdAt: typeof createdAt;
             }) &
           (Timestamp['updatedAt'] extends UpdatedAt
             ? {
-                [K in Timestamp['updatedAt']]: typeof defaultUpdatedAt;
+                [K in Timestamp['updatedAt']]: typeof updatedAt;
               }
             : {
-                updatedAt: typeof defaultUpdatedAt;
+                updatedAt: typeof updatedAt;
               })
       : NonNullable<unknown>) &
   (Paranoid extends true
     ? {
-        deletedAt: typeof defaultDeletedAt;
+        deletedAt: typeof deletedAt;
       }
     : Paranoid extends string
       ? {
-          [K in Paranoid]: typeof defaultDeletedAt;
+          [K in Paranoid]: typeof deletedAt;
         }
       : NonNullable<unknown>);

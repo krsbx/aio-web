@@ -28,7 +28,7 @@ export class Column<
   public readonly length: number | undefined;
   public readonly enums: readonly Values[];
 
-  constructor(options: Options) {
+  private constructor(options: Options) {
     this.type = options.type;
     this.enums = [];
 
@@ -48,6 +48,14 @@ export class Column<
       comment: null,
       default: undefined,
     } as Definition;
+  }
+
+  public static define<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Options extends ColumnOptions<Values> = ColumnOptions<Values>,
+  >(options: Options) {
+    return new Column(options);
   }
 
   public autoIncrement() {
