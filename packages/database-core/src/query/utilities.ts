@@ -1,79 +1,72 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
+import { Dialect } from '../table/constants';
 import { AcceptedOperator } from './constants';
 import type { WhereValue } from './types';
 
 export function getCondition<
+  DbDialect extends Dialect,
   TableRef extends Table<string, Record<string, Column>>,
   ColName extends keyof TableRef['columns'],
   Operator extends AcceptedOperator,
   Value extends WhereValue<Column>[Operator],
->(column: ColName, operator: Operator, value: Value) {
+>(dialect: DbDialect, column: ColName, operator: Operator, value: Value) {
   switch (operator) {
     case AcceptedOperator.EQ:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} = ?`;
+      return `${column as string} = ?`;
 
     case AcceptedOperator.NE:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} != ?`;
+      return `${column as string} != ?`;
 
     case AcceptedOperator.GT:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} > ?`;
+      return `${column as string} > ?`;
 
     case AcceptedOperator.LT:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} < ?`;
+      return `${column as string} < ?`;
 
     case AcceptedOperator.GTE:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} >= ?`;
+      return `${column as string} >= ?`;
 
     case AcceptedOperator.LTE:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} <= ?`;
+      return `${column as string} <= ?`;
 
     case AcceptedOperator.IN:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} IN (${(value as never[]).map(() => '?').join(', ')})`;
+      return `${column as string} IN (${(value as never[]).map(() => '?').join(', ')})`;
 
     case AcceptedOperator.NOT_IN:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} NOT IN (${(value as never[]).map(() => '?').join(', ')})`;
+      return `${column as string} NOT IN (${(value as never[]).map(() => '?').join(', ')})`;
 
     case AcceptedOperator.LIKE:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} LIKE ?`;
+      return `${column as string} LIKE ?`;
+
+    case AcceptedOperator.NOT_LIKE:
+      return `${column as string} NOT LIKE ?`;
+
+    case AcceptedOperator.ILIKE:
+      if (dialect === Dialect.POSTGRES) {
+        return `${column as string} ILIKE ?`;
+      }
+
+      return `LOWER(${column as string}) LIKE LOWER(?)`;
+
+    case AcceptedOperator.NOT_ILIKE:
+      if (dialect === Dialect.POSTGRES) {
+        return `${column as string} NOT ILIKE ?`;
+      }
+
+      return `LOWER(${column as string}) NOT LIKE LOWER(?)`;
 
     case AcceptedOperator.IS_NULL:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} IS NULL`;
+      return `${column as string} IS NULL`;
 
     case AcceptedOperator.IS_NOT_NULL:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} IS NOT NULL`;
+      return `${column as string} IS NOT NULL`;
 
     case AcceptedOperator.BETWEEN:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} BETWEEN ? AND ?`;
+      return `${column as string} BETWEEN ? AND ?`;
 
     case AcceptedOperator.NOT_BETWEEN:
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return `${column} NOT BETWEEN ? AND ?`;
+      return `${column as string} NOT BETWEEN ? AND ?`;
 
     default:
       throw new Error('Invalid operator');
