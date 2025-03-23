@@ -26,6 +26,7 @@ export type AcceptedColumnTypeMap<T = any> = {
     | typeof AcceptedColumnTypes.FLOAT
     | typeof AcceptedColumnTypes.DOUBLE
     | typeof AcceptedColumnTypes.DECIMAL
+    | typeof AcceptedColumnTypes.SERIAL
     ? number
     : K extends
           | typeof AcceptedColumnTypes.STRING

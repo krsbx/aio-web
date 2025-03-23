@@ -1,4 +1,4 @@
-import type { Dialect } from '../table/constants';
+import { Dialect } from '../table/constants';
 import { ColumnTypeMapping } from './constants';
 import type {
   AcceptedColumnTypeMap,
@@ -153,15 +153,19 @@ export class Column<
     }
 
     if (this.definition.autoIncrement) {
-      sql += 'AUTOINCREMENT';
+      if (this.definition.dialect === Dialect.POSTGRES) {
+        sql = `SERIAL${this.definition.primaryKey ? ' PRIMARY KEY' : ''}`;
+      } else {
+        sql += ' AUTOINCREMENT';
+      }
     }
 
     if (this.definition.notNull) {
-      sql += 'NOT NULL';
+      sql += ' NOT NULL';
     }
 
     if (this.definition.unique) {
-      sql += 'UNIQUE';
+      sql += ' UNIQUE';
     }
 
     if (this.definition.default !== undefined) {
@@ -169,7 +173,7 @@ export class Column<
       const isString = typeof this.definition.default === 'string';
       const finalValue = isString ? `'${value}'` : value;
 
-      sql += `DEFAULT ${finalValue}`;
+      sql += ` DEFAULT ${finalValue}`;
     }
 
     return { query: sql + ';', params: [] };

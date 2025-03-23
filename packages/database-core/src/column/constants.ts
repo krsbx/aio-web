@@ -18,6 +18,7 @@ export const AcceptedColumnTypes = {
   DATETIME: 'DATETIME',
   DATEONLY: 'DATEONLY',
   ENUM: 'ENUM',
+  SERIAL: 'SERIAL',
 } as const;
 
 export type AcceptedColumnTypes =
@@ -91,5 +92,9 @@ export const ColumnTypeMapping = {
   [AcceptedColumnTypes.ENUM]: {
     [Dialect.SQLITE]: 'TEXT',
     [Dialect.POSTGRES]: 'TEXT',
+  },
+  [AcceptedColumnTypes.SERIAL]: {
+    [Dialect.SQLITE]: 'INTEGER AUTOINCREMENT',
+    [Dialect.POSTGRES]: 'SERIAL',
   },
 } as const;
