@@ -1,5 +1,6 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
+import type { UnionToIntersection } from '../types';
 import type {
   AcceptedOperator,
   AggregationFunction,
@@ -22,14 +23,14 @@ export type WhereValue<T extends Column> = {
   [K in AcceptedOperator]: K extends
     | typeof AcceptedOperator.BETWEEN
     | typeof AcceptedOperator.NOT_BETWEEN
-    ? [ReturnType<T['infer']>, ReturnType<T['infer']>]
+    ? [T['_output'], T['_output']]
     : K extends typeof AcceptedOperator.IN | typeof AcceptedOperator.NOT_IN
-      ? ReturnType<T['infer']>[]
+      ? T['_output'][]
       : K extends
             | typeof AcceptedOperator.IS_NULL
             | typeof AcceptedOperator.IS_NOT_NULL
         ? never
-        : ReturnType<T['infer']>;
+        : T['_output'];
 };
 
 export type AcceptedOrderBy<Columns extends string> = {
@@ -39,7 +40,7 @@ export type AcceptedOrderBy<Columns extends string> = {
 
 type InsertValuesParser<Columns extends Record<string, Column>> = {
   [ColName in keyof Columns]: {
-    infer: ReturnType<Columns[ColName]['infer']>;
+    output: Columns[ColName]['_output'];
     required: Columns[ColName]['definition'] extends { default: unknown }
       ? false
       : Columns[ColName]['definition'] extends { notNull: true }
@@ -53,7 +54,7 @@ type InsertValuesParserRequired<
 > = {
   [ColName in keyof Parsed as Parsed[ColName]['required'] extends true
     ? ColName
-    : never]: Parsed[ColName]['infer'];
+    : never]: Parsed[ColName]['output'];
 };
 
 type InsertValuesParserOptional<
@@ -61,7 +62,7 @@ type InsertValuesParserOptional<
 > = {
   [ColName in keyof Parsed as Parsed[ColName]['required'] extends false
     ? ColName
-    : never]?: Parsed[ColName]['infer'];
+    : never]?: Parsed[ColName]['output'];
 };
 
 export type AcceptedInsertValues<
@@ -74,7 +75,7 @@ export type AcceptedInsertValues<
 > = Array<Required & Optional>;
 
 export type AcceptedUpdateValues<Columns extends Record<string, Column>> = {
-  [ColName in keyof Columns]?: ReturnType<Columns[ColName]['infer']>;
+  [ColName in keyof Columns]?: Columns[ColName]['_output'];
 };
 
 export type RawColumn<AllowedColumn extends string> = AllowedColumn;
@@ -125,3 +126,92 @@ export interface QueryDefinition<
   withDeleted: boolean | null;
   joinedTables: JoinedTables | null;
 }
+
+type InsertQueryOutput<TableRef extends Table<string, Record<string, Column>>> =
+  {
+    [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
+  };
+type InferAliasedColumn<
+  Current extends AliasedColumn<string, string>,
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+> = Current extends {
+  column: `${infer TableAlias}.${infer ColName}`;
+  as: `${infer ColAlias}`;
+}
+  ? TableAlias extends keyof JoinedTables
+    ? {
+        [T in TableAlias]: {
+          [K in ColAlias]: JoinedTables[T]['columns'][ColName]['_output'];
+        };
+      }
+    : TableAlias extends Alias | TableRef['name']
+      ? {
+          [K in ColName as ColAlias]: TableRef['columns'][K]['_output'];
+        }
+      : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+type InferRawColumn<
+  Current extends string,
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+> = Current extends `${infer TableAlias}.${infer ColName}`
+  ? TableAlias extends keyof JoinedTables
+    ? {
+        [T in TableAlias]: {
+          [K in ColName]: JoinedTables[T]['columns'][K]['_output'];
+        };
+      }
+    : TableAlias extends Alias | TableRef['name']
+      ? {
+          [K in ColName]: TableRef['columns'][K]['_output'];
+        }
+      : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+export type SelectQueryOutput<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+> = Definition extends { select: infer Select }
+  ? Select extends Array<SelectableColumn<AllowedColumn>>
+    ? UnionToIntersection<
+        Select[number] extends infer Col
+          ? Col extends RawColumn<AllowedColumn>
+            ? InferRawColumn<Col, Alias, TableRef, JoinedTables>
+            : Col extends AliasedColumn<AllowedColumn>
+              ? InferAliasedColumn<Col, Alias, TableRef, JoinedTables>
+              : never
+          : never
+      >
+    : never
+  : never;
+
+export type QueryOutput<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+> = Definition extends { queryType: infer Type }
+  ? Type extends null
+    ? never
+    : Type extends typeof QueryType.INSERT
+      ? InsertQueryOutput<TableRef>
+      : Type extends typeof QueryType.DELETE | typeof QueryType.UPDATE
+        ? void
+        : Type extends typeof QueryType.SELECT
+          ? SelectQueryOutput<
+              Alias,
+              TableRef,
+              JoinedTables,
+              Definition,
+              AllowedColumn
+            >
+          : never
+  : never;

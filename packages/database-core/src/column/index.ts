@@ -27,6 +27,7 @@ export class Column<
   public readonly type: Options['type'];
   public readonly length: number | undefined;
   public readonly enums: readonly Values[];
+  public readonly _output!: ValueSelector<Definition, Value>;
 
   private constructor(options: Options) {
     this.type = options.type;
@@ -178,7 +179,7 @@ export class Column<
     return this.toQuery().query;
   }
 
-  public infer(): ValueSelector<Definition, Value> {
+  public infer(): this['_output'] {
     return null as never;
   }
 }

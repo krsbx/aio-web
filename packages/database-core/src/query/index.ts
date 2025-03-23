@@ -17,6 +17,7 @@ import type {
   AliasedColumn,
   ColumnSelector,
   QueryDefinition,
+  QueryOutput,
   RawColumn,
   WhereValue,
 } from './types';
@@ -40,6 +41,13 @@ export class QueryBuilder<
 > {
   public readonly table: TableRef;
   public readonly definition: Definition;
+  public readonly _output!: QueryOutput<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn
+  >;
 
   public toQuery: () => {
     query: string;
@@ -720,5 +728,9 @@ export class QueryBuilder<
       JoinedTables,
       Omit<Definition, 'queryType'> & { queryType: typeof QueryType.DELETE }
     >;
+  }
+
+  public infer(): this['_output'] {
+    return null as never;
   }
 }

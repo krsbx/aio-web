@@ -24,8 +24,6 @@ export interface TableOptions<
   columns: Columns;
   paranoid?: Paranoid;
   timestamp?: Timestamp;
-  createdAt?: CreatedAt;
-  updatedAt?: UpdatedAt;
 }
 
 export type MergeTimestampParanoid<
