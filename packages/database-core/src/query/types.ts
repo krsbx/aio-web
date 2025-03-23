@@ -138,6 +138,7 @@ type InsertQueryOutput<TableRef extends Table<string, Record<string, Column>>> =
   {
     [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
   };
+
 type InferAliasedColumn<
   Current extends AliasedColumn<string, string>,
   Alias extends string,

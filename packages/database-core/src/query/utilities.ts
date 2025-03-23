@@ -156,6 +156,36 @@ export function getWhereConditions<
   return conditions;
 }
 
+export function getGroupByConditions<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  Query extends QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn
+  >,
+>(q: Query) {
+  if (q.definition.groupBy?.length) return q.definition.groupBy;
+
+  if (q.definition.aggregates?.length) {
+    if (q.definition.select?.length)
+      return q.definition.select.map((col) =>
+        typeof col === 'string' ? col : col.column
+      );
+
+    const from = q.definition.baseAlias ?? q.table.name;
+
+    return Object.keys(q.table.columns).map((col) => `${from}.${col}`);
+  }
+
+  return [];
+}
+
 export function getTableSelectName<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,

@@ -9,7 +9,7 @@ import {
 } from './builder';
 import { QueryType } from './constants';
 import type { ColumnSelector, QueryDefinition } from './types';
-import { getWhereConditions } from './utilities';
+import { getGroupByConditions, getWhereConditions } from './utilities';
 
 export function toQuery<
   Alias extends string,
@@ -58,8 +58,10 @@ export function toQuery<
     sql += ` WHERE ${whereConditions.join(' ')}`;
   }
 
-  if (this.definition?.groupBy?.length) {
-    sql += ` GROUP BY ${this.definition.groupBy.join(', ')};`;
+  const groupByConditions = getGroupByConditions(this);
+
+  if (groupByConditions) {
+    sql += ` GROUP BY ${groupByConditions.join(', ')};`;
   }
 
   if (this.definition?.having?.length) {
