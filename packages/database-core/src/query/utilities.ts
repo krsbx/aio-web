@@ -144,7 +144,7 @@ export function getWhereConditions<
   const isHasConditions = !!q.definition.where?.length;
 
   if (!withDeleted && isWithParanoid) {
-    const suffix = isHasConditions ? ' AND ' : '';
+    const suffix = isHasConditions ? ' AND' : '';
 
     conditions.unshift(`${base}.${deletedAt} IS NULL${suffix}`);
   }
@@ -154,4 +154,23 @@ export function getWhereConditions<
   }
 
   return conditions;
+}
+
+export function getTableSelectName<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  Query extends QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn
+  >,
+>(q: Query) {
+  if (!q.definition.baseAlias) return q.table.name;
+
+  return `${q.table.name} AS ${q.definition.baseAlias}`;
 }

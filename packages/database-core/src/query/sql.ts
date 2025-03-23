@@ -59,17 +59,7 @@ export function toQuery<
   }
 
   if (this.definition?.groupBy?.length) {
-    sql += ' GROUP BY';
-
-    const placeholders = this.definition.groupBy.map(() => '?').join(', ');
-
-    const params = this.definition.groupBy.map((group) => group);
-
-    sql += ` ${placeholders}`;
-
-    if (!this.definition.params) this.definition.params = [];
-
-    this.definition.params.push(...params);
+    sql += ` GROUP BY ${this.definition.groupBy.join(', ')};`;
   }
 
   if (this.definition?.having?.length) {
@@ -77,19 +67,9 @@ export function toQuery<
   }
 
   if (this.definition?.orderBy?.length) {
-    sql += ' ORDER BY';
-
-    const placeholders = this.definition.orderBy.map(() => '? ?').join(', ');
-
-    const params = this.definition.orderBy
-      .map((order) => [order.column, order.direction])
-      .flat(1);
-
-    sql += ` ${placeholders}`;
-
-    if (!this.definition.params) this.definition.params = [];
-
-    this.definition.params.push(...params);
+    sql += ` ORDER BY ${this.definition.orderBy
+      .map((order) => [order.column, order.direction].join(' '))
+      .join(', ')};`;
   }
 
   if (this.definition?.limit !== null) {

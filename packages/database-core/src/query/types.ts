@@ -92,6 +92,16 @@ export type SelectableColumn<Allowed extends string> =
   | RawColumn<Allowed>
   | AliasedColumn<Allowed>;
 
+export type AggregateColumn<
+  Allowed extends string,
+  Fn extends AggregationFunction = AggregationFunction,
+  Alias extends string = string,
+> = {
+  column: Allowed;
+  as?: Alias | Fn;
+  fn: AggregationFunction;
+};
+
 export interface QueryDefinition<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
@@ -116,10 +126,7 @@ export interface QueryDefinition<
   insertValues: AcceptedInsertValues<TableRef['columns']> | null;
   updateValues: AcceptedUpdateValues<TableRef['columns']> | null;
   orderBy: AcceptedOrderBy<AllowedColumn>[] | null;
-  aggregate: {
-    column: AllowedColumn;
-    fn: AggregationFunction;
-  } | null;
+  aggregates: AggregateColumn<AllowedColumn>[] | null;
   distinct: boolean | null;
   joins: string[] | null;
   baseAlias: Alias | null;
@@ -172,7 +179,7 @@ type InferRawColumn<
       : NonNullable<unknown>
   : NonNullable<unknown>;
 
-export type SelectQueryOutput<
+type InferSelectQueryOutput<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
@@ -186,11 +193,81 @@ export type SelectQueryOutput<
             ? InferRawColumn<Col, Alias, TableRef, JoinedTables>
             : Col extends AliasedColumn<AllowedColumn>
               ? InferAliasedColumn<Col, Alias, TableRef, JoinedTables>
-              : never
-          : never
+              : NonNullable<unknown>
+          : NonNullable<unknown>
       >
-    : never
-  : never;
+    : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+type InferAggregateColumn<
+  Current extends AggregateColumn<string>,
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+> = Current extends {
+  column: `${infer TableAlias}.${infer ColName}`;
+  as: `${infer ColAlias}`;
+  fn?: AggregationFunction;
+}
+  ? TableAlias extends keyof JoinedTables
+    ? {
+        [T in TableAlias]: {
+          [K in ColAlias]:
+            | JoinedTables[T]['columns'][ColName]['_output']
+            | number;
+        };
+      }
+    : TableAlias extends Alias | TableRef['name']
+      ? {
+          [K in ColName as ColAlias]:
+            | TableRef['columns'][K]['_output']
+            | number;
+        }
+      : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+type InferAggregateQueryOutput<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+> = Definition extends { aggregates: infer Aggregates }
+  ? Aggregates extends Array<AggregateColumn<AllowedColumn>>
+    ? UnionToIntersection<
+        Aggregates[number] extends infer Col
+          ? Col extends RawColumn<AllowedColumn>
+            ? InferRawColumn<Col, Alias, TableRef, JoinedTables>
+            : Col extends AliasedColumn<AllowedColumn>
+              ? InferAliasedColumn<Col, Alias, TableRef, JoinedTables>
+              : Col extends AggregateColumn<AllowedColumn>
+                ? InferAggregateColumn<Col, Alias, TableRef, JoinedTables>
+                : NonNullable<unknown>
+          : NonNullable<unknown>
+      >
+    : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+export type SelectQueryOutput<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+> = InferSelectQueryOutput<
+  Alias,
+  TableRef,
+  JoinedTables,
+  Definition,
+  AllowedColumn
+> &
+  InferAggregateQueryOutput<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn
+  >;
 
 export type QueryOutput<
   Alias extends string,

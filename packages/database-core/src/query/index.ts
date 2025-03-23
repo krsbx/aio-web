@@ -14,6 +14,7 @@ import type {
   AcceptedInsertValues,
   AcceptedOrderBy,
   AcceptedUpdateValues,
+  AggregateColumn,
   AliasedColumn,
   ColumnSelector,
   QueryDefinition,
@@ -69,7 +70,7 @@ export class QueryBuilder<
       insertValues: null,
       updateValues: null,
       orderBy: null,
-      aggregate: null,
+      aggregates: null,
       joins: null,
       distinct: null,
       baseAlias: null,
@@ -90,6 +91,42 @@ export class QueryBuilder<
       JoinedTables,
       Omit<Definition, 'baseAlias'> & { baseAlias: NewAlias }
     >;
+  }
+
+  private aggregateCol<
+    Aggregate extends AggregationFunction,
+    ColName extends AllowedColumn,
+  >(
+    fn: Aggregate,
+    column: ColName
+  ): {
+    column: ColName;
+    as: Lowercase<Aggregate>;
+    fn: Aggregate;
+  };
+  private aggregateCol<
+    Aggregate extends AggregationFunction,
+    ColName extends AllowedColumn,
+    ColAlias extends string,
+  >(
+    fn: Aggregate,
+    column: ColName,
+    alias: ColAlias
+  ): {
+    column: ColName;
+    as: ColAlias;
+    fn: Aggregate;
+  };
+  private aggregateCol<
+    Aggregate extends AggregationFunction,
+    ColName extends AllowedColumn,
+    ColAlias extends string,
+  >(fn: Aggregate, column: ColName, alias?: ColAlias) {
+    return {
+      column,
+      as: alias ?? fn.toLowerCase(),
+      fn,
+    };
   }
 
   private col<ColName extends AllowedColumn, ColAlias extends string>(
@@ -475,41 +512,29 @@ export class QueryBuilder<
     >;
   }
 
-  private aggregate<
-    ColName extends AllowedColumn,
-    Fn extends AggregationFunction,
-  >(column: ColName, fn: Fn) {
-    this.definition.aggregate = {
-      column,
-      fn,
-    };
+  public aggregate<
+    Aggregates extends Array<
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      (c: this['aggregateCol']) => AggregateColumn<AllowedColumn>
+    >,
+  >(...aggregates: Aggregates) {
+    this.definition.aggregates = aggregates.map((aggregate) =>
+      aggregate(this.aggregateCol)
+    );
 
     return this as unknown as QueryBuilder<
       Alias,
       TableRef,
       JoinedTables,
-      Omit<Definition, 'aggregate'> & { aggregate: { column: ColName; fn: Fn } }
+      Omit<Definition, 'aggregates'> & {
+        aggregates: {
+          [K in keyof Aggregates]: Aggregates[K] extends (col: never) => infer R
+            ? R
+            : Aggregates[K];
+        };
+      }
     >;
-  }
-
-  public count<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.COUNT);
-  }
-
-  public sum<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.SUM);
-  }
-
-  public min<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.MIN);
-  }
-
-  public max<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.MAX);
-  }
-
-  public avg<ColName extends AllowedColumn>(column: ColName) {
-    return this.aggregate(column, AggregationFunction.AVG);
   }
 
   public groupBy<

@@ -2,6 +2,7 @@ import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
 import type { ColumnSelector, QueryDefinition } from './types';
+import { getTableSelectName } from './utilities';
 
 export function buildSelectQuery<
   Alias extends string,
@@ -17,33 +18,33 @@ export function buildSelectQuery<
     AllowedColumn
   >,
 >(q: Query) {
-  let from = q.table.name;
+  const from = getTableSelectName(q);
+  const columns: string[] = [];
 
-  if (q.definition.baseAlias) {
-    from = `${q.table.name} AS ${q.definition.baseAlias}`;
+  if (q.definition.select?.length) {
+    for (const col of q.definition.select) {
+      if (typeof col === 'object') {
+        columns.push(`${col.column} AS ${col.as}`);
+        continue;
+      }
+
+      columns.push(col);
+    }
   }
 
-  if (q.definition?.aggregate) {
-    return `SELECT ${q.definition.aggregate.fn}(${q.definition.aggregate.column}) FROM ${from}`;
+  if (q.definition?.aggregates) {
+    for (const aggregate of q.definition.aggregates) {
+      columns.push(`${aggregate.fn}(${aggregate.column}) AS ${aggregate.as}`);
+    }
   }
 
-  let columns = '*';
-
-  if (q.definition?.select?.length) {
-    columns = q.definition.select
-      .map((col) => {
-        if (typeof col === 'object') {
-          return `${col.column} AS ${col.as}`;
-        }
-
-        return col;
-      })
-      .join(', ');
+  if (!columns.length) {
+    columns.push('*');
   }
 
   const distinct = q.definition.distinct ? 'DISTINCT ' : '';
 
-  return `SELECT ${distinct}${columns} FROM ${from}`;
+  return `SELECT ${distinct}${columns.join(', ')} FROM ${from}`;
 }
 
 export function buildInsertQuery<
