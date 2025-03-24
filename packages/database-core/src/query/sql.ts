@@ -100,6 +100,13 @@ export function toQuery<
     this.definition.params.push(this.definition.offset);
   }
 
+  if (
+    this.definition.queryType === QueryType.UPDATE ||
+    this.definition.queryType === QueryType.DELETE
+  ) {
+    sql += ` RETURNING *`;
+  }
+
   return { query: sql + ';', params: this.definition.params };
 }
 

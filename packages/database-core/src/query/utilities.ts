@@ -5,8 +5,10 @@ import { Dialect } from '../table/constants';
 import { quoteIdentifier } from '../utilities';
 import { AcceptedOperator, QueryType } from './constants';
 import type {
+  AliasedColumn,
   ColumnSelector,
   QueryDefinition,
+  SelectableColumn,
   StrictColumnSelector,
   WhereValue,
 } from './types';
@@ -271,4 +273,54 @@ export function getTableSelectName<
   if (!q.definition.baseAlias) return q.table.name;
 
   return `${q.table.name} AS ${q.definition.baseAlias}`;
+}
+
+export function parseAliasedRow({
+  row,
+  selects,
+  root = null,
+}: {
+  row: Record<string, unknown>;
+  selects: SelectableColumn<string>[];
+  root?: string | null;
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let result: Record<string, any> = {};
+
+  for (const key in row) {
+    const [table, column] = key.split('.');
+
+    if (!column) {
+      const alias = selects.find(
+        (s) => typeof s === 'object' && s.as === table
+      );
+
+      if (alias) {
+        const [oriTab] = (alias as AliasedColumn<string>).column.split('.');
+
+        if (!result[oriTab]) result[oriTab] = {};
+
+        result[oriTab][table] = row[key];
+        continue;
+      }
+
+      result[key] = row[key];
+      continue;
+    }
+
+    if (!result[table]) result[table] = {};
+
+    result[table][column] = row[key];
+  }
+
+  if (root) {
+    result = {
+      ...result,
+      ...result[root],
+    };
+
+    delete result[root];
+  }
+
+  return result;
 }

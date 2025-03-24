@@ -35,7 +35,16 @@ export function buildSelectQuery<
   if (q.definition.select?.length) {
     for (const col of q.definition.select) {
       if (typeof col === 'object') {
-        columns.push(`${col.column} AS ${col.as}`);
+        const alias = quoteIdentifier(col.as.replace(/"/g, ''));
+
+        columns.push(`${col.column} AS ${alias}`);
+        continue;
+      }
+
+      if (!col.endsWith('*')) {
+        const alias = quoteIdentifier(col.replace(/"/g, ''));
+
+        columns.push(`${col} AS ${alias}`);
         continue;
       }
 
@@ -45,12 +54,10 @@ export function buildSelectQuery<
 
   if (q.definition?.aggregates) {
     for (const aggregate of q.definition.aggregates) {
-      columns.push(`${aggregate.fn}(${aggregate.column}) AS ${aggregate.as}`);
+      columns.push(
+        `${aggregate.fn}(${aggregate.column}) AS ${quoteIdentifier(aggregate.as as string)}`
+      );
     }
-  }
-
-  if (!columns.length) {
-    columns.push('*');
   }
 
   const distinct = q.definition.distinct ? 'DISTINCT ' : '';
@@ -94,7 +101,7 @@ export function buildInsertQuery<
     keys.map((key) => (row as TableRef['columns'])[key])
   );
 
-  return `INSERT INTO ${q.table.name} (${columns}) VALUES ${placeholders}`;
+  return `INSERT INTO ${q.table.name} (${columns}) VALUES ${placeholders} RETURNING *`;
 }
 
 export function buildUpdateQuery<
@@ -121,10 +128,12 @@ export function buildUpdateQuery<
     throw new Error(`UPDATE requires values`);
   }
 
-  const keys = Object.keys(q.definition.updateValues).map(quoteIdentifier);
+  let keys = Object.keys(q.definition.updateValues);
   const updateParams = keys.map(
     (key) => q.definition.updateValues![key] as unknown
   );
+
+  keys = keys.map(quoteIdentifier);
 
   if (q.definition?.params) {
     q.definition.params = [...updateParams, ...q.definition.params];

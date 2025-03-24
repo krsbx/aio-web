@@ -146,10 +146,11 @@ export interface QueryDefinition<
   joinedTables: JoinedTables | null;
 }
 
-type InsertQueryOutput<TableRef extends Table<string, Record<string, Column>>> =
-  {
-    [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
-  };
+type InsertUpdateDeleteQueryOutput<
+  TableRef extends Table<string, Record<string, Column>>,
+> = {
+  [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
+};
 
 type InferAliasedColumn<
   Current extends AliasedColumn<string, string>,
@@ -157,7 +158,7 @@ type InferAliasedColumn<
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
 > = Current extends {
-  column: `${infer TableAlias}.${infer ColName}`;
+  column: `${infer TableAlias}."${infer ColName}"`;
   as: `${infer ColAlias}`;
 }
   ? TableAlias extends keyof JoinedTables
@@ -178,7 +179,7 @@ type InferRawColumn<
   Alias extends string,
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
-> = Current extends `${infer TableAlias}.${infer ColName}`
+> = Current extends `${infer TableAlias}."${infer ColName}"`
   ? TableAlias extends keyof JoinedTables
     ? ColName extends '*'
       ? {
@@ -228,7 +229,7 @@ type InferAggregateColumn<
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
 > = Current extends {
-  column: `${infer TableAlias}.${infer ColName}`;
+  column: `${infer TableAlias}."${infer ColName}"`;
   as: `${infer ColAlias}`;
   fn?: AggregationFunction;
 }
@@ -301,17 +302,18 @@ export type QueryOutput<
 > = Definition extends { queryType: infer Type }
   ? Type extends null
     ? never
-    : Type extends typeof QueryType.INSERT
-      ? InsertQueryOutput<TableRef>
-      : Type extends typeof QueryType.DELETE | typeof QueryType.UPDATE
-        ? void
-        : Type extends typeof QueryType.SELECT
-          ? SelectQueryOutput<
-              Alias,
-              TableRef,
-              JoinedTables,
-              Definition,
-              AllowedColumn
-            >
-          : never
+    : Type extends
+          | typeof QueryType.INSERT
+          | typeof QueryType.UPDATE
+          | typeof QueryType.DELETE
+      ? InsertUpdateDeleteQueryOutput<TableRef>
+      : Type extends typeof QueryType.SELECT
+        ? SelectQueryOutput<
+            Alias,
+            TableRef,
+            JoinedTables,
+            Definition,
+            AllowedColumn
+          >
+        : never
   : never;

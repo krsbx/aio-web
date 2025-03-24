@@ -24,7 +24,12 @@ import type {
   StrictColumnSelector,
   WhereValue,
 } from './types';
-import { getCondition, getParanoid, getTimestamp } from './utilities';
+import {
+  getCondition,
+  getParanoid,
+  getTimestamp,
+  parseAliasedRow,
+} from './utilities';
 
 export class QueryBuilder<
   Alias extends string,
@@ -102,7 +107,7 @@ export class QueryBuilder<
 
   private aggregateCol<
     Aggregate extends AggregationFunction,
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
   >(
     fn: Aggregate,
     column: ColName
@@ -113,7 +118,7 @@ export class QueryBuilder<
   };
   private aggregateCol<
     Aggregate extends AggregationFunction,
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     ColAlias extends string,
   >(
     fn: Aggregate,
@@ -393,10 +398,10 @@ export class QueryBuilder<
     JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinType: AcceptedJoin,
+    alias: JoinAlias,
     joinTable: JoinTable,
     baseColumn: BaseColName,
-    joinColumn: JoinColName,
-    alias: JoinAlias
+    joinColumn: JoinColName
   ) {
     if (!this.definition.joins) this.definition.joins = [];
 
@@ -435,16 +440,16 @@ export class QueryBuilder<
     JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
+    alias: JoinAlias,
     baseColumn: BaseColName,
-    joinColumn: JoinColName,
-    alias: JoinAlias
+    joinColumn: JoinColName
   ) {
     return this.addJoin(
       AcceptedJoin.LEFT,
+      alias,
       joinTable,
       baseColumn,
-      joinColumn,
-      alias
+      joinColumn
     );
   }
 
@@ -455,16 +460,16 @@ export class QueryBuilder<
     JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
+    alias: JoinAlias,
     baseColumn: BaseColName,
-    joinColumn: JoinColName,
-    alias: JoinAlias
+    joinColumn: JoinColName
   ) {
     return this.addJoin(
       AcceptedJoin.RIGHT,
+      alias,
       joinTable,
       baseColumn,
-      joinColumn,
-      alias
+      joinColumn
     );
   }
 
@@ -475,16 +480,16 @@ export class QueryBuilder<
     JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
+    alias: JoinAlias,
     baseColumn: BaseColName,
-    joinColumn: JoinColName,
-    alias: JoinAlias
+    joinColumn: JoinColName
   ) {
     return this.addJoin(
       AcceptedJoin.INNER,
+      alias,
       joinTable,
       baseColumn,
-      joinColumn,
-      alias
+      joinColumn
     );
   }
 
@@ -495,16 +500,16 @@ export class QueryBuilder<
     JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
+    alias: JoinAlias,
     baseColumn: BaseColName,
-    joinColumn: JoinColName,
-    alias: JoinAlias
+    joinColumn: JoinColName
   ) {
     return this.addJoin(
       AcceptedJoin.NATURAL,
+      alias,
       joinTable,
       baseColumn,
-      joinColumn,
-      alias
+      joinColumn
     );
   }
 
@@ -762,18 +767,32 @@ export class QueryBuilder<
     >;
   }
 
-  public exec(): Promise<
-    this['_output'] extends void ? void : this['_output'][]
-  > {
+  public async exec<
+    Output extends this['_output'] extends void ? void : this['_output'][],
+  >(): Promise<Output> {
     if (!this.table.database) throw new Error('Database client not defined');
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let result: any;
     const { query, params } = this.toQuery();
 
     if (this.table.dialect === Dialect.SQLITE) {
-      return this.table.database.exec(query, params);
+      result = await this.table.database.exec(query, params);
+    } else {
+      result = await this.table.database.exec(buildQuery(query), params);
     }
 
-    return this.table.database.exec(buildQuery(query), params);
+    if (Array.isArray(result)) {
+      return result.map((r) =>
+        parseAliasedRow({
+          row: r,
+          selects: this.definition.select ?? [],
+          root: this.definition?.baseAlias ?? this.table.name,
+        })
+      ) as Output;
+    }
+
+    return result;
   }
 
   public infer(): this['_output'] {
