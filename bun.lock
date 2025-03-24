@@ -20,8 +20,8 @@
         "typescript": "^5",
       },
     },
-    "packages/database": {
-      "name": "@ignisia/database-adapter",
+    "packages/database-core": {
+      "name": "@ignisia/database-core",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -31,33 +31,6 @@
     },
     "packages/mongodb": {
       "name": "@ignisia/mongodb-adapter",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
-    },
-    "packages/mysql": {
-      "name": "@ignisia/mysql-adapter",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
-    },
-    "packages/postgresql": {
-      "name": "@ignisia/postgresql-adapter",
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
-    },
-    "packages/sqlite": {
-      "name": "@ignisia/sqlite-adapter",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -131,15 +104,9 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.2", "", {}, "sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ=="],
 
-    "@ignisia/database-adapter": ["@ignisia/database-adapter@workspace:packages/database"],
+    "@ignisia/database-core": ["@ignisia/database-core@workspace:packages/database-core"],
 
     "@ignisia/mongodb-adapter": ["@ignisia/mongodb-adapter@workspace:packages/mongodb"],
-
-    "@ignisia/mysql-adapter": ["@ignisia/mysql-adapter@workspace:packages/mysql"],
-
-    "@ignisia/postgresql-adapter": ["@ignisia/postgresql-adapter@workspace:packages/postgresql"],
-
-    "@ignisia/sqlite-adapter": ["@ignisia/sqlite-adapter@workspace:packages/sqlite"],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
