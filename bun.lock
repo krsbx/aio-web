@@ -20,8 +20,8 @@
         "typescript": "^5",
       },
     },
-    "packages/database-core": {
-      "name": "@ignisia/database-core",
+    "packages/mongodb": {
+      "name": "@ignisia/mongodb-adapter",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -29,8 +29,8 @@
         "typescript": "^5",
       },
     },
-    "packages/mongodb": {
-      "name": "@ignisia/mongodb-adapter",
+    "packages/sql": {
+      "name": "@ignisia/sql",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -104,9 +104,9 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.2", "", {}, "sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ=="],
 
-    "@ignisia/database-core": ["@ignisia/database-core@workspace:packages/database-core"],
-
     "@ignisia/mongodb-adapter": ["@ignisia/mongodb-adapter@workspace:packages/mongodb"],
+
+    "@ignisia/sql": ["@ignisia/sql@workspace:packages/sql"],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
