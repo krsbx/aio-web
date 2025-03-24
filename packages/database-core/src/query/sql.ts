@@ -13,7 +13,21 @@ import type {
   QueryDefinition,
   StrictColumnSelector,
 } from './types';
-import { getGroupByConditions, getWhereConditions } from './utilities';
+import {
+  getGroupByConditions,
+  getWhereConditions,
+  parseAliasedRow,
+} from './utilities';
+
+export function buildQuery(query: string) {
+  let index = 0;
+
+  return query.replace(/\?/g, () => {
+    index++;
+
+    return `$${index}`;
+  });
+}
 
 export function toQuery<
   Alias extends string,
@@ -107,6 +121,8 @@ export function toQuery<
     sql += ` RETURNING *`;
   }
 
+  sql = buildQuery(sql);
+
   return { query: sql + ';', params: this.definition.params };
 }
 
@@ -133,12 +149,42 @@ export function toString<
   return this.toQuery().query;
 }
 
-export function buildQuery(query: string) {
-  let index = 0;
+export async function exec<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+  Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
+  AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
+  Query extends QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn,
+    StrictAllowedColumn
+  >,
+  Output extends Query['_output'] extends void ? void : Query['_output'][],
+>(this: Query) {
+  if (!this.table.database) throw new Error('Database client not defined');
 
-  return query.replace(/\?/g, () => {
-    index++;
+  const { query, params } = this.toQuery();
 
-    return `$${index}`;
-  });
+  const result = await this.table.database.exec(query, params);
+
+  if (Array.isArray(result)) {
+    return result.map((r) =>
+      parseAliasedRow({
+        row: r,
+        selects: this.definition.select ?? [],
+        root: this.definition?.baseAlias ?? this.table.name,
+      })
+    ) as Output;
+  }
+
+  return [] as Output;
 }

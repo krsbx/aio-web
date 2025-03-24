@@ -1,6 +1,5 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
-import { Dialect } from '../table/constants';
 import { deepClone, quoteIdentifier } from '../utilities';
 import {
   AcceptedJoin,
@@ -10,7 +9,7 @@ import {
   LogicalOperator,
   QueryType,
 } from './constants';
-import { buildQuery, toQuery } from './sql';
+import { exec, toQuery } from './sql';
 import type {
   AcceptedInsertValues,
   AcceptedOrderBy,
@@ -24,12 +23,7 @@ import type {
   StrictColumnSelector,
   WhereValue,
 } from './types';
-import {
-  getCondition,
-  getParanoid,
-  getTimestamp,
-  parseAliasedRow,
-} from './utilities';
+import { getCondition, getParanoid, getTimestamp } from './utilities';
 
 export class QueryBuilder<
   Alias extends string,
@@ -67,6 +61,9 @@ export class QueryBuilder<
     params: Definition['params'];
   };
   public toString: () => string;
+  public exec: <
+    Output extends this['_output'] extends void ? void : this['_output'][],
+  >() => Promise<Output>;
 
   constructor(table: TableRef) {
     this.table = table;
@@ -92,6 +89,9 @@ export class QueryBuilder<
 
     this.toQuery = toQuery.bind(this);
     this.toString = toString.bind(this);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    this.exec = exec.bind(this);
   }
 
   public alias<NewAlias extends string>(alias: NewAlias) {
@@ -426,7 +426,7 @@ export class QueryBuilder<
       JoinedTables & { [K in JoinAlias]: JoinTable },
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
-      Definition & {
+      Omit<Definition, 'joins' | 'joinedTables'> & {
         joins: string[];
         joinedTables: JoinedTables & { [K in JoinAlias]: JoinTable };
       }
@@ -690,9 +690,7 @@ export class QueryBuilder<
     return this as any;
   }
 
-  public insert<Values extends AcceptedInsertValues<TableRef['columns']>>(
-    ...values: Values
-  ) {
+  public insert(...values: AcceptedInsertValues<TableRef['columns']>) {
     this.definition.queryType = QueryType.INSERT;
 
     if (!this.definition.insertValues) this.definition.insertValues = [];
@@ -706,10 +704,12 @@ export class QueryBuilder<
         ...row,
         [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
         [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
-      })) as Values;
+      })) as AcceptedInsertValues<TableRef['columns']>;
     }
 
-    this.definition.insertValues.push(...values);
+    this.definition.insertValues = values as AcceptedInsertValues<
+      TableRef['columns']
+    >;
 
     return this as unknown as QueryBuilder<
       Alias,
@@ -717,7 +717,7 @@ export class QueryBuilder<
       JoinedTables,
       Omit<Definition, 'queryType' | 'insertValues'> & {
         queryType: typeof QueryType.INSERT;
-        insertValues: Values;
+        insertValues: AcceptedInsertValues<TableRef['columns']>;
       }
     >;
   }
@@ -765,34 +765,6 @@ export class QueryBuilder<
       JoinedTables,
       Omit<Definition, 'queryType'> & { queryType: typeof QueryType.DELETE }
     >;
-  }
-
-  public async exec<
-    Output extends this['_output'] extends void ? void : this['_output'][],
-  >(): Promise<Output> {
-    if (!this.table.database) throw new Error('Database client not defined');
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let result: any;
-    const { query, params } = this.toQuery();
-
-    if (this.table.dialect === Dialect.SQLITE) {
-      result = await this.table.database.exec(query, params);
-    } else {
-      result = await this.table.database.exec(buildQuery(query), params);
-    }
-
-    if (Array.isArray(result)) {
-      return result.map((r) =>
-        parseAliasedRow({
-          row: r,
-          selects: this.definition.select ?? [],
-          root: this.definition?.baseAlias ?? this.table.name,
-        })
-      ) as Output;
-    }
-
-    return result;
   }
 
   public infer(): this['_output'] {
