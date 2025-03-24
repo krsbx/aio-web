@@ -38,6 +38,15 @@
         "typescript": "^5",
       },
     },
+    "packages/storage": {
+      "name": "@ignisia/storage",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
   },
   "packages": {
     "@babel/code-frame": ["@babel/code-frame@7.26.2", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.25.9", "js-tokens": "^4.0.0", "picocolors": "^1.0.0" } }, "sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ=="],
@@ -107,6 +116,8 @@
     "@ignisia/mongodb-adapter": ["@ignisia/mongodb-adapter@workspace:packages/mongodb"],
 
     "@ignisia/sql": ["@ignisia/sql@workspace:packages/sql"],
+
+    "@ignisia/storage": ["@ignisia/storage@workspace:packages/storage"],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
