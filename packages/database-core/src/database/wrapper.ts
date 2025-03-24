@@ -49,6 +49,22 @@ export class DatabasePsql implements DatabaseDialect {
 
     return this.client.unsafe(sql, values) as T;
   }
+
+  public async transaction<T, U extends () => Promise<T>>(fn: U): Promise<T> {
+    try {
+      await this.exec('BEGIN');
+
+      const result = await fn();
+
+      await this.exec('COMMIT');
+
+      return result;
+    } catch (err) {
+      await this.exec('ROLLBACK');
+
+      throw err;
+    }
+  }
 }
 
 export class DatabaseSqlite implements DatabaseDialect {
@@ -88,5 +104,21 @@ export class DatabaseSqlite implements DatabaseDialect {
     const query = this.client.prepare(sql, params);
 
     return query.all() as T;
+  }
+
+  public async transaction<T, U extends () => Promise<T>>(fn: U): Promise<T> {
+    try {
+      await this.exec('BEGIN');
+
+      const result = await fn();
+
+      await this.exec('COMMIT');
+
+      return result;
+    } catch (err) {
+      await this.exec('ROLLBACK');
+
+      throw err;
+    }
   }
 }

@@ -33,6 +33,8 @@ export interface DatabaseDefinition<
 }
 
 export interface DatabaseDialect {
+  status: 'connecting' | 'connected' | 'disconnected';
+
   connect(): Promise<this>;
   disconnect(): Promise<this>;
 
@@ -40,5 +42,5 @@ export interface DatabaseDialect {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   exec<T>(sql: string, params: any): Promise<T>;
 
-  status: 'connecting' | 'connected' | 'disconnected';
+  transaction<T, U extends () => Promise<T>>(fn: U): Promise<T>;
 }

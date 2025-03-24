@@ -157,6 +157,10 @@ export class Database<
     return this;
   }
 
+  public async transaction<T, U extends () => Promise<T>>(fn: U) {
+    return this.client.transaction(fn);
+  }
+
   public static define<
     DbDialect extends Dialect,
     Tables extends Record<string, Table<string, Record<string, Column>>>,
