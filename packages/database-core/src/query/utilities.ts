@@ -2,13 +2,43 @@ import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
 import { Dialect } from '../table/constants';
-import { AcceptedOperator } from './constants';
-import type { ColumnSelector, QueryDefinition, WhereValue } from './types';
+import { quoteIdentifier } from '../utilities';
+import { AcceptedOperator, QueryType } from './constants';
+import type {
+  ColumnSelector,
+  QueryDefinition,
+  StrictColumnSelector,
+  WhereValue,
+} from './types';
+
+export function getTableColumnNames<
+  ColName extends string,
+  BaseAlias extends string,
+  BaseTable extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+>(
+  column: ColName,
+  baseAlias: BaseAlias,
+  baseTable: BaseTable,
+  joinedTables: JoinedTables
+) {
+  const [tableAlias] = column.split('.');
+
+  const isOnBase = tableAlias === baseAlias;
+  const from = isOnBase ? baseAlias : tableAlias;
+  const columns = isOnBase
+    ? Object.keys(baseTable.columns)
+    : Object.keys(joinedTables?.[from]?.columns ?? {});
+
+  return {
+    from,
+    columns,
+  };
+}
 
 export function getCondition<
   DbDialect extends Dialect,
-  TableRef extends Table<string, Record<string, Column>>,
-  ColName extends keyof TableRef['columns'],
+  ColName extends string,
   Operator extends AcceptedOperator,
   Value extends WhereValue<Column>[Operator],
 >(dialect: DbDialect, column: ColName, operator: Operator, value: Value) {
@@ -128,14 +158,22 @@ export function getWhereConditions<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(q: Query) {
+  if (q.definition.queryType === QueryType.INSERT) return [];
+
   const conditions: string[] = [];
 
   const base = q.definition.baseAlias ?? q.table.name;
@@ -145,8 +183,9 @@ export function getWhereConditions<
 
   if (!withDeleted && isWithParanoid) {
     const suffix = isHasConditions ? ' AND' : '';
+    const column = `${base}.${quoteIdentifier(deletedAt)}`;
 
-    conditions.unshift(`${base}.${deletedAt} IS NULL${suffix}`);
+    conditions.unshift(`${column} IS NULL${suffix}`);
   }
 
   if (q.definition.where?.length) {
@@ -162,25 +201,48 @@ export function getGroupByConditions<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(q: Query) {
+  if (q.definition.queryType !== QueryType.SELECT) return [];
+
   if (q.definition.groupBy?.length) return q.definition.groupBy;
 
   if (q.definition.aggregates?.length) {
     if (q.definition.select?.length)
-      return q.definition.select.map((col) =>
-        typeof col === 'string' ? col : col.column
-      );
+      return q.definition.select.map((col) => {
+        if (typeof col === 'string' && col.endsWith('*')) {
+          const { from, columns } = getTableColumnNames(
+            col,
+            q.definition.baseAlias ?? q.table.name,
+            q.table,
+            q.definition.joinedTables ?? {}
+          );
+
+          return columns
+            .map((column) => `${from}.${quoteIdentifier(column)}`)
+            .join(' ');
+        }
+
+        return col;
+      });
 
     const from = q.definition.baseAlias ?? q.table.name;
 
-    return Object.keys(q.table.columns).map((col) => `${from}.${col}`);
+    return Object.keys(q.table.columns).map(
+      (col) => `${from}.${quoteIdentifier(col)}`
+    );
   }
 
   return [];
@@ -192,12 +254,18 @@ export function getTableSelectName<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(q: Query) {
   if (!q.definition.baseAlias) return q.table.name;

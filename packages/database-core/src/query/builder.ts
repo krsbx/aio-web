@@ -1,7 +1,12 @@
 import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
-import type { ColumnSelector, QueryDefinition } from './types';
+import { quoteIdentifier } from '../utilities';
+import type {
+  ColumnSelector,
+  QueryDefinition,
+  StrictColumnSelector,
+} from './types';
 import { getTableSelectName } from './utilities';
 
 export function buildSelectQuery<
@@ -10,12 +15,18 @@ export function buildSelectQuery<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(q: Query) {
   const from = getTableSelectName(q);
@@ -53,12 +64,18 @@ export function buildInsertQuery<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(q: Query) {
   const rows = q.definition?.insertValues;
@@ -69,7 +86,7 @@ export function buildInsertQuery<
 
   const keys = Object.keys(rows[0]);
 
-  const columns = keys.join(', ');
+  const columns = keys.map(quoteIdentifier).join(', ');
   const rowPlaceholders = `(${keys.map(() => '?').join(', ')})`;
   const placeholders = rows.map(() => rowPlaceholders).join(', ');
 
@@ -86,19 +103,25 @@ export function buildUpdateQuery<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(q: Query) {
   if (!q.definition?.updateValues) {
     throw new Error(`UPDATE requires values`);
   }
 
-  const keys = Object.keys(q.definition.updateValues);
+  const keys = Object.keys(q.definition.updateValues).map(quoteIdentifier);
   const updateParams = keys.map(
     (key) => q.definition.updateValues![key] as unknown
   );
@@ -109,7 +132,7 @@ export function buildUpdateQuery<
     q.definition.params = updateParams;
   }
 
-  return `UPDATE ${q.table.name} SET ${keys.map((key) => `${key as string} = ?`.trim()).join(', ')}`;
+  return `UPDATE ${q.table.name} SET ${keys.map((key) => `${key} = ?`.trim()).join(', ')}`;
 }
 
 export function buildDeleteQuery<

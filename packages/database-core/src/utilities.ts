@@ -14,3 +14,9 @@ export function deepClone<T>(obj: T): T {
 
   return obj;
 }
+
+export function quoteIdentifier<T extends string, U extends `"${T}"`>(
+  identifier: T
+): U {
+  return `"${identifier.replace(/"/g, '""')}"` as U;
+}

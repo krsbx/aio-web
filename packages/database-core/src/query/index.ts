@@ -1,6 +1,6 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
-import { deepClone } from '../utilities';
+import { deepClone, quoteIdentifier } from '../utilities';
 import {
   AcceptedJoin,
   AcceptedOperator,
@@ -20,6 +20,7 @@ import type {
   QueryDefinition,
   QueryOutput,
   RawColumn,
+  StrictColumnSelector,
   WhereValue,
 } from './types';
 import { getCondition, getParanoid, getTimestamp } from './utilities';
@@ -39,6 +40,11 @@ export class QueryBuilder<
     TableRef,
     JoinedTables
   > = ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  > = StrictColumnSelector<Alias, TableRef, JoinedTables>,
 > {
   public readonly table: TableRef;
   public readonly definition: Definition;
@@ -119,7 +125,7 @@ export class QueryBuilder<
   };
   private aggregateCol<
     Aggregate extends AggregationFunction,
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     ColAlias extends string,
   >(fn: Aggregate, column: ColName, alias?: ColAlias) {
     return {
@@ -139,7 +145,7 @@ export class QueryBuilder<
     } as const;
   }
 
-  private rawCol<ColName extends AllowedColumn>(column: ColName) {
+  private rawCol<ColName extends StrictAllowedColumn>(column: ColName) {
     return column;
   }
 
@@ -243,7 +249,7 @@ export class QueryBuilder<
 
   private addCondition<
     Clause extends ConditionClause,
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
       ? TableAlias extends Alias
         ? TableRef['columns'][TableColumn]
@@ -304,7 +310,7 @@ export class QueryBuilder<
   }
 
   public where<
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
       ? TableAlias extends Alias
         ? TableRef['columns'][TableColumn]
@@ -323,7 +329,7 @@ export class QueryBuilder<
   }
 
   public having<
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
       ? TableAlias extends Alias
         ? TableRef['columns'][TableColumn]
@@ -342,7 +348,7 @@ export class QueryBuilder<
   }
 
   public and<
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
       ? TableAlias extends Alias
         ? TableRef['columns'][TableColumn]
@@ -361,7 +367,7 @@ export class QueryBuilder<
   }
 
   public or<
-    ColName extends AllowedColumn,
+    ColName extends StrictAllowedColumn,
     Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
       ? TableAlias extends Alias
         ? TableRef['columns'][TableColumn]
@@ -382,8 +388,8 @@ export class QueryBuilder<
   private addJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
-    BaseColName extends keyof TableRef['columns'],
-    JoinColName extends keyof JoinTable['columns'],
+    BaseColName extends `${Alias}."${keyof TableRef['columns'] & string}"`,
+    JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinType: AcceptedJoin,
     joinTable: JoinTable,
@@ -394,9 +400,9 @@ export class QueryBuilder<
     if (!this.definition.joins) this.definition.joins = [];
 
     this.definition.joins.push(
-      `${joinType} JOIN ${joinTable.name} AS ${alias} ON ${this.definition.baseAlias}.${String(
+      `${joinType} JOIN ${joinTable.name} AS ${alias} ON ${
         baseColumn
-      )} = ${alias}.${String(joinColumn)}`
+      } = ${joinColumn}`
     );
 
     if (!this.definition.joinedTables) {
@@ -424,8 +430,8 @@ export class QueryBuilder<
   public leftJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
-    BaseColName extends keyof TableRef['columns'],
-    JoinColName extends keyof JoinTable['columns'],
+    BaseColName extends `${Alias}."${keyof TableRef['columns'] & string}"`,
+    JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
     baseColumn: BaseColName,
@@ -444,8 +450,8 @@ export class QueryBuilder<
   public rightJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
-    BaseColName extends keyof TableRef['columns'],
-    JoinColName extends keyof JoinTable['columns'],
+    BaseColName extends `${Alias}."${keyof TableRef['columns'] & string}"`,
+    JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
     baseColumn: BaseColName,
@@ -464,8 +470,8 @@ export class QueryBuilder<
   public innerJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
-    BaseColName extends keyof TableRef['columns'],
-    JoinColName extends keyof JoinTable['columns'],
+    BaseColName extends `${Alias}."${keyof TableRef['columns'] & string}"`,
+    JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
     baseColumn: BaseColName,
@@ -484,8 +490,8 @@ export class QueryBuilder<
   public naturalJoin<
     JoinTable extends Table<string, Record<string, Column>>,
     JoinAlias extends string,
-    BaseColName extends keyof TableRef['columns'],
-    JoinColName extends keyof JoinTable['columns'],
+    BaseColName extends `${Alias}."${keyof TableRef['columns'] & string}"`,
+    JoinColName extends `${JoinAlias}."${keyof JoinTable['columns'] & string}"`,
   >(
     joinTable: JoinTable,
     baseColumn: BaseColName,
@@ -540,12 +546,12 @@ export class QueryBuilder<
   public groupBy<
     Groupable extends NonNullable<Definition['select']>,
     Columns extends Groupable extends readonly (infer Col)[]
-      ? Col extends RawColumn<AllowedColumn>
+      ? Col extends RawColumn<StrictAllowedColumn>
         ? Col[]
-        : Col extends AliasedColumn<AllowedColumn, infer Alias>
+        : Col extends AliasedColumn<StrictAllowedColumn, infer Alias>
           ? Alias[]
-          : AllowedColumn[]
-      : AllowedColumn[],
+          : StrictAllowedColumn[]
+      : StrictAllowedColumn[],
   >(...columns: Columns) {
     this.definition.groupBy = columns as Columns;
 
@@ -579,7 +585,7 @@ export class QueryBuilder<
     >;
   }
 
-  public orderBy<OrderBy extends AcceptedOrderBy<AllowedColumn>>(
+  public orderBy<OrderBy extends AcceptedOrderBy<StrictAllowedColumn>>(
     ...orderBy: OrderBy[]
   ) {
     if (!this.definition.orderBy) this.definition.orderBy = [];
@@ -624,7 +630,7 @@ export class QueryBuilder<
     JoinedTables,
     Omit<Definition, 'queryType' | 'select'> & {
       queryType: typeof QueryType.SELECT;
-      select: Array<`${Base}.${keyof Columns & string}`>;
+      select: Array<`${Base}."${keyof Columns & string}"`>;
     }
   >;
   public select<
@@ -659,7 +665,7 @@ export class QueryBuilder<
       const base = this.definition.baseAlias ?? this.table.name;
 
       columns = Object.keys(this.table.columns).map(
-        (colName) => `${base}.${colName}`
+        (colName) => `${base}.${quoteIdentifier(colName)}`
       );
     } else {
       columns = columns.map((column) => {

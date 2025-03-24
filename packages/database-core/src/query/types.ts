@@ -13,10 +13,22 @@ export type ColumnSelector<
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
 > =
-  | `${Alias}.${keyof TableRef['columns'] & string}`
+  | `${Alias}."${keyof TableRef['columns'] & string}"`
+  | `${Alias}.*`
   | {
-      [A in keyof JoinedTables]: `${A & string}.${keyof JoinedTables[A]['columns'] &
-        string}`;
+      [A in keyof JoinedTables]:
+        | `${A & string}."${keyof JoinedTables[A]['columns'] & string}"`
+        | `${A & string}.*`;
+    }[keyof JoinedTables];
+
+export type StrictColumnSelector<
+  Alias extends string,
+  TableRef extends Table<string, Record<string, Column>>,
+  JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
+> =
+  | `${Alias}."${keyof TableRef['columns'] & string}"`
+  | {
+      [A in keyof JoinedTables]: `${A & string}."${keyof JoinedTables[A]['columns'] & string}"`;
     }[keyof JoinedTables];
 
 export type WhereValue<T extends Column> = {
@@ -168,15 +180,25 @@ type InferRawColumn<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
 > = Current extends `${infer TableAlias}.${infer ColName}`
   ? TableAlias extends keyof JoinedTables
-    ? {
-        [T in TableAlias]: {
-          [K in ColName]: JoinedTables[T]['columns'][K]['_output'];
-        };
-      }
-    : TableAlias extends Alias | TableRef['name']
+    ? ColName extends '*'
       ? {
-          [K in ColName]: TableRef['columns'][K]['_output'];
+          [T in TableAlias]: {
+            [K in keyof JoinedTables[T]['columns']]: JoinedTables[T]['columns'][K]['_output'];
+          };
         }
+      : {
+          [T in TableAlias]: {
+            [K in ColName]: JoinedTables[T]['columns'][K]['_output'];
+          };
+        }
+    : TableAlias extends Alias | TableRef['name']
+      ? ColName extends '*'
+        ? {
+            [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
+          }
+        : {
+            [K in ColName]: TableRef['columns'][K]['_output'];
+          }
       : NonNullable<unknown>
   : NonNullable<unknown>;
 

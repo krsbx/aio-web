@@ -8,7 +8,11 @@ import {
   buildUpdateQuery,
 } from './builder';
 import { QueryType } from './constants';
-import type { ColumnSelector, QueryDefinition } from './types';
+import type {
+  ColumnSelector,
+  QueryDefinition,
+  StrictColumnSelector,
+} from './types';
 import { getGroupByConditions, getWhereConditions } from './utilities';
 
 export function toQuery<
@@ -17,12 +21,18 @@ export function toQuery<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(this: Query) {
   let sql = '';
@@ -60,8 +70,8 @@ export function toQuery<
 
   const groupByConditions = getGroupByConditions(this);
 
-  if (groupByConditions) {
-    sql += ` GROUP BY ${groupByConditions.join(', ')};`;
+  if (groupByConditions.length) {
+    sql += ` GROUP BY ${groupByConditions.join(', ')}`;
   }
 
   if (this.definition?.having?.length) {
@@ -71,7 +81,7 @@ export function toQuery<
   if (this.definition?.orderBy?.length) {
     sql += ` ORDER BY ${this.definition.orderBy
       .map((order) => [order.column, order.direction].join(' '))
-      .join(', ')};`;
+      .join(', ')}`;
   }
 
   if (this.definition?.limit !== null) {
@@ -99,12 +109,18 @@ export function toString<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
   Query extends QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
+    AllowedColumn,
+    StrictAllowedColumn
   >,
 >(this: Query) {
   return this.toQuery().query;
