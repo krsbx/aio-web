@@ -180,7 +180,7 @@ export class Column<
       sql += ` DEFAULT ${finalValue}`;
     }
 
-    return { query: sql + ';', params: [] };
+    return { query: sql, params: [] };
   }
 
   public toString() {

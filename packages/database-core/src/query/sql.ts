@@ -125,3 +125,13 @@ export function toString<
 >(this: Query) {
   return this.toQuery().query;
 }
+
+export function buildQuery(query: string) {
+  let index = 0;
+
+  return query.replace(/\?/g, () => {
+    index++;
+
+    return `$${index}`;
+  });
+}

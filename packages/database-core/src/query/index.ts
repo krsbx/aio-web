@@ -1,5 +1,6 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
+import { Dialect } from '../table/constants';
 import { deepClone, quoteIdentifier } from '../utilities';
 import {
   AcceptedJoin,
@@ -9,7 +10,7 @@ import {
   LogicalOperator,
   QueryType,
 } from './constants';
-import { toQuery } from './sql';
+import { buildQuery, toQuery } from './sql';
 import type {
   AcceptedInsertValues,
   AcceptedOrderBy,
@@ -135,7 +136,7 @@ export class QueryBuilder<
     };
   }
 
-  private col<ColName extends AllowedColumn, ColAlias extends string>(
+  private col<ColName extends StrictAllowedColumn, ColAlias extends string>(
     column: ColName,
     alias: ColAlias
   ) {
@@ -759,6 +760,20 @@ export class QueryBuilder<
       JoinedTables,
       Omit<Definition, 'queryType'> & { queryType: typeof QueryType.DELETE }
     >;
+  }
+
+  public exec(): Promise<
+    this['_output'] extends void ? void : this['_output'][]
+  > {
+    if (!this.table.database) throw new Error('Database client not defined');
+
+    const { query, params } = this.toQuery();
+
+    if (this.table.dialect === Dialect.SQLITE) {
+      return this.table.database.exec(query, params);
+    }
+
+    return this.table.database.exec(buildQuery(query), params);
   }
 
   public infer(): this['_output'] {

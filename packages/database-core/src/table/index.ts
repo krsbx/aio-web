@@ -1,4 +1,6 @@
 import type { Column } from '../column';
+import type { Database } from '../database';
+import type { DatabaseDialect } from '../database/types';
 import { QueryBuilder } from '../query';
 import type { Dialect } from './constants';
 import type { TableOptions, TimestampOptions } from './types';
@@ -15,6 +17,7 @@ export class Table<
     | boolean,
   Paranoid extends string | boolean = string | boolean,
 > {
+  public database: DatabaseDialect | null;
   public readonly dialect: DbDialect;
   public readonly name: TableName;
   public readonly columns: Columns;
@@ -37,15 +40,12 @@ export class Table<
     this.columns = options.columns;
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
+    this.database = null;
 
     for (const column of Object.values(this.columns)) {
       // Set dialect for each column
       column.dialect(options.dialect);
     }
-  }
-
-  public query() {
-    return new QueryBuilder(this).alias(this.name);
   }
 
   public static define<
@@ -73,5 +73,37 @@ export class Table<
       ...options,
       columns,
     });
+  }
+
+  public async create<
+    DbDialect extends Dialect,
+    Tables extends Record<string, Table<string, Record<string, Column>>>,
+    Db extends Database<DbDialect, Tables>,
+  >(db: Db) {
+    const sql = `CREATE TABLE IF NOT EXISTS ${this.name} (${Object.entries(
+      this.columns
+    )
+      .map(([name, column]) => `${name} ${column.toQuery().query}`)
+      .join(', ')});`;
+
+    await db.client.exec(sql);
+
+    return this;
+  }
+
+  public async drop<
+    DbDialect extends Dialect,
+    Tables extends Record<string, Table<string, Record<string, Column>>>,
+    Db extends Database<DbDialect, Tables>,
+  >(db: Db) {
+    const sql = `DROP TABLE IF EXISTS ${this.name};`;
+
+    await db.client.exec(sql);
+
+    return this;
+  }
+
+  public query() {
+    return new QueryBuilder(this).alias(this.name);
   }
 }
