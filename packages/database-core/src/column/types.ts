@@ -68,7 +68,8 @@ export type NumberOptions<Length extends number = number> = {
     | typeof AcceptedColumnTypes.BIGINT
     | typeof AcceptedColumnTypes.FLOAT
     | typeof AcceptedColumnTypes.DECIMAL
-    | typeof AcceptedColumnTypes.DOUBLE;
+    | typeof AcceptedColumnTypes.DOUBLE
+    | typeof AcceptedColumnTypes.SERIAL;
   length?: Length;
 };
 

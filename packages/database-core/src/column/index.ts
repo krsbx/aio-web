@@ -1,5 +1,5 @@
 import { Dialect } from '../table/constants';
-import { ColumnTypeMapping } from './constants';
+import { AcceptedColumnTypes, ColumnTypeMapping } from './constants';
 import type {
   AcceptedColumnTypeMap,
   ColumnDefinition,
@@ -153,10 +153,14 @@ export class Column<
     }
 
     if (this.definition.autoIncrement) {
+      const isPrimaryKey = !!this.definition.primaryKey;
+
       if (this.definition.dialect === Dialect.POSTGRES) {
-        sql = `SERIAL${this.definition.primaryKey ? ' PRIMARY KEY' : ''}`;
+        sql = `SERIAL${isPrimaryKey ? ' PRIMARY KEY' : ''}`;
       } else {
-        sql += ' AUTOINCREMENT';
+        if (this.type !== AcceptedColumnTypes.SERIAL) {
+          sql += ' AUTOINCREMENT';
+        }
       }
     }
 
