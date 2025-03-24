@@ -37,7 +37,7 @@ export class Database<
 
     if (options.tables) {
       for (const tableName in options.tables) {
-        options.tables[tableName].database = this as never;
+        options.tables[tableName].database = this.client;
       }
     }
   }
@@ -51,18 +51,6 @@ export class Database<
 
     // Fix the type
     return table.query() as QueryBuilder<TableName & string, typeof table>;
-  }
-
-  public async create<TableName extends keyof Tables>(tableName: TableName) {
-    if (!this.defintion.tables || !this.defintion.tables[tableName]) {
-      throw new Error(`Table ${tableName as string} does not exist`);
-    }
-
-    const table = this.defintion.tables[tableName];
-
-    await table.create(this as never);
-
-    return this;
   }
 
   public async createTable<
@@ -94,7 +82,7 @@ export class Database<
       ...options,
     });
 
-    table.database = this as never;
+    table.database = this.client;
 
     if (!this.defintion.tables) {
       this.defintion.tables = {} as Tables;
@@ -114,7 +102,7 @@ export class Database<
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    await table.create(this as never);
+    await table.create(this.client);
 
     return this as unknown as Database<
       DbDialect,
@@ -151,7 +139,7 @@ export class Database<
     if (!this.defintion.tables) this.defintion.tables = {} as Tables;
 
     if (this.defintion.tables[tableName]) {
-      await this.defintion.tables[tableName].drop(this as never);
+      await this.defintion.tables[tableName].drop(this.client);
 
       delete this.defintion.tables[tableName];
 

@@ -1,5 +1,4 @@
 import type { Column } from '../column';
-import type { Database } from '../database';
 import type { DatabaseDialect } from '../database/types';
 import { QueryBuilder } from '../query';
 import type { Dialect } from './constants';
@@ -75,30 +74,26 @@ export class Table<
     });
   }
 
-  public async create<
-    DbDialect extends Dialect,
-    Tables extends Record<string, Table<string, Record<string, Column>>>,
-    Db extends Database<DbDialect, Tables>,
-  >(db: Db) {
+  public async create(db: DatabaseDialect | null = this.database) {
+    if (!db) throw new Error('Database client not defined');
+
     const sql = `CREATE TABLE IF NOT EXISTS ${this.name} (${Object.entries(
       this.columns
     )
       .map(([name, column]) => `${name} ${column.toQuery().query}`)
       .join(', ')});`;
 
-    await db.client.exec(sql);
+    await db.exec(sql);
 
     return this;
   }
 
-  public async drop<
-    DbDialect extends Dialect,
-    Tables extends Record<string, Table<string, Record<string, Column>>>,
-    Db extends Database<DbDialect, Tables>,
-  >(db: Db) {
+  public async drop(db: DatabaseDialect | null = this.database) {
+    if (!db) throw new Error('Database client not defined');
+
     const sql = `DROP TABLE IF EXISTS ${this.name};`;
 
-    await db.client.exec(sql);
+    await db.exec(sql);
 
     return this;
   }

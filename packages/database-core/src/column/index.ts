@@ -149,10 +149,13 @@ export class Column<
       correctType + (this.length !== undefined ? `(${this.length})` : '');
 
     if (this.definition.primaryKey) {
-      sql += 'PRIMARY KEY';
+      sql += ' PRIMARY KEY';
     }
 
-    if (this.definition.autoIncrement) {
+    if (
+      this.definition.autoIncrement ||
+      this.type === AcceptedColumnTypes.SERIAL
+    ) {
       const isPrimaryKey = !!this.definition.primaryKey;
 
       if (this.definition.dialect === Dialect.POSTGRES) {
@@ -160,6 +163,12 @@ export class Column<
       } else {
         if (this.type !== AcceptedColumnTypes.SERIAL) {
           sql += ' AUTOINCREMENT';
+        } else {
+          const sqls = ['INTEGER', 'PRIMARY KEY', 'AUTOINCREMENT'];
+
+          if (!isPrimaryKey) sqls.splice(1, 1);
+
+          sql = sqls.join(' ');
         }
       }
     }
