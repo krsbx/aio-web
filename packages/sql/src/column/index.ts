@@ -9,9 +9,13 @@ import type {
 } from './types';
 
 export class Column<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Values = any,
-  Options extends ColumnOptions<Values> = ColumnOptions<Values>,
+  Type extends AcceptedColumnTypes = AcceptedColumnTypes,
+  Values extends
+    | number
+    | readonly string[] = Type extends typeof AcceptedColumnTypes.ENUM
+    ? readonly string[]
+    : number,
+  Options extends ColumnOptions<Type, Values> = ColumnOptions<Type, Values>,
   ColumnValue extends
     AcceptedColumnTypeMap[Options['type']] = AcceptedColumnTypeMap[Options['type']],
   Value extends Options extends EnumOptions<infer Value>
@@ -26,7 +30,7 @@ export class Column<
   public readonly definition: Definition;
   public readonly type: Options['type'];
   public readonly length: number | undefined;
-  public readonly enums: readonly Values[];
+  public readonly enums: readonly Value[];
   public readonly _output!: ValueSelector<Definition, Value>;
 
   private constructor(options: Options) {
@@ -38,7 +42,7 @@ export class Column<
     }
 
     if ('values' in options) {
-      this.enums = options.values as readonly Values[];
+      this.enums = options.values as readonly Value[];
     }
 
     this.definition = {
@@ -52,9 +56,9 @@ export class Column<
   }
 
   public static define<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Values = any,
-    Options extends ColumnOptions<Values> = ColumnOptions<Values>,
+    Type extends AcceptedColumnTypes = AcceptedColumnTypes,
+    Values extends number | readonly string[] = number | readonly string[],
+    Options extends ColumnOptions<Type, Values> = ColumnOptions<Type, Values>,
   >(options: Options) {
     return new Column(options);
   }
@@ -62,6 +66,7 @@ export class Column<
   public autoIncrement() {
     this.definition.autoIncrement = true;
     return this as Column<
+      Type,
       Values,
       Options,
       ColumnValue,
@@ -73,6 +78,7 @@ export class Column<
   public primaryKey() {
     this.definition.primaryKey = true;
     return this as Column<
+      Type,
       Values,
       Options,
       ColumnValue,
@@ -84,6 +90,7 @@ export class Column<
   public notNull() {
     this.definition.notNull = true;
     return this as Column<
+      Type,
       Values,
       Options,
       ColumnValue,
@@ -95,6 +102,7 @@ export class Column<
   public unique() {
     this.definition.unique = true;
     return this as Column<
+      Type,
       Values,
       Options,
       ColumnValue,
@@ -106,6 +114,7 @@ export class Column<
   public comment<Comment extends string | null>(value: Comment) {
     this.definition.comment = value;
     return this as unknown as Column<
+      Type,
       Values,
       Options,
       ColumnValue,
@@ -119,6 +128,7 @@ export class Column<
   ) {
     this.definition.default = value as unknown as Value;
     return this as unknown as Column<
+      Type,
       Values,
       Options,
       ColumnValue,
@@ -130,6 +140,7 @@ export class Column<
   public dialect<DbDialect extends Dialect>(dialect: DbDialect) {
     this.definition.dialect = dialect as never;
     return this as unknown as Column<
+      Type,
       Values,
       Options,
       ColumnValue,

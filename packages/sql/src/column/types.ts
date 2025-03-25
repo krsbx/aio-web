@@ -1,5 +1,5 @@
 import type { Dialect } from '../table/constants';
-import type { AcceptedColumnTypes } from './constants';
+import { AcceptedColumnTypes } from './constants';
 
 export interface ColumnDefinition<T, U extends Dialect | null = null> {
   primaryKey: boolean;
@@ -16,7 +16,9 @@ export type ValueSelector<
     | Partial<ColumnDefinition<Value, Dialect>>
     | ColumnDefinition<Value, Dialect>,
   Value,
-> = Definition['notNull'] extends true ? Value | string : Value | string | null;
+> = Definition['notNull'] extends true
+  ? Value | (string & {})
+  : Value | (string & {}) | null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AcceptedColumnTypeMap<T = any> = {
@@ -98,18 +100,41 @@ export type BlobOptions = {
   type: typeof AcceptedColumnTypes.BLOB;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ColumnOptions<T = any> =
-  | DateOptions
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  | NumberOptions<T>
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  | StringOptions<T>
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  | EnumOptions<T>
-  | BooleanOptions
-  | JsonOptions
-  | BlobOptions;
+export type ColumnOptions<
+  Type extends AcceptedColumnTypes,
+  U extends number | readonly string[],
+> = Type extends typeof AcceptedColumnTypes.BLOB
+  ? BlobOptions
+  : Type extends typeof AcceptedColumnTypes.JSON
+    ? JsonOptions
+    : Type extends typeof AcceptedColumnTypes.BOOLEAN
+      ? BooleanOptions
+      : Type extends
+            | typeof AcceptedColumnTypes.DATE
+            | typeof AcceptedColumnTypes.TIME
+            | typeof AcceptedColumnTypes.TIMESTAMP
+            | typeof AcceptedColumnTypes.DATETIME
+            | typeof AcceptedColumnTypes.DATEONLY
+        ? DateOptions
+        : Type extends
+              | typeof AcceptedColumnTypes.STRING
+              | typeof AcceptedColumnTypes.VARCHAR
+              | typeof AcceptedColumnTypes.TEXT
+          ? U extends number
+            ? StringOptions<U>
+            : StringOptions
+          : Type extends
+                | typeof AcceptedColumnTypes.INTEGER
+                | typeof AcceptedColumnTypes.BIGINT
+                | typeof AcceptedColumnTypes.FLOAT
+                | typeof AcceptedColumnTypes.DECIMAL
+                | typeof AcceptedColumnTypes.DOUBLE
+                | typeof AcceptedColumnTypes.SERIAL
+            ? U extends number
+              ? NumberOptions<U>
+              : NumberOptions
+            : Type extends typeof AcceptedColumnTypes.ENUM
+              ? U extends readonly string[]
+                ? EnumOptions<U>
+                : never
+              : never;
