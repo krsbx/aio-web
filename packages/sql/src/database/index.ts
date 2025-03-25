@@ -9,6 +9,10 @@ import {
   setColumnDefault,
 } from './alter';
 import { addColumn, dropColumn, renameColumn } from './column';
+import type {
+  ColumnAlterationContract,
+  TableAlterationContract,
+} from './contract';
 import { createTable, dropTable, renameTable } from './table';
 import type {
   DatabaseDefinition,
@@ -18,10 +22,6 @@ import type {
   SqliteConfig,
 } from './types';
 import { DatabasePsql, DatabaseSqlite } from './wrapper';
-import type {
-  ColumnAlterationContract,
-  TableAlterationContract,
-} from './contract';
 
 export class Database<
   DbDialect extends Dialect,
@@ -99,8 +99,9 @@ export class Database<
     this.defintion = {
       dialect: options.dialect,
       config: options.config,
-      tables: options.tables,
+      tables: options.tables ?? {},
     } as unknown as Definition;
+
     this.client =
       options.dialect === Dialect.POSTGRES
         ? new DatabasePsql(options.config as PostgresConfig)
