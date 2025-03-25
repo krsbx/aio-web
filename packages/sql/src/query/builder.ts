@@ -20,15 +20,16 @@ export function buildSelectQuery<
     TableRef,
     JoinedTables
   >,
-  Query extends QueryBuilder<
+>(
+  q: QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
     AllowedColumn,
     StrictAllowedColumn
-  >,
->(q: Query) {
+  >
+) {
   const from = getTableSelectName(q);
   const columns: string[] = [];
 
@@ -76,15 +77,16 @@ export function buildInsertQuery<
     TableRef,
     JoinedTables
   >,
-  Query extends QueryBuilder<
+>(
+  q: QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
     AllowedColumn,
     StrictAllowedColumn
-  >,
->(q: Query) {
+  >
+) {
   const rows = q.definition?.insertValues;
 
   if (!rows?.length) {
@@ -115,15 +117,16 @@ export function buildUpdateQuery<
     TableRef,
     JoinedTables
   >,
-  Query extends QueryBuilder<
+>(
+  q: QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
     AllowedColumn,
     StrictAllowedColumn
-  >,
->(q: Query) {
+  >
+) {
   if (!q.definition?.updateValues) {
     throw new Error(`UPDATE requires values`);
   }
@@ -150,13 +153,20 @@ export function buildDeleteQuery<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<QueryDefinition<Alias, TableRef, JoinedTables>>,
   AllowedColumn extends ColumnSelector<Alias, TableRef, JoinedTables>,
-  Query extends QueryBuilder<
+  StrictAllowedColumn extends StrictColumnSelector<
+    Alias,
+    TableRef,
+    JoinedTables
+  >,
+>(
+  q: QueryBuilder<
     Alias,
     TableRef,
     JoinedTables,
     Definition,
-    AllowedColumn
-  >,
->(q: Query) {
+    AllowedColumn,
+    StrictAllowedColumn
+  >
+) {
   return `DELETE FROM ${q.table.name}`;
 }

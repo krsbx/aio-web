@@ -1,4 +1,5 @@
 import type { Column } from '../column';
+import type { AcceptedColumnTypes } from '../column/constants';
 import type { Table } from '../table';
 import type { UnionToIntersection } from '../types';
 import type {
@@ -53,11 +54,17 @@ export type AcceptedOrderBy<Columns extends string> = {
 type InsertValuesParser<Columns extends Record<string, Column>> = {
   [ColName in keyof Columns]: {
     output: Columns[ColName]['_output'];
-    required: Columns[ColName]['definition'] extends { default: unknown }
-      ? false
-      : Columns[ColName]['definition'] extends { notNull: true }
-        ? true
-        : false;
+    required: Columns[ColName]['definition'] extends { type: infer Type }
+      ? Type extends typeof AcceptedColumnTypes.SERIAL
+        ? false
+        : Columns[ColName]['definition'] extends { notNull: true }
+          ? true
+          : Columns[ColName]['definition'] extends { autoIncrement: true }
+            ? false
+            : Columns[ColName]['definition'] extends { default: unknown }
+              ? false
+              : true
+      : false;
   };
 };
 
@@ -181,27 +188,31 @@ type InferRawColumn<
   JoinedTables extends Record<string, Table<string, Record<string, Column>>>,
 > = Current extends `${infer TableAlias}."${infer ColName}"`
   ? TableAlias extends keyof JoinedTables
-    ? ColName extends '*'
-      ? {
-          [T in TableAlias]: {
-            [K in keyof JoinedTables[T]['columns']]: JoinedTables[T]['columns'][K]['_output'];
-          };
-        }
-      : {
-          [T in TableAlias]: {
-            [K in ColName]: JoinedTables[T]['columns'][K]['_output'];
-          };
-        }
+    ? {
+        [T in TableAlias]: {
+          [K in ColName]: JoinedTables[T]['columns'][K]['_output'];
+        };
+      }
     : TableAlias extends Alias | TableRef['name']
-      ? ColName extends '*'
-        ? {
-            [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
-          }
-        : {
-            [K in ColName]: TableRef['columns'][K]['_output'];
-          }
+      ? {
+          [K in ColName]: TableRef['columns'][K]['_output'];
+        }
       : NonNullable<unknown>
-  : NonNullable<unknown>;
+  : Current extends `${infer TableAlias}.${infer ColName}`
+    ? ColName extends '*'
+      ? TableAlias extends keyof JoinedTables
+        ? {
+            [T in TableAlias]: {
+              [K in keyof JoinedTables[T]['columns']]: JoinedTables[T]['columns'][K]['_output'];
+            };
+          }
+        : TableAlias extends Alias | TableRef['name']
+          ? {
+              [K in keyof TableRef['columns']]: TableRef['columns'][K]['_output'];
+            }
+          : NonNullable<unknown>
+      : NonNullable<unknown>
+    : NonNullable<unknown>;
 
 type InferSelectQueryOutput<
   Alias extends string,

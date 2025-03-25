@@ -1,4 +1,4 @@
-import type { QueryBuilder } from '.';
+import { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
 import { Dialect } from '../table/constants';
