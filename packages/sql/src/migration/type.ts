@@ -10,7 +10,6 @@ export interface MigrationOptions<
   db: Database<DbDialect, Tables>;
   up: (() => Promise<void>) | null;
   down: (() => Promise<void>) | null;
-  useTransaction?: boolean;
 }
 
 export interface MigrationFn<

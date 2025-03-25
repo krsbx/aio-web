@@ -9,13 +9,11 @@ export class Migration<
   Tables extends Record<string, Table<string, Record<string, Column>>>,
 > {
   public readonly db: Database<DbDialect, Tables>;
-  public useTransaction: boolean;
   private _up: (() => Promise<void>) | null;
   private _down: (() => Promise<void>) | null;
 
   private constructor(options: MigrationOptions<DbDialect, Tables>) {
     this.db = options.db;
-    this.useTransaction = options.useTransaction ?? true;
 
     this._up = options.up;
     this._down = options.down;
@@ -59,14 +57,12 @@ export class Migration<
     options?: {
       up?: MigrationFn<DbDialect, Tables>;
       down?: MigrationFn<DbDialect, Tables>;
-      useTransaction?: boolean;
     }
   ) {
     const migration = new Migration({
       db,
       up: options?.up ? () => options.up!(db) : null,
       down: options?.down ? () => options.down!(db) : null,
-      useTransaction: options?.useTransaction ?? true,
     });
 
     return {
