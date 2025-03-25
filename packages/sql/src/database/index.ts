@@ -2,7 +2,14 @@ import type { Column } from '../column';
 import type { QueryBuilder } from '../query';
 import { Table } from '../table';
 import { Dialect } from '../table/constants';
-import type { MergeTimestampParanoid, TimestampOptions } from '../table/types';
+import {
+  alterColumnType,
+  dropColumnDefault,
+  dropColumnNotNull,
+  setColumnDefault,
+} from './alter';
+import { addColumn, dropColumn, renameColumn } from './column';
+import { createTable, dropTable, renameTable } from './table';
 import type {
   DatabaseDefinition,
   DatabaseDialect,
@@ -11,6 +18,10 @@ import type {
   SqliteConfig,
 } from './types';
 import { DatabasePsql, DatabaseSqlite } from './wrapper';
+import type {
+  ColumnAlterationContract,
+  TableAlterationContract,
+} from './contract';
 
 export class Database<
   DbDialect extends Dialect,
@@ -22,6 +33,66 @@ export class Database<
   public readonly dialect: DbDialect;
   public readonly defintion: Definition;
   public readonly client: DatabaseDialect;
+
+  public createTable: TableAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['createTable'];
+  public renameTable: TableAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['renameTable'];
+  public dropTable: TableAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['dropTable'];
+
+  public addColumn: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['addColumn'];
+  public renameColumn: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['renameColumn'];
+  public dropColumn: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['dropColumn'];
+
+  public alterColumnType: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['alterColumnType'];
+
+  public setColumnDefault: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['setColumnDefault'];
+  public dropColumnDefault: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['dropColumnDefault'];
+
+  public setColumnNotNull: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['setColumnNotNull'];
+  public dropColumnNotNull: ColumnAlterationContract<
+    DbDialect,
+    Tables,
+    Definition
+  >['dropColumnNotNull'];
 
   private constructor(options: DatabaseOptions<DbDialect, Tables>) {
     this.dialect = options.dialect;
@@ -40,9 +111,38 @@ export class Database<
         options.tables[tableName].database = this.client;
       }
     }
+
+    this.createTable = createTable.bind(this) as this['createTable'];
+    this.renameTable = renameTable.bind(this) as this['renameTable'];
+    this.dropTable = dropTable.bind(this) as this['dropTable'];
+
+    this.addColumn = addColumn.bind(this) as this['addColumn'];
+    this.renameColumn = renameColumn.bind(this) as this['renameColumn'];
+    this.dropColumn = dropColumn.bind(this) as this['dropColumn'];
+
+    this.alterColumnType = alterColumnType.bind(
+      this
+    ) as this['alterColumnType'];
+
+    this.setColumnDefault = setColumnDefault.bind(
+      this
+    ) as this['setColumnDefault'];
+    this.dropColumnDefault = dropColumnDefault.bind(
+      this
+    ) as this['dropColumnDefault'];
+
+    this.setColumnNotNull = setColumnDefault.bind(
+      this
+    ) as this['setColumnNotNull'];
+    this.dropColumnNotNull = dropColumnNotNull.bind(
+      this
+    ) as this['dropColumnNotNull'];
   }
 
-  public table<TableName extends keyof Tables>(tableName: TableName) {
+  public table<
+    TableName extends keyof Tables & string,
+    Table extends Tables[TableName],
+  >(tableName: TableName) {
     if (!this.defintion.tables || !this.defintion.tables[tableName]) {
       throw new Error(`Table ${tableName as string} does not exist`);
     }
@@ -50,111 +150,7 @@ export class Database<
     const table = this.defintion.tables[tableName];
 
     // Fix the type
-    return table.query() as QueryBuilder<TableName & string, typeof table>;
-  }
-
-  public async createTable<
-    TableName extends string,
-    Columns extends Record<string, Column>,
-    CreatedAt extends string,
-    UpdatedAt extends string,
-    Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
-    Paranoid extends string | boolean,
-    FinalColumns extends MergeTimestampParanoid<
-      Columns,
-      CreatedAt,
-      UpdatedAt,
-      Timestamp,
-      Paranoid
-    >,
-  >(
-    tableName: TableName,
-    columns: Columns,
-    options?: {
-      paranoid?: Paranoid;
-      timestamp?: Timestamp;
-    }
-  ) {
-    const table = Table.define({
-      name: tableName,
-      dialect: this.dialect,
-      columns,
-      ...options,
-    });
-
-    table.database = this.client;
-
-    if (!this.defintion.tables) {
-      this.defintion.tables = {} as Tables;
-    }
-
-    this.defintion.tables = {
-      ...this.defintion.tables,
-      [tableName]: table,
-    };
-
-    // Create the table
-    if (!this?.client) {
-      throw new Error('Database not connected');
-    }
-
-    while (this.client.status === 'connecting') {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    await table.create(this.client);
-
-    return this as unknown as Database<
-      DbDialect,
-      Tables & {
-        [K in TableName]: Table<
-          TableName,
-          FinalColumns,
-          DbDialect,
-          CreatedAt,
-          UpdatedAt,
-          Timestamp,
-          Paranoid
-        >;
-      },
-      Definition & {
-        tables: {
-          [K in TableName]: Table<
-            TableName,
-            FinalColumns,
-            DbDialect,
-            CreatedAt,
-            UpdatedAt,
-            Timestamp,
-            Paranoid
-          >;
-        };
-      }
-    >;
-  }
-
-  public async dropTable<TableName extends keyof Tables | (string & {})>(
-    tableName: TableName
-  ) {
-    if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-    if (this.defintion.tables[tableName]) {
-      await this.defintion.tables[tableName].drop(this.client);
-
-      delete this.defintion.tables[tableName];
-
-      return this as unknown as Database<
-        DbDialect,
-        Omit<Tables, TableName>,
-        Definition & {
-          tables: Omit<Tables, TableName>;
-        }
-      >;
-    }
-
-    await this.client.exec(`DROP TABLE IF EXISTS ${tableName as string};`);
-
-    return this;
+    return table.query() as unknown as QueryBuilder<TableName, Table>;
   }
 
   public async transaction<T, U extends () => Promise<T>>(fn: U) {
