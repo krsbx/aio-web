@@ -90,3 +90,75 @@ export type FieldOptions<
                     ArrayOptions<U>
                   : ArrayOptions<readonly Field[]>
                 : never;
+
+export interface FieldDefinition<T> {
+  notNull: boolean;
+  default: T;
+}
+
+export type PremitiveValueSelector<
+  Type extends AcceptedColumnTypes,
+  NotNull extends boolean,
+> = NotNull extends true
+  ? AcceptedColumnTypeMap[Type]
+  : AcceptedColumnTypeMap[Type] | null;
+
+export type ValueSelector<
+  Type extends AcceptedColumnTypes,
+  Values extends Record<string, Field> | readonly string[],
+  Options extends FieldOptions<Type, Values>,
+  ColValue extends AcceptedColumnTypeMap[Type],
+  Value extends Options extends EnumOptions<infer Value>
+    ? Value[number]
+    : ColValue,
+  Fields extends Options extends JsonOptions<infer Fields>
+    ? Fields
+    : Options extends ArrayOptions<infer Fields>
+      ? Fields
+      : never,
+  Definition extends Partial<FieldDefinition<Value>> | FieldDefinition<Value>,
+> = Type extends
+  | typeof AcceptedColumnTypes.NUMBER
+  | typeof AcceptedColumnTypes.STRING
+  | typeof AcceptedColumnTypes.BOOLEAN
+  | typeof AcceptedColumnTypes.TIMESTAMP
+  | typeof AcceptedColumnTypes.DATE
+  ? PremitiveValueSelector<
+      Type,
+      Definition['notNull'] extends true ? true : false
+    >
+  : Type extends typeof AcceptedColumnTypes.JSON
+    ? Fields extends Record<string, Field>
+      ? {
+          [K in keyof Fields]: Fields[K] extends Field<
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            infer CT,
+            infer VS,
+            infer O,
+            infer CV,
+            infer V,
+            infer F,
+            infer D
+          >
+            ? ValueSelector<O['type'], VS, O, CV, V, F, D>
+            : never;
+        }
+      : NonNullable<unknown>
+    : Type extends typeof AcceptedColumnTypes.ARRAY
+      ? Fields extends readonly Field<
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          infer CT,
+          infer VS,
+          infer O,
+          infer CV,
+          infer V,
+          infer F,
+          infer D
+        >[]
+        ? ValueSelector<O['type'], VS, O, CV, V, F, D>[]
+        : unknown[]
+      : Type extends typeof AcceptedColumnTypes.ENUM
+        ? Options extends EnumOptions<infer Value>
+          ? Value[number]
+          : never
+        : never;

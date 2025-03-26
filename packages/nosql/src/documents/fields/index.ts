@@ -3,8 +3,10 @@ import type {
   AcceptedColumnTypeMap,
   ArrayOptions,
   EnumOptions,
+  FieldDefinition,
   FieldOptions,
   JsonOptions,
+  ValueSelector,
 } from './types';
 
 export class Field<
@@ -20,15 +22,30 @@ export class Field<
     : Options extends ArrayOptions<infer Fields>
       ? Fields
       : never = never,
+  Definition extends Partial<FieldDefinition<Value>> = FieldDefinition<Value>,
 > {
-  public readonly type: Type;
+  public readonly type: Options['type'];
   public readonly enums: readonly Value[];
   public readonly fields: Fields;
+  public readonly definition: Definition;
+  public readonly _output!: ValueSelector<
+    Options['type'],
+    Values,
+    Options,
+    ColValue,
+    Value,
+    Fields,
+    Definition
+  >;
 
   private constructor(options: Options) {
-    this.type = options.type as Type;
+    this.type = options.type;
     this.enums = [];
     this.fields = null as unknown as Fields;
+    this.definition = {
+      default: null,
+      notNull: false,
+    } as Definition;
 
     if ('values' in options) {
       this.enums = options.values as readonly Value[];
@@ -37,6 +54,24 @@ export class Field<
     if ('fields' in options) {
       this.fields = options.fields as Fields;
     }
+  }
+
+  public notNull() {
+    this.definition.notNull = true;
+
+    return this as unknown as Field<
+      Type,
+      Values,
+      Options,
+      ColValue,
+      Value,
+      Fields,
+      Omit<Definition, 'notNull'> & { notNull: true }
+    >;
+  }
+
+  public infer(): this['_output'] {
+    return null as never;
   }
 
   public static define<
@@ -52,10 +87,17 @@ export class Field<
       : Options extends ArrayOptions<infer Fields>
         ? Fields
         : never,
+    Definition extends Partial<FieldDefinition<Value>>,
   >(options: Options) {
-    const field = new Field<Type, Values, Options, ColValue, Value, Fields>(
-      options
-    );
+    const field = new Field<
+      Type,
+      Values,
+      Options,
+      ColValue,
+      Value,
+      Fields,
+      Definition
+    >(options);
 
     return field;
   }
