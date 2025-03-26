@@ -36,19 +36,6 @@ export class KeyValue {
     // KV Index
     this.db.run(`CREATE INDEX IF NOT EXISTS kv_store_key ON kv_store (key);`);
     this.db.run(`CREATE INDEX IF NOT EXISTS kv_store_ttl ON kv_store (ttl);`);
-
-    // KV Tags
-    // this.db.run(`
-    // CREATE TABLE IF NOT EXISTS kv_tags (
-    //   tag TEXT,
-    //   key TEXT,
-    //   PRIMARY KEY (key, tag),
-    //   FOREIGN KEY (key) REFERENCES kv_store(key) ON DELETE CASCADE
-    // ) STRICT;
-    // `);
-
-    // KV Tags Index
-    // this.db.run(`CREATE INDEX IF NOT EXISTS kv_tags_tag ON kv_tags (tag);`);
   }
 
   private compress<Value = any>(value: Value): Uint8Array {
@@ -317,57 +304,6 @@ export class KeyValue {
 
     return row.ttl - now;
   }
-
-  // public addTag(key: string, tag: string) {
-  //   this.sql.addTag.run({ key, tag });
-
-  //   return this;
-  // }
-
-  // public deleteTag(key: string, tag: string) {
-  //   this.sql.deleteTag.run({ key, tag });
-
-  //   return this;
-  // }
-
-  // public deleteTags(key: string): KeyValue;
-  // public deleteTags(key: string, tags: string[]): KeyValue;
-  // public deleteTags(key: string, tags?: string[]) {
-  //   if (tags) {
-  //     this.db.transaction(() => {
-  //       tags.forEach((tag) => {
-  //         this.deleteTag(key, tag);
-  //       });
-  //     })();
-  //   } else {
-  //     this.sql.deleteTags.run({ key });
-  //   }
-
-  //   return this;
-  // }
-
-  // public deleteTaggedItems(tag: string) {
-  //   this.sql.deleteTaggedItems.run({ tag });
-
-  //   return this;
-  // }
-
-  // public getTaggedKeys(tag: string) {
-  //   const rows = this.sql.keyTags.all({ tag });
-
-  //   return rows.map((row) => row.key);
-  // }
-
-  // public getTaggedValues<Value = any>(tag: string): Value[] {
-  //   return this.db.transaction(() => {
-  //     const keys = this.getTaggedKeys(tag);
-
-  //     return keys
-  //       .map((key) => this.getItems<Value>(key))
-  //       .map((item) => item.map((i) => i.value))
-  //       .flat(1);
-  //   })();
-  // }
 
   public static define(options: KeyValueConfig) {
     return new KeyValue(options);

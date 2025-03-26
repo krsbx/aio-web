@@ -62,22 +62,5 @@ export function getSql(db: Database) {
     countExpiring: db.query(
       `SELECT COUNT(*) AS count FROM kv_store WHERE IS NOT NULL;`
     ) as Statement<{ count: number }>,
-
-    // addTag: db.query(
-    //   `INSERT OR IGNORE INTO kv_tags (key, tag) VALUES ($key, $tag);`
-    // ) as Statement,
-    // deleteTag: db.query(
-    //   `DELETE FROM kv_tags WHERE tag = $tag AND key = $key;`
-    // ) as Statement,
-    // deleteTags: db.query(`DELETE from kv_tags WHERE key = $key;`) as Statement,
-    // deleteTaggedItems: db.query(
-    //   `DELETE FROM kv_store WHERE key IN (SELECT key FROM kv_tags WHERE tag = $tag)`
-    // ) as Statement,
-
-    // keyTags: db.query(
-    //   `SELECT key FROM kv_tags WHERE tag = $tag;`
-    // ) as Statement<{
-    //   key: string;
-    // }>,
   };
 }
