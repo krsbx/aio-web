@@ -1,4 +1,4 @@
-export const AcceptedColumnTypes = {
+export const AcceptedFieldTypes = {
   NUMBER: 'NUMBER',
   STRING: 'STRING',
   BOOLEAN: 'BOOLEAN',
@@ -9,5 +9,5 @@ export const AcceptedColumnTypes = {
   ARRAY: 'ARRAY',
 } as const;
 
-export type AcceptedColumnTypes =
-  (typeof AcceptedColumnTypes)[keyof typeof AcceptedColumnTypes];
+export type AcceptedFieldTypes =
+  (typeof AcceptedFieldTypes)[keyof typeof AcceptedFieldTypes];

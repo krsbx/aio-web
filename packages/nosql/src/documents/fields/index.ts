@@ -1,4 +1,4 @@
-import { AcceptedColumnTypes } from './constants';
+import { AcceptedFieldTypes } from './constants';
 import type {
   AcceptedColumnTypeMap,
   ArrayOptions,
@@ -10,7 +10,7 @@ import type {
 } from './types';
 
 export class Field<
-  Type extends AcceptedColumnTypes = AcceptedColumnTypes,
+  Type extends AcceptedFieldTypes = AcceptedFieldTypes,
   Values extends Record<string, Field> | readonly string[] = readonly string[],
   Options extends FieldOptions<Type, Values> = FieldOptions<Type, Values>,
   ColValue extends AcceptedColumnTypeMap[Type] = AcceptedColumnTypeMap[Type],
@@ -99,7 +99,7 @@ export class Field<
   }
 
   public static define<
-    Type extends AcceptedColumnTypes,
+    Type extends AcceptedFieldTypes,
     Values extends Record<string, Field> | readonly string[],
     Options extends FieldOptions<Type, Values>,
     ColValue extends AcceptedColumnTypeMap[Type],
