@@ -18,8 +18,8 @@ export function addJoin<
   JoinType extends AcceptedJoin,
   JoinTable extends Documents<string, Record<string, Field>>,
   JoinAlias extends string,
-  BaseColName extends `${keyof DocRef['fields'] & string}`,
-  JoinColName extends `${keyof JoinTable['fields'] & string}`,
+  BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
+  JoinColName extends `${JoinAlias}.${keyof JoinTable['fields'] & string}`,
   FinalJoinedDocs extends JoinedDocs & { [K in JoinAlias]: JoinTable },
 >(
   query: QueryBuilder<
@@ -36,12 +36,16 @@ export function addJoin<
   baseColumn: BaseColName,
   joinColumn: JoinColName
 ) {
-  const base = query.definition.baseAlias ?? query.doc.name;
+  const [baseTable, correctedColumn] = baseColumn.split('.') as [
+    string,
+    string,
+  ];
+  const [aliasTable, aliasColumn] = joinColumn.split('.') as [string, string];
 
   if (!query.definition.joins) query.definition.joins = [];
 
   query.definition.joins.push(
-    `${joinType} JOIN documents AS ${alias} ON JSON_EXTRACT(${base}.data, '$.${baseColumn}') = JSON_EXTRACT(${alias}.data, '$.${joinColumn}')`
+    `${joinType} JOIN documents AS ${alias} ON JSON_EXTRACT(${baseTable}.data, '$.${correctedColumn}') = JSON_EXTRACT(${aliasTable}.data, '$.${aliasColumn}')`
   );
 
   if (!query.definition.joinedDocs) {
