@@ -174,7 +174,7 @@ export async function exec<
 
   const { query, params } = this.toQuery();
 
-  const result = await this.table.database.exec<Output>(query, params);
+  const result = await this.table.database.exec<never[]>(query, params);
 
   return result.map((r) =>
     parseAliasedRow({
