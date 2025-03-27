@@ -1,5 +1,9 @@
 import type { Field } from '../fields';
-import type { DocumentOptions, TimestampOptions } from './types';
+import type {
+  DocumentOptions,
+  DocumentOutput,
+  TimestampOptions,
+} from './types';
 import { defineFields } from './utilities';
 
 export class Documents<
@@ -14,6 +18,14 @@ export class Documents<
   public readonly fields: Fields;
   public readonly timestamp: Timestamp | null;
   public readonly paranoid: Paranoid | null;
+  public readonly _output!: DocumentOutput<
+    DocName,
+    Fields,
+    CreatedAt,
+    UpdatedAt,
+    Timestamp,
+    Paranoid
+  >;
 
   private constructor(
     options: DocumentOptions<
@@ -29,6 +41,10 @@ export class Documents<
     this.fields = options.fields;
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
+  }
+
+  public infer(): this['_output'] {
+    return null as never;
   }
 
   public static define<

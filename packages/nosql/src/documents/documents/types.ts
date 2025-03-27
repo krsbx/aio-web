@@ -1,5 +1,6 @@
 import type { Field } from '../fields';
-import type { createdAt, deletedAt, updatedAt } from './utilities';
+import type { Documents } from '.';
+import type { _id, createdAt, deletedAt, updatedAt } from './utilities';
 
 export interface TimestampOptions<
   CreatedAt extends string,
@@ -29,8 +30,7 @@ export type MergeTimestampParanoid<
   UpdatedAt extends string,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
-> = Fields &
-  (Timestamp extends true
+> = Fields & { _id: typeof _id } & (Timestamp extends true
     ? {
         createdAt: typeof createdAt;
         updatedAt: typeof updatedAt;
@@ -60,3 +60,22 @@ export type MergeTimestampParanoid<
           [K in Paranoid]: typeof deletedAt;
         }
       : NonNullable<unknown>);
+
+export type DocumentOutput<
+  DocName extends string,
+  Fields extends Record<string, Field>,
+  CreatedAt extends string,
+  UpdatedAt extends string,
+  Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
+  Paranoid extends string | boolean,
+  Doc extends Documents<
+    DocName,
+    Fields,
+    CreatedAt,
+    UpdatedAt,
+    Timestamp,
+    Paranoid
+  > = Documents<DocName, Fields, CreatedAt, UpdatedAt, Timestamp, Paranoid>,
+> = {
+  [K in keyof Doc['fields'] & string]: Doc['fields'][K]['_output'];
+};

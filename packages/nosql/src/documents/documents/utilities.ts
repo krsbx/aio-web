@@ -5,6 +5,10 @@ import type {
   TimestampOptions,
 } from './types';
 
+export const _id = Field.define({
+  type: 'STRING',
+});
+
 export const createdAt = Field.define({
   type: 'TIMESTAMP',
 });
