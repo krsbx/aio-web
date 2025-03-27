@@ -1,3 +1,4 @@
+import type { Database as Sqlite } from 'bun:sqlite';
 import type { Field } from '../fields';
 import type {
   DocumentOptions,
@@ -7,13 +8,16 @@ import type {
 import { defineFields } from './utilities';
 
 export class Documents<
-  DocName extends string,
-  Fields extends Record<string, Field>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
-  Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
-  Paranoid extends string | boolean,
+  DocName extends string = string,
+  Fields extends Record<string, Field> = Record<string, Field>,
+  CreatedAt extends string = string,
+  UpdatedAt extends string = string,
+  Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean =
+    | TimestampOptions<CreatedAt, UpdatedAt>
+    | boolean,
+  Paranoid extends string | boolean = string | boolean,
 > {
+  public database: Sqlite | null;
   public readonly name: DocName;
   public readonly fields: Fields;
   public readonly timestamp: Timestamp | null;
@@ -41,6 +45,7 @@ export class Documents<
     this.fields = options.fields;
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
+    this.database = null;
   }
 
   public infer(): this['_output'] {
