@@ -2,7 +2,7 @@ import type { Column } from '../column';
 import type { DatabaseDialect } from '../database/types';
 import { QueryBuilder } from '../query';
 import type { Dialect } from './constants';
-import type { TableOptions, TimestampOptions } from './types';
+import type { TableOptions, TableOutput, TimestampOptions } from './types';
 import { defineColumns } from './utilities';
 
 export class Table<
@@ -22,6 +22,15 @@ export class Table<
   public readonly columns: Columns;
   public readonly timestamp: Timestamp | null;
   public readonly paranoid: Paranoid | null;
+  public readonly _output!: TableOutput<
+    TableName,
+    Columns,
+    DbDialect,
+    CreatedAt,
+    UpdatedAt,
+    Timestamp,
+    Paranoid
+  >;
 
   private constructor(
     options: TableOptions<
@@ -45,6 +54,10 @@ export class Table<
       // Set dialect for each column
       column.dialect(options.dialect);
     }
+  }
+
+  public infer(): this['_output'] {
+    return null as never;
   }
 
   public static define<
