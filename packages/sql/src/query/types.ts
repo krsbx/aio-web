@@ -317,7 +317,7 @@ export type QueryOutput<
           | typeof QueryType.INSERT
           | typeof QueryType.UPDATE
           | typeof QueryType.DELETE
-      ? InsertUpdateDeleteQueryOutput<TableRef>
+      ? InsertUpdateDeleteQueryOutput<TableRef>[]
       : Type extends typeof QueryType.SELECT
         ? SelectQueryOutput<
             Alias,
@@ -325,6 +325,6 @@ export type QueryOutput<
             JoinedTables,
             Definition,
             AllowedColumn
-          >
+          >[]
         : never
   : never;

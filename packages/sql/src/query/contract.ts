@@ -68,11 +68,7 @@ export interface QueryTransformerContract<
       AllowedColumn,
       StrictAllowedColumn
     >,
-    Output extends This['_output'] extends void
-      ? void
-      : This['_output'][] = This['_output'] extends void
-      ? void
-      : This['_output'][],
+    Output extends This['_output'][] = This['_output'][],
   >(
     this: This
   ): Promise<Output>;
