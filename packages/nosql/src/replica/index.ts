@@ -1,5 +1,8 @@
 import type { ReplicaInstanceMap, ReplicaInstanceType } from './constants';
-import type { DatabaseReplicaBaseConfig, DatabaseReplicaOptions } from './type';
+import type {
+  DatabaseReplicaBaseConfig,
+  DatabaseReplicaOptions,
+} from './types';
 
 export class DatabaseReplica<
   IsPrimary extends boolean,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Database } from 'bun:sqlite';
-import type { Item, KeyValueConfig, RawItem, RawKey } from './type';
+import type { Item, KeyValueConfig, RawItem, RawKey } from './types';
 import { getSql } from './sql';
 
 export class KeyValue {
