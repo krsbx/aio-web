@@ -1,6 +1,7 @@
-import type { createdAt, deletedAt, updatedAt } from './utilities';
+import type { Table } from '.';
 import type { Column } from '../column';
 import type { Dialect } from './constants';
+import type { createdAt, deletedAt, updatedAt } from './utilities';
 
 export interface TimestampOptions<
   CreatedAt extends string,
@@ -63,3 +64,32 @@ export type MergeTimestampParanoid<
           [K in Paranoid]: typeof deletedAt;
         }
       : NonNullable<unknown>);
+
+export type TableOutput<
+  TableName extends string,
+  Columns extends Record<string, Column>,
+  DbDialect extends Dialect,
+  CreatedAt extends string,
+  UpdatedAt extends string,
+  Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
+  Paranoid extends string | boolean,
+  TableRef extends Table<
+    TableName,
+    Columns,
+    DbDialect,
+    CreatedAt,
+    UpdatedAt,
+    Timestamp,
+    Paranoid
+  > = Table<
+    TableName,
+    Columns,
+    DbDialect,
+    CreatedAt,
+    UpdatedAt,
+    Timestamp,
+    Paranoid
+  >,
+> = {
+  [K in keyof TableRef['columns'] & string]: TableRef['columns'][K]['_output'];
+};

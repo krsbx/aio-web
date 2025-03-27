@@ -29,13 +29,14 @@ export class Column<
 > {
   public readonly definition: Definition;
   public readonly type: Options['type'];
-  public readonly length: number | undefined;
+  public readonly length: number | null;
   public readonly enums: readonly Value[];
   public readonly _output!: ValueSelector<Definition, Value>;
 
   private constructor(options: Options) {
     this.type = options.type;
     this.enums = [];
+    this.length = null;
 
     if ('length' in options) {
       this.length = options.length as number;
