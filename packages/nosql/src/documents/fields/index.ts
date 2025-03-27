@@ -22,7 +22,7 @@ export class Field<
     : Options extends ArrayOptions<infer Fields>
       ? Fields
       : never = never,
-  Definition extends Partial<FieldDefinition<Value>> = FieldDefinition<Value>,
+  Definition extends Partial<FieldDefinition<Value>> = NonNullable<unknown>,
 > {
   public readonly type: Options['type'];
   public readonly enums: readonly Value[];
@@ -56,6 +56,30 @@ export class Field<
     }
   }
 
+  public default<
+    FinalValue extends ValueSelector<
+      Options['type'],
+      Values,
+      Options,
+      ColValue,
+      Value,
+      Fields,
+      Definition
+    >,
+  >(value: FinalValue) {
+    this.definition.default = value as unknown as Value;
+
+    return this as unknown as Field<
+      Type,
+      Values,
+      Options,
+      ColValue,
+      Value,
+      Fields,
+      Definition & { default: FinalValue }
+    >;
+  }
+
   public notNull() {
     this.definition.notNull = true;
 
@@ -66,7 +90,7 @@ export class Field<
       ColValue,
       Value,
       Fields,
-      Omit<Definition, 'notNull'> & { notNull: true }
+      Definition & { notNull: true }
     >;
   }
 
