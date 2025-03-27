@@ -12,11 +12,11 @@ export type FieldSelector<
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedTables extends Record<string, Documents<string, Record<string, Field>>>,
 > =
-  | `${Alias}."${keyof DocRef['fields'] & string}"`
+  | `${Alias}.${keyof DocRef['fields'] & string}`
   | `${Alias}.*`
   | {
       [A in keyof JoinedTables]:
-        | `${A & string}."${keyof JoinedTables[A]['fields'] & string}"`
+        | `${A & string}.${keyof JoinedTables[A]['fields'] & string}`
         | `${A & string}.*`;
     }[keyof JoinedTables];
 
@@ -25,9 +25,9 @@ export type StrictFieldSelector<
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
 > =
-  | `${Alias}."${keyof DocRef['fields'] & string}"`
+  | `${Alias}.${keyof DocRef['fields'] & string}`
   | {
-      [A in keyof JoinedDocs]: `${A & string}."${keyof JoinedDocs[A]['fields'] & string}"`;
+      [A in keyof JoinedDocs]: `${A & string}.${keyof JoinedDocs[A]['fields'] & string}`;
     }[keyof JoinedDocs];
 
 export type WhereValue<T extends Field> = {
@@ -45,35 +45,39 @@ export type WhereValue<T extends Field> = {
 };
 
 export type AcceptedOrderBy<Fields extends string> = {
-  column: Fields;
+  field: Fields;
   direction: OrderBy;
 };
 
 type InsertValuesParser<Fields extends Record<string, Field>> = {
-  [ColName in keyof Fields]: {
-    output: Fields[ColName]['_output'];
-    required: Fields[ColName]['definition'] extends { notNull: true }
+  [FieldName in keyof Fields]: {
+    output: Fields[FieldName]['_output'];
+    required: Fields[FieldName]['definition'] extends {
+      notNull: true;
+    }
       ? true
-      : Fields[ColName]['definition'] extends { default: unknown }
-        ? false
-        : true;
+      : Fields[FieldName]['definition'] extends { default: infer Default }
+        ? Default extends NonNullable<Default>
+          ? false
+          : true
+        : false;
   };
 };
 
 type InsertValuesParserRequired<
   Parsed extends InsertValuesParser<Record<string, Field>>,
 > = {
-  [ColName in keyof Parsed as Parsed[ColName]['required'] extends true
-    ? ColName
-    : never]: Parsed[ColName]['output'];
+  [FieldName in keyof Parsed as Parsed[FieldName]['required'] extends true
+    ? FieldName
+    : never]: Parsed[FieldName]['output'];
 };
 
 type InsertValuesParserOptional<
   Parsed extends InsertValuesParser<Record<string, Field>>,
 > = {
-  [ColName in keyof Parsed as Parsed[ColName]['required'] extends false
-    ? ColName
-    : never]?: Parsed[ColName]['output'];
+  [FieldName in keyof Parsed as Parsed[FieldName]['required'] extends false
+    ? FieldName
+    : never]?: Parsed[FieldName]['output'];
 };
 
 export type AcceptedInsertValues<
@@ -86,7 +90,7 @@ export type AcceptedInsertValues<
 > = Array<Required & Optional>;
 
 export type AcceptedUpdateValues<Fields extends Record<string, Field>> = {
-  [ColName in keyof Fields]?: Fields[ColName]['_output'];
+  [FieldName in keyof Fields]?: Fields[FieldName]['_output'];
 };
 
 export type RawField<AllowedField extends string> = AllowedField;

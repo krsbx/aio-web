@@ -46,6 +46,7 @@ export function defineFields<
   >
 ) {
   const fields: Record<string, Field> = {
+    _id,
     ...options.fields,
   };
 

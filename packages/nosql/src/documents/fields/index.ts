@@ -43,7 +43,7 @@ export class Field<
     this.enums = [];
     this.fields = null as unknown as Fields;
     this.definition = {
-      default: null,
+      default: undefined,
       notNull: false,
     } as Definition;
 
