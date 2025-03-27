@@ -1,5 +1,6 @@
 import type { Database as Sqlite } from 'bun:sqlite';
 import type { Field } from '../fields';
+import { QueryBuilder } from '../query';
 import type {
   DocumentOptions,
   DocumentOutput,
@@ -46,6 +47,10 @@ export class Documents<
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
     this.database = null;
+  }
+
+  public query() {
+    return new QueryBuilder(this).alias(this.name);
   }
 
   public infer(): this['_output'] {

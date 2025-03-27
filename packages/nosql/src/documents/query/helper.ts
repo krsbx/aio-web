@@ -2,6 +2,7 @@ import { QueryBuilder } from '.';
 import { deepClone } from '../../utilities';
 import type { Documents } from '../documents';
 import type { Field } from '../fields';
+import type { AggregationFunction } from './constants';
 import type {
   FieldSelector,
   QueryDefinition,
@@ -59,4 +60,61 @@ export function clone<
   Object.assign(query.definition, deepClone(this.definition));
 
   return query;
+}
+
+export function rawCol<
+  StrictAllowedField extends string,
+  FieldName extends StrictAllowedField = StrictAllowedField,
+>(field: FieldName) {
+  return field;
+}
+
+export function col<
+  StrictAllowedField extends string,
+  FieldName extends StrictAllowedField = StrictAllowedField,
+  FieldAlias extends string = string,
+>(field: FieldName, alias: FieldAlias) {
+  return {
+    field,
+    as: alias,
+  } as const;
+}
+
+export function aggregateCol<
+  StrictAllowedField extends string,
+  Aggregate extends AggregationFunction = AggregationFunction,
+  FieldName extends StrictAllowedField = StrictAllowedField,
+>(
+  fn: Aggregate,
+  field: FieldName
+): {
+  field: FieldName;
+  as: Lowercase<Aggregate>;
+  fn: Aggregate;
+};
+export function aggregateCol<
+  StrictAllowedField extends string,
+  Aggregate extends AggregationFunction = AggregationFunction,
+  FieldName extends StrictAllowedField = StrictAllowedField,
+  FieldAlias extends string = string,
+>(
+  fn: Aggregate,
+  field: FieldName,
+  alias: FieldAlias
+): {
+  field: FieldName;
+  as: FieldAlias;
+  fn: Aggregate;
+};
+export function aggregateCol<
+  StrictAllowedField extends string,
+  Aggregate extends AggregationFunction = AggregationFunction,
+  FieldName extends StrictAllowedField = StrictAllowedField,
+  FieldAlias extends string = string,
+>(fn: Aggregate, field: FieldName, alias?: FieldAlias) {
+  return {
+    field,
+    as: alias ?? fn.toLowerCase(),
+    fn,
+  };
 }
