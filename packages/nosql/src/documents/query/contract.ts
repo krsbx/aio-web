@@ -64,9 +64,14 @@ export interface QueryTransformerContract<
       AllowedField,
       StrictAllowedField
     >,
+    Output extends This['_output'] extends void
+      ? void
+      : This['_output'][] = This['_output'] extends void
+      ? void
+      : This['_output'][],
   >(
     this: This
-  ): Promise<This['_output']>;
+  ): Promise<Output>;
 
   clone(
     this: QueryBuilder<

@@ -162,18 +162,18 @@ type InferAliasedField<
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
 > = Current extends {
-  column: `${infer DocAlias}.${infer FIeldName}`;
+  column: `${infer DocAlias}.${infer FieldName}`;
   as: `${infer ColAlias}`;
 }
   ? DocAlias extends keyof JoinedDocs
     ? {
         [T in DocAlias]: {
-          [K in ColAlias]: JoinedDocs[T]['fields'][FIeldName]['_output'];
+          [K in ColAlias]: JoinedDocs[T]['fields'][FieldName]['_output'];
         };
       }
     : DocAlias extends Alias | DocRef['name']
       ? {
-          [K in FIeldName as ColAlias]: DocRef['fields'][K]['_output'];
+          [K in FieldName as ColAlias]: DocRef['fields'][K]['_output'];
         }
       : NonNullable<unknown>
   : NonNullable<unknown>;
@@ -183,20 +183,20 @@ type InferRawField<
   Alias extends string,
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
-> = Current extends `${infer DocAlias}.${infer FIeldName}`
+> = Current extends `${infer DocAlias}.${infer FieldName}`
   ? DocAlias extends keyof JoinedDocs
     ? {
         [T in DocAlias]: {
-          [K in FIeldName]: JoinedDocs[T]['fields'][K]['_output'];
+          [K in FieldName]: JoinedDocs[T]['fields'][K]['_output'];
         };
       }
     : DocAlias extends Alias | DocRef['name']
       ? {
-          [K in FIeldName]: DocRef['fields'][K]['_output'];
+          [K in FieldName]: DocRef['fields'][K]['_output'];
         }
       : NonNullable<unknown>
-  : Current extends `${infer DocAlias}.${infer FIeldName}`
-    ? FIeldName extends '*'
+  : Current extends `${infer DocAlias}.${infer FieldName}`
+    ? FieldName extends '*'
       ? DocAlias extends keyof JoinedDocs
         ? {
             [T in DocAlias]: {
@@ -237,7 +237,7 @@ type InferAggregateField<
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
 > = Current extends {
-  column: `${infer DocAlias}.${infer FIeldName}`;
+  column: `${infer DocAlias}.${infer FieldName}`;
   as: `${infer ColAlias}`;
   fn?: AggregationFunction;
 }
@@ -245,13 +245,13 @@ type InferAggregateField<
     ? {
         [T in DocAlias]: {
           [K in ColAlias]:
-            | JoinedDocs[T]['fields'][FIeldName]['_output']
+            | JoinedDocs[T]['fields'][FieldName]['_output']
             | number;
         };
       }
     : DocAlias extends Alias | DocRef['name']
       ? {
-          [K in FIeldName as ColAlias]: DocRef['fields'][K]['_output'] | number;
+          [K in FieldName as ColAlias]: DocRef['fields'][K]['_output'] | number;
         }
       : NonNullable<unknown>
   : NonNullable<unknown>;
@@ -312,8 +312,14 @@ export type QueryOutput<
           | typeof QueryType.INSERT
           | typeof QueryType.UPDATE
           | typeof QueryType.DELETE
-      ? InsertUpdateDeleteQueryOutput<DocRef>
+      ? InsertUpdateDeleteQueryOutput<DocRef>[]
       : Type extends typeof QueryType.SELECT
-        ? SelectQueryOutput<Alias, DocRef, JoinedDocs, Definition, AllowedField>
+        ? SelectQueryOutput<
+            Alias,
+            DocRef,
+            JoinedDocs,
+            Definition,
+            AllowedField
+          >[]
         : never
   : never;
