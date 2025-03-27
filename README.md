@@ -1,15 +1,29 @@
-# aio-web
+# Ignisia
 
-To install dependencies:
+An all-in-one tooling for your web development needs. Everything you need in one place, built with most of [**Bun**](https://bun.sh) internal modules unless otherwise specified.
 
-```bash
-bun install
-```
+## Features
 
-To run:
+- [x] [@ignisia/sql]('./packages/sql')
 
-```bash
-bun run index.ts
-```
+> SQL Database Query Builder for [**Bun**](https://bun.sh) SQL and SQLite.
 
-This project was created using `bun init` in bun v1.2.4. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+- [x] [@ignisia/nosql]('./packages/nosql')
+
+> NoSQL Database Query Builder for [**Bun**](https://bun.sh), built on top of [**SQLite**](https://sqlite.org/).
+
+- [ ] [@ignisia/storage]('./packages/storage')
+
+> Bun File Storage adapter, built on top of Bun File System and S3.
+
+- [ ] [@ignisia/web]('./packages/web')
+
+> Web Framework built on top of [**Bun**](https://bun.sh) HTTP Server and WebSocket Server.
+
+## Plan
+
+- [ ] Add support for replica-set mechanism for the NoSQL adapters.
+
+- [ ] Add support for password protected database for the NoSQL adapters.
+
+- [ ] Add support for password protected database for the SQL (SQLite) adapters.
