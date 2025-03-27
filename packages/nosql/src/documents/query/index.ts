@@ -1,18 +1,28 @@
+import { randomUUIDv7 } from 'bun';
 import type { Documents } from '../documents';
 import type { Field } from '../fields';
-import { AcceptedJoin } from './constants';
-import type { QueryTransformerContract } from './contract';
-import { aggregateCol, alias, clone } from './helper';
-import { addJoin } from './join';
+import { having, or, rawHaving, rawOr, rawWhere, where } from './condition';
+import { AcceptedJoin, QueryType } from './constants';
 import type {
+  QueryConditionContract,
+  QueryTransformerContract,
+} from './contract';
+import { aggregateCol, alias, clone, col } from './helper';
+import { addJoin } from './join';
+import { exec, toQuery, toString } from './sql';
+import type {
+  AcceptedInsertValues,
   AcceptedOrderBy,
+  AcceptedUpdateValues,
   AggregateField,
   AliasedField,
   FieldSelector,
   QueryDefinition,
+  QueryOutput,
   RawField,
   StrictFieldSelector,
 } from './types';
+import { getParanoid, getTimestamp } from './utilities';
 
 export class QueryBuilder<
   Alias extends string,
@@ -37,6 +47,13 @@ export class QueryBuilder<
 > {
   public readonly doc: DocRef;
   public readonly definition: Definition;
+  public readonly _output!: QueryOutput<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField
+  >;
 
   public alias: QueryTransformerContract<
     Alias,
@@ -54,6 +71,97 @@ export class QueryBuilder<
     AllowedField,
     StrictAllowedField
   >['clone'];
+  public exec: QueryTransformerContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['exec'];
+
+  public toQuery: QueryTransformerContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['toQuery'];
+  public toString: QueryTransformerContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['toString'];
+
+  public rawWhere: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['rawWhere'];
+  public rawAnd: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['rawWhere'];
+  public rawOr: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['rawOr'];
+  public rawHaving: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['rawHaving'];
+
+  public where: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['where'];
+  public and: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['where'];
+  public or: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['or'];
+  public having: QueryConditionContract<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField,
+    StrictAllowedField
+  >['having'];
 
   constructor(doc: DocRef) {
     this.doc = doc;
@@ -79,13 +187,29 @@ export class QueryBuilder<
 
     this.alias = alias.bind(this) as this['alias'];
     this.clone = clone.bind(this) as this['clone'];
+
+    this.toQuery = toQuery.bind(this) as this['toQuery'];
+    this.toString = toString.bind(this) as this['toString'];
+    this.exec = exec.bind(this) as unknown as this['exec'];
+
+    this.rawWhere = rawWhere.bind(this) as this['rawWhere'];
+    this.rawHaving = rawHaving.bind(this) as this['rawHaving'];
+
+    this.rawAnd = this.rawWhere;
+    this.rawOr = rawOr.bind(this) as this['rawOr'];
+
+    this.where = where.bind(this) as this['where'];
+    this.having = having.bind(this) as this['having'];
+
+    this.and = this.where as this['and'];
+    this.or = or.bind(this) as this['or'];
   }
 
   public leftJoin<
     JoinDoc extends Documents<string, Record<string, Field>>,
     JoinAlias extends string,
-    BaseColName extends `${keyof DocRef['fields'] & string}`,
-    JoinColName extends `${keyof JoinDoc['fields'] & string}`,
+    BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
+    JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
   >(
     joinDoc: JoinDoc,
     alias: JoinAlias,
@@ -105,8 +229,8 @@ export class QueryBuilder<
   public rightJoin<
     JoinDoc extends Documents<string, Record<string, Field>>,
     JoinAlias extends string,
-    BaseColName extends `${keyof DocRef['fields'] & string}`,
-    JoinColName extends `${keyof JoinDoc['fields'] & string}`,
+    BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
+    JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
   >(
     joinDoc: JoinDoc,
     alias: JoinAlias,
@@ -126,8 +250,8 @@ export class QueryBuilder<
   public innerJoin<
     JoinDoc extends Documents<string, Record<string, Field>>,
     JoinAlias extends string,
-    BaseColName extends `${keyof DocRef['fields'] & string}`,
-    JoinColName extends `${keyof JoinDoc['fields'] & string}`,
+    BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
+    JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
   >(
     joinDoc: JoinDoc,
     alias: JoinAlias,
@@ -147,8 +271,8 @@ export class QueryBuilder<
   public naturalJoin<
     JoinDoc extends Documents<string, Record<string, Field>>,
     JoinAlias extends string,
-    BaseColName extends `${keyof DocRef['fields'] & string}`,
-    JoinColName extends `${keyof JoinDoc['fields'] & string}`,
+    BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
+    JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
   >(
     joinDoc: JoinDoc,
     alias: JoinAlias,
@@ -267,5 +391,154 @@ export class QueryBuilder<
       JoinedDocs,
       Omit<Definition, 'withDeleted'> & { withDeleted: true }
     >;
+  }
+
+  public select<
+    Base extends Definition['baseAlias'] extends string
+      ? Definition['baseAlias']
+      : DocRef['name'],
+    Fields extends DocRef['fields'],
+  >(): QueryBuilder<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Omit<Definition, 'queryType' | 'select'> & {
+      queryType: typeof QueryType.SELECT;
+      select: Array<`${Base}.${keyof Fields & string}`>;
+    }
+  >;
+  public select<
+    Fields extends Array<
+      | RawField<AllowedField>
+      | ((c: typeof col) => AliasedField<AllowedField, string>)
+    >,
+  >(
+    ...columns: Fields
+  ): QueryBuilder<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    Omit<Definition, 'queryType' | 'select'> & {
+      queryType: typeof QueryType.SELECT;
+      select: {
+        [K in keyof Fields]: Fields[K] extends (col: never) => infer R
+          ? R
+          : Fields[K];
+      };
+    }
+  >;
+  public select(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...columns: any[]
+  ) {
+    if (!columns.length) {
+      const base = this.definition.baseAlias ?? this.doc.name;
+
+      columns = Object.keys(this.doc.fields).map(
+        (colName) => `${base}.${colName}`
+      );
+    } else {
+      columns = columns.map((column) => {
+        if (typeof column === 'function') {
+          return column(col);
+        }
+
+        return column;
+      });
+    }
+
+    this.definition.select = columns;
+    this.definition.queryType = QueryType.SELECT;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this as any;
+  }
+
+  public insert(...values: AcceptedInsertValues<DocRef['fields']>) {
+    this.definition.queryType = QueryType.INSERT;
+
+    if (!this.definition.insertValues) this.definition.insertValues = [];
+
+    const { isWithTimestamp, createdAt, updatedAt, timestamp } = getTimestamp(
+      this.doc
+    );
+
+    values = values.map((row) => ({
+      ...row,
+      _id: (row as { _id?: string })._id ?? randomUUIDv7(),
+    }));
+
+    if (isWithTimestamp) {
+      values = values.map((row) => ({
+        ...row,
+        [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
+        [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
+      })) as AcceptedInsertValues<DocRef['fields']>;
+    }
+
+    this.definition.insertValues = values as AcceptedInsertValues<
+      DocRef['fields']
+    >;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Omit<Definition, 'queryType' | 'insertValues'> & {
+        queryType: typeof QueryType.INSERT;
+        insertValues: AcceptedInsertValues<DocRef['fields']>;
+      }
+    >;
+  }
+
+  public update<Values extends AcceptedUpdateValues<DocRef['fields']>>(
+    values: Values
+  ) {
+    const { isWithTimestamp, updatedAt, timestamp } = getTimestamp(this.doc);
+
+    if (isWithTimestamp) {
+      values = {
+        ...values,
+        [updatedAt]: values[updatedAt as keyof typeof values] ?? timestamp,
+      };
+    }
+
+    this.definition.queryType = QueryType.UPDATE;
+    this.definition.updateValues = values;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Omit<Definition, 'queryType' | 'updateValues'> & {
+        queryType: typeof QueryType.UPDATE;
+        updateValues: Values;
+      }
+    >;
+  }
+
+  public delete() {
+    const { isWithParanoid, deletedAt, timestamp } = getParanoid(this.doc);
+
+    if (isWithParanoid) {
+      return this.update({
+        [deletedAt]: timestamp,
+      } as AcceptedUpdateValues<DocRef['fields']>);
+    }
+
+    this.definition.queryType = QueryType.DELETE;
+
+    return this as unknown as QueryBuilder<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Omit<Definition, 'queryType'> & { queryType: typeof QueryType.DELETE }
+    >;
+  }
+
+  public infer(): this['_output'] {
+    return null as never;
   }
 }

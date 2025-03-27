@@ -1,3 +1,4 @@
+import type { UnionToIntersection } from '../../types';
 import type { Documents } from '../documents';
 import type { Field } from '../fields';
 import type {
@@ -10,15 +11,15 @@ import type {
 export type FieldSelector<
   Alias extends string,
   DocRef extends Documents<string, Record<string, Field>>,
-  JoinedTables extends Record<string, Documents<string, Record<string, Field>>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
 > =
   | `${Alias}.${keyof DocRef['fields'] & string}`
   | `${Alias}.*`
   | {
-      [A in keyof JoinedTables]:
-        | `${A & string}.${keyof JoinedTables[A]['fields'] & string}`
+      [A in keyof JoinedDocs]:
+        | `${A & string}.${keyof JoinedDocs[A]['fields'] & string}`
         | `${A & string}.*`;
-    }[keyof JoinedTables];
+    }[keyof JoinedDocs];
 
 export type StrictFieldSelector<
   Alias extends string,
@@ -148,3 +149,171 @@ export interface QueryDefinition<
   withDeleted: boolean | null;
   joinedDocs: JoinedDocs | null;
 }
+
+type InsertUpdateDeleteQueryOutput<
+  DocRef extends Documents<string, Record<string, Field>>,
+> = {
+  [K in keyof DocRef['fields']]: DocRef['fields'][K]['_output'];
+};
+
+type InferAliasedField<
+  Current extends AliasedField<string, string>,
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+> = Current extends {
+  column: `${infer DocAlias}.${infer FIeldName}`;
+  as: `${infer ColAlias}`;
+}
+  ? DocAlias extends keyof JoinedDocs
+    ? {
+        [T in DocAlias]: {
+          [K in ColAlias]: JoinedDocs[T]['fields'][FIeldName]['_output'];
+        };
+      }
+    : DocAlias extends Alias | DocRef['name']
+      ? {
+          [K in FIeldName as ColAlias]: DocRef['fields'][K]['_output'];
+        }
+      : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+type InferRawField<
+  Current extends string,
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+> = Current extends `${infer DocAlias}.${infer FIeldName}`
+  ? DocAlias extends keyof JoinedDocs
+    ? {
+        [T in DocAlias]: {
+          [K in FIeldName]: JoinedDocs[T]['fields'][K]['_output'];
+        };
+      }
+    : DocAlias extends Alias | DocRef['name']
+      ? {
+          [K in FIeldName]: DocRef['fields'][K]['_output'];
+        }
+      : NonNullable<unknown>
+  : Current extends `${infer DocAlias}.${infer FIeldName}`
+    ? FIeldName extends '*'
+      ? DocAlias extends keyof JoinedDocs
+        ? {
+            [T in DocAlias]: {
+              [K in keyof JoinedDocs[T]['fields']]: JoinedDocs[T]['fields'][K]['_output'];
+            };
+          }
+        : DocAlias extends Alias | DocRef['name']
+          ? {
+              [K in keyof DocRef['fields']]: DocRef['fields'][K]['_output'];
+            }
+          : NonNullable<unknown>
+      : NonNullable<unknown>
+    : NonNullable<unknown>;
+
+type InferSelectQueryOutput<
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
+  AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
+> = Definition extends { select: infer Select }
+  ? Select extends Array<SelectableField<AllowedField>>
+    ? UnionToIntersection<
+        Select[number] extends infer Col
+          ? Col extends RawField<AllowedField>
+            ? InferRawField<Col, Alias, DocRef, JoinedDocs>
+            : Col extends AliasedField<AllowedField>
+              ? InferAliasedField<Col, Alias, DocRef, JoinedDocs>
+              : NonNullable<unknown>
+          : NonNullable<unknown>
+      >
+    : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+type InferAggregateField<
+  Current extends AggregateField<string>,
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+> = Current extends {
+  column: `${infer DocAlias}.${infer FIeldName}`;
+  as: `${infer ColAlias}`;
+  fn?: AggregationFunction;
+}
+  ? DocAlias extends keyof JoinedDocs
+    ? {
+        [T in DocAlias]: {
+          [K in ColAlias]:
+            | JoinedDocs[T]['fields'][FIeldName]['_output']
+            | number;
+        };
+      }
+    : DocAlias extends Alias | DocRef['name']
+      ? {
+          [K in FIeldName as ColAlias]: DocRef['fields'][K]['_output'] | number;
+        }
+      : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+type InferAggregateQueryOutput<
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
+  AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
+> = Definition extends { aggregates: infer Aggregates }
+  ? Aggregates extends Array<AggregateField<AllowedField>>
+    ? UnionToIntersection<
+        Aggregates[number] extends infer Col
+          ? Col extends RawField<AllowedField>
+            ? InferRawField<Col, Alias, DocRef, JoinedDocs>
+            : Col extends AliasedField<AllowedField>
+              ? InferAliasedField<Col, Alias, DocRef, JoinedDocs>
+              : Col extends AggregateField<AllowedField>
+                ? InferAggregateField<Col, Alias, DocRef, JoinedDocs>
+                : NonNullable<unknown>
+          : NonNullable<unknown>
+      >
+    : NonNullable<unknown>
+  : NonNullable<unknown>;
+
+export type SelectQueryOutput<
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
+  AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
+> = InferSelectQueryOutput<
+  Alias,
+  DocRef,
+  JoinedDocs,
+  Definition,
+  AllowedField
+> &
+  InferAggregateQueryOutput<
+    Alias,
+    DocRef,
+    JoinedDocs,
+    Definition,
+    AllowedField
+  >;
+
+export type QueryOutput<
+  Alias extends string,
+  DocRef extends Documents<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
+  AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
+> = Definition extends { queryType: infer Type }
+  ? Type extends null
+    ? never
+    : Type extends
+          | typeof QueryType.INSERT
+          | typeof QueryType.UPDATE
+          | typeof QueryType.DELETE
+      ? InsertUpdateDeleteQueryOutput<DocRef>
+      : Type extends typeof QueryType.SELECT
+        ? SelectQueryOutput<Alias, DocRef, JoinedDocs, Definition, AllowedField>
+        : never
+  : never;
