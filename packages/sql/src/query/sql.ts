@@ -168,23 +168,19 @@ export async function exec<
     AllowedColumn,
     StrictAllowedColumn
   >,
-  Output extends Query['_output'] extends void ? void : Query['_output'][],
+  Output extends Query['_output'][] = Query['_output'][],
 >(this: Query) {
   if (!this.table.database) throw new Error('Database client not defined');
 
   const { query, params } = this.toQuery();
 
-  const result = await this.table.database.exec(query, params);
+  const result = await this.table.database.exec<Output>(query, params);
 
-  if (Array.isArray(result)) {
-    return result.map((r) =>
-      parseAliasedRow({
-        row: r,
-        selects: this.definition.select ?? [],
-        root: this.definition?.baseAlias ?? this.table.name,
-      })
-    ) as Output;
-  }
-
-  return [] as Output;
+  return result.map((r) =>
+    parseAliasedRow({
+      row: r,
+      selects: this.definition.select ?? [],
+      root: this.definition?.baseAlias ?? this.table.name,
+    })
+  ) as Output;
 }
