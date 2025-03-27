@@ -162,7 +162,7 @@ type InferAliasedField<
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
 > = Current extends {
-  column: `${infer DocAlias}.${infer FieldName}`;
+  field: `${infer DocAlias}.${infer FieldName}`;
   as: `${infer ColAlias}`;
 }
   ? DocAlias extends keyof JoinedDocs
@@ -237,7 +237,7 @@ type InferAggregateField<
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
 > = Current extends {
-  column: `${infer DocAlias}.${infer FieldName}`;
+  field: `${infer DocAlias}.${infer FieldName}`;
   as: `${infer ColAlias}`;
   fn?: AggregationFunction;
 }
