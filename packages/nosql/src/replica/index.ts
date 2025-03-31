@@ -13,7 +13,9 @@ export class DatabaseReplica<
   public readonly type: Type | null;
   public readonly instance: Instance | null;
 
-  constructor(options: DatabaseReplicaOptions<IsPrimary, Type, Instance>) {
+  private constructor(
+    options: DatabaseReplicaOptions<IsPrimary, Type, Instance>
+  ) {
     this.isPrimary = options.isPrimary;
 
     if (!this.isPrimary) {
