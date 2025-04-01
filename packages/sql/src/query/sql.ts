@@ -168,7 +168,7 @@ export async function exec<
     AllowedColumn,
     StrictAllowedColumn
   >,
-  Output extends Query['_output'][] = Query['_output'][],
+  Output extends Query['_output'] = Query['_output'],
 >(this: Query) {
   if (!this.table.database) throw new Error('Database client not defined');
 

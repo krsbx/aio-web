@@ -146,7 +146,7 @@ export function toString<
   return this.toQuery().query;
 }
 
-export function exec<
+export async function exec<
   Alias extends string,
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
@@ -161,7 +161,7 @@ export function exec<
     AllowedField,
     StrictAllowedField
   >,
-  Output extends Query['_output'] extends void ? void : Query['_output'][],
+  Output extends Query['_output'] = Query['_output'],
 >(this: Query) {
   if (!this.doc.database) throw new Error('Database client not defined');
 
