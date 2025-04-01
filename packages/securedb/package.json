@@ -1,0 +1,13 @@
+{
+  "name": "@ignisia/securedb",
+  "module": "src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@ignisia/sql": "workspace:*",
+    "@ignisia/nosql": "workspace:*",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
