@@ -8,7 +8,7 @@ export async function build(source: string) {
   await tsup({
     splitting: false,
     entryPoints: [resolve(source, 'src/**/*.ts')],
-    external: ['bun', 'bun:*'],
+    external: ['bun', 'bun:sqlite'],
     format: ['esm'],
     outDir: 'dist',
     minify: false,
