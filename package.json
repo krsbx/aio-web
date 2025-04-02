@@ -23,7 +23,7 @@
   ],
   "dependencies": {},
   "scripts": {
-    "build": "bun run --filter \"*\" build",
+    "build": "bun run bin/build.ts",
     "cleanup": "bun run bin/cleanup.ts",
     "prepare": "husky"
   },
