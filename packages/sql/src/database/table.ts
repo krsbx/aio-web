@@ -8,7 +8,7 @@ import type { DatabaseDefinition } from './types';
 export async function createTable<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends string,
   Columns extends Record<string, Column>,
   CreatedAt extends string,
@@ -51,14 +51,8 @@ export async function createTable<
 
   table.database = this.client;
 
-  if (!this.defintion.tables) {
-    this.defintion.tables = {} as Tables;
-  }
-
-  this.defintion.tables = {
-    ...this.defintion.tables,
-    [tableName]: table,
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (this.tables as any)[tableName] = table;
 
   // Create the table
   if (!this?.client) {
@@ -71,19 +65,13 @@ export async function createTable<
 
   await table.create(this.client);
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Definition & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function renameTable<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   OldName extends (keyof Tables & string) | (string & {}),
   NewName extends string,
   NewTables extends Omit<Tables, OldName> & {
@@ -96,45 +84,29 @@ export async function renameTable<
 ) {
   await this.client.exec(`ALTER TABLE ${oldName} RENAME TO ${newName};`);
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (this.defintion.tables as any)[newName] = this.defintion.tables[oldName];
+  (this.tables as any)[newName] = this.tables[oldName];
 
-  delete this.defintion.tables[oldName];
+  delete this.tables[oldName];
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function dropTable<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
 >(this: Database<DbDialect, Tables, Definition>, tableName: TableName) {
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-  if (!this.defintion.tables[tableName]) {
+  if (!this.tables[tableName]) {
     await this.client.exec(`DROP TABLE IF EXISTS ${tableName as string};`);
 
     return this;
   }
 
-  await this.defintion.tables[tableName].drop(this.client);
+  await this.tables[tableName].drop(this.client);
 
-  delete this.defintion.tables[tableName];
+  delete this.tables[tableName];
 
-  return this as Database<
-    DbDialect,
-    Omit<Tables, TableName>,
-    Definition & {
-      tables: Omit<Tables, TableName>;
-    }
-  >;
+  return this as Database<DbDialect, Omit<Tables, TableName>, Definition>;
 }

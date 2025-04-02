@@ -7,7 +7,7 @@ import type { DatabaseDefinition } from './types';
 export async function addColumn<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   NewTables extends Omit<Tables, TableName> & {
@@ -28,25 +28,17 @@ export async function addColumn<
     `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${column.toString()};`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
+  if (!this.tables[tableName]) return this;
 
-  if (!this.defintion.tables[tableName]) return this;
+  this.tables[tableName].columns[columnName] = column;
 
-  this.defintion.tables[tableName].columns[columnName] = column;
-
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function renameColumn<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   OldName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   NewName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
@@ -72,28 +64,20 @@ export async function renameColumn<
     `ALTER TABLE ${tableName} RENAME COLUMN ${oldName} TO ${newName};`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
+  if (!this.tables[tableName]) return this;
 
-  if (!this.defintion.tables[tableName]) return this;
+  this.tables[tableName].columns[newName] =
+    this.tables[tableName].columns[oldName];
 
-  this.defintion.tables[tableName].columns[newName] =
-    this.defintion.tables[tableName].columns[oldName];
+  delete this.tables[tableName].columns[oldName];
 
-  delete this.defintion.tables[tableName].columns[oldName];
-
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function dropColumn<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   NewTables extends Omit<Tables, TableName> & {
@@ -111,19 +95,11 @@ export async function dropColumn<
     throw new Error('SQLite does not support DROP COLUMN natively.');
   }
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
   await this.client.exec(`ALTER TABLE ${tableName} DROP COLUMN ${columnName};`);
 
-  if (!this.defintion.tables[tableName]) return this;
+  if (!this.tables[tableName]) return this;
 
-  delete this.defintion.tables[tableName].columns[columnName];
+  delete this.tables[tableName].columns[columnName];
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }

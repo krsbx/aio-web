@@ -10,8 +10,8 @@ export interface TableAlterationContract<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<
-    DatabaseDefinition<DbDialect, Tables>
-  > = DatabaseDefinition<DbDialect, Tables>,
+    DatabaseDefinition<DbDialect>
+  > = DatabaseDefinition<DbDialect>,
 > {
   createTable<
     TableName extends string,
@@ -45,15 +45,7 @@ export interface TableAlterationContract<
       paranoid?: Paranoid;
       timestamp?: Timestamp;
     }
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   renameTable<
     OldName extends (keyof Tables & string) | (string & {}),
@@ -74,23 +66,15 @@ export interface TableAlterationContract<
 
   dropTable<TableName extends (keyof Tables & string) | (string & {})>(
     tableName: TableName
-  ): Promise<
-    Database<
-      DbDialect,
-      Omit<Tables, TableName>,
-      Omit<Definition, 'tables'> & {
-        tables: Omit<Tables, TableName>;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, Omit<Tables, TableName>, Definition>>;
 }
 
 export interface ColumnAlterationContract<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<
-    DatabaseDefinition<DbDialect, Tables>
-  > = DatabaseDefinition<DbDialect, Tables>,
+    DatabaseDefinition<DbDialect>
+  > = DatabaseDefinition<DbDialect>,
 > {
   addColumn<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -109,15 +93,7 @@ export interface ColumnAlterationContract<
     tableName: TableName,
     columnName: ColName,
     column: Column
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   renameColumn<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -139,15 +115,7 @@ export interface ColumnAlterationContract<
     tableName: TableName,
     oldName: OldName,
     newName: NewName
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   dropColumn<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -163,15 +131,7 @@ export interface ColumnAlterationContract<
   >(
     tableName: TableName,
     columnName: ColName
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   alterColumnType<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -193,15 +153,7 @@ export interface ColumnAlterationContract<
     tableName: TableName,
     columnName: ColName,
     newType: Type
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   setColumnDefault<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -231,15 +183,7 @@ export interface ColumnAlterationContract<
     tableName: TableName,
     columnName: ColName,
     value: DefaultValue
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   dropColumnDefault<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -267,15 +211,7 @@ export interface ColumnAlterationContract<
   >(
     tableName: TableName,
     columnName: ColName
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   setColumnNotNull<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -303,15 +239,7 @@ export interface ColumnAlterationContract<
   >(
     tableName: TableName,
     columnName: ColName
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 
   dropColumnNotNull<
     TableName extends (keyof Tables & string) | (string & {}),
@@ -337,13 +265,5 @@ export interface ColumnAlterationContract<
   >(
     tableName: TableName,
     columnName: ColName
-  ): Promise<
-    Database<
-      DbDialect,
-      NewTables,
-      Omit<Definition, 'tables'> & {
-        tables: NewTables;
-      }
-    >
-  >;
+  ): Promise<Database<DbDialect, NewTables, Definition>>;
 }

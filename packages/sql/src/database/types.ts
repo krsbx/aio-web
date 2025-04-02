@@ -25,12 +25,11 @@ export interface DatabaseOptions<
   tables?: Tables;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseDefinition<
   DbDialect extends Dialect,
-  Tables extends Record<string, Table<string, Record<string, Column>>>,
-> extends DatabaseOptions<DbDialect, Tables> {
-  tables: Tables;
-}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+> extends Omit<DatabaseOptions<DbDialect, any>, 'tables'> {}
 
 export interface DatabaseDialect {
   status: 'connecting' | 'connected' | 'disconnected';
