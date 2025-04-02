@@ -27,11 +27,12 @@ export class Database<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
   Definition extends Partial<
-    DatabaseDefinition<DbDialect, Tables>
-  > = DatabaseDefinition<DbDialect, Tables>,
+    DatabaseDefinition<DbDialect>
+  > = DatabaseDefinition<DbDialect>,
 > {
   public readonly dialect: DbDialect;
   public readonly defintion: Definition;
+  public readonly tables: Tables;
   public readonly client: DatabaseDialect;
 
   public createTable: TableAlterationContract<
@@ -96,10 +97,10 @@ export class Database<
 
   private constructor(options: DatabaseOptions<DbDialect, Tables>) {
     this.dialect = options.dialect;
+    this.tables = options.tables ?? ({} as Tables);
     this.defintion = {
       dialect: options.dialect,
       config: options.config,
-      tables: options.tables ?? {},
     } as unknown as Definition;
 
     this.client =
@@ -144,11 +145,11 @@ export class Database<
     TableName extends keyof Tables & string,
     Table extends Tables[TableName],
   >(tableName: TableName) {
-    if (!this.defintion.tables || !this.defintion.tables[tableName]) {
+    if (!this.tables[tableName]) {
       throw new Error(`Table ${tableName as string} does not exist`);
     }
 
-    const table = this.defintion.tables[tableName];
+    const table = this.tables[tableName];
 
     // Fix the type
     return table.query() as unknown as QueryBuilder<TableName, Table>;

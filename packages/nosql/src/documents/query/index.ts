@@ -190,7 +190,7 @@ export class QueryBuilder<
 
     this.toQuery = toQuery.bind(this) as this['toQuery'];
     this.toString = toString.bind(this) as this['toString'];
-    this.exec = exec.bind(this) as unknown as this['exec'];
+    this.exec = exec.bind(this) as this['exec'];
 
     this.rawWhere = rawWhere.bind(this) as this['rawWhere'];
     this.rawHaving = rawHaving.bind(this) as this['rawHaving'];

@@ -8,7 +8,7 @@ import type { DatabaseDefinition } from './types';
 export async function alterColumnType<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   Type extends Omit<AcceptedColumnTypes, typeof AcceptedColumnTypes.ENUM>,
@@ -36,26 +36,18 @@ export async function alterColumnType<
     `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} TYPE ${newType}`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-  if (!this.defintion.tables[tableName]) return this;
+  if (!this.tables[tableName]) return this;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (this.defintion.tables as any)[tableName].columns[columnName].type = newType;
+  (this.tables as any)[tableName].columns[columnName].type = newType;
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function setColumnDefault<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   DefaultValue extends string | number | boolean | null,
@@ -91,37 +83,27 @@ export async function setColumnDefault<
     `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DEFAULT ${value}`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-  if (!this.defintion.tables[tableName]) return this;
+  if (!this.tables[tableName]) return this;
 
   if (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !(this.defintion.tables as any)[tableName].columns[columnName].definition
+    !(this.tables as any)[tableName].columns[columnName].definition
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.defintion.tables as any)[tableName].columns[columnName].definition =
-      {};
+    (this.tables as any)[tableName].columns[columnName].definition = {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (this.defintion.tables as any)[tableName].columns[
-    columnName
-  ].definition.default = value;
+  (this.tables as any)[tableName].columns[columnName].definition.default =
+    value;
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function dropColumnDefault<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   NewTables extends Omit<Tables, TableName> & {
@@ -155,36 +137,26 @@ export async function dropColumnDefault<
     `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP DEFAULT`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-  if (!this.defintion.tables[tableName]) return this;
+  if (!this.tables[tableName]) return this;
 
   if (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !(this.defintion.tables as any)[tableName].columns[columnName].definition
+    !(this.tables as any)[tableName].columns[columnName].definition
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.defintion.tables as any)[tableName].columns[columnName].definition =
-      {};
+    (this.tables as any)[tableName].columns[columnName].definition = {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (this.defintion.tables as any)[tableName].columns[columnName]
-    .definition.default;
+  delete (this.tables as any)[tableName].columns[columnName].definition.default;
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function setColumnNotNull<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   NewTables extends Omit<Tables, TableName> & {
@@ -220,37 +192,26 @@ export async function setColumnNotNull<
     `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET NOT NULL`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-  if (!this.defintion.tables[tableName]) return this;
+  if (!this.tables[tableName]) return this;
 
   if (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !(this.defintion.tables as any)[tableName].columns[columnName].definition
+    !(this.tables as any)[tableName].columns[columnName].definition
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.defintion.tables as any)[tableName].columns[columnName].definition =
-      {};
+    (this.tables as any)[tableName].columns[columnName].definition = {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (this.defintion.tables as any)[tableName].columns[
-    columnName
-  ].definition.notNull = true;
+  (this.tables as any)[tableName].columns[columnName].definition.notNull = true;
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
 
 export async function dropColumnNotNull<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
-  Definition extends Partial<DatabaseDefinition<DbDialect, Tables>>,
+  Definition extends Partial<DatabaseDefinition<DbDialect>>,
   TableName extends (keyof Tables & string) | (string & {}),
   ColName extends (keyof Tables[TableName]['columns'] & string) | (string & {}),
   NewTables extends Omit<Tables, TableName> & {
@@ -284,29 +245,18 @@ export async function dropColumnNotNull<
     `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP NOT NULL`
   );
 
-  if (!this.defintion.tables) this.defintion.tables = {} as Tables;
-
-  if (!this.defintion.tables[tableName]) return this;
+  if (!this.tables[tableName]) return this;
 
   if (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    !(this.defintion.tables as any)[tableName].columns[columnName].definition
+    !(this.tables as any)[tableName].columns[columnName].definition
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.defintion.tables as any)[tableName].columns[columnName].definition =
-      {};
+    (this.tables as any)[tableName].columns[columnName].definition = {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (this.defintion.tables as any)[tableName].columns[
-    columnName
-  ].definition.notNull = null;
+  (this.tables as any)[tableName].columns[columnName].definition.notNull = null;
 
-  return this as unknown as Database<
-    DbDialect,
-    NewTables,
-    Omit<Definition, 'tables'> & {
-      tables: NewTables;
-    }
-  >;
+  return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
