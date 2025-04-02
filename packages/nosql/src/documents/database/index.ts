@@ -2,6 +2,7 @@ import { Database as Sqlite } from 'bun:sqlite';
 import type { Documents } from '../documents';
 import type { Field } from '../fields';
 import type { DatabaseOptions } from './types';
+import type { QueryBuilder } from '../query';
 
 export class Database<
   Docs extends Record<string, Documents<string, Record<string, Field>>>,
@@ -37,8 +38,17 @@ export class Database<
     `);
   }
 
-  public document<DocName extends keyof Docs & string>(docName: DocName) {
-    return this.docs[docName];
+  public document<
+    DocName extends keyof Docs & string,
+    Doc extends Docs[DocName],
+  >(docName: DocName) {
+    if (!this.docs[docName]) {
+      throw new Error(`Document ${docName as string} does not exist`);
+    }
+
+    const doc = this.docs[docName];
+
+    return doc.query() as unknown as QueryBuilder<DocName, Doc>;
   }
 
   public static define<
