@@ -1,2 +1,2 @@
-import {} from '@ignisia/nosql';
-import {} from '@ignisia/sql';
+export { SecureNoSqlDb } from './nosql';
+export { SecureSqlDb } from './sql';

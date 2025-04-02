@@ -2,6 +2,9 @@
   "name": "@ignisia/securedb",
   "module": "src/index.ts",
   "type": "module",
+  "dependencies": {
+    "@ignisia/encryption": "workspace:*"
+  },
   "devDependencies": {
     "@ignisia/sql": "workspace:*",
     "@ignisia/nosql": "workspace:*",
