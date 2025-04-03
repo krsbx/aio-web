@@ -5,9 +5,14 @@ import {
   type QueryBuilder,
 } from '@ignisia/nosql/dist/documents';
 import type { DatabaseOptions } from '@ignisia/nosql/dist/documents/database/types';
-import type { SecureDbContract, TrackChangesParams } from '../contract';
+import { decrypt, encrypt, setupSecureDb, trackChanges } from '../helper';
+import type {
+  DecryptDbParams,
+  EncryptDbParams,
+  SecureDbContract,
+  TrackChangesParams,
+} from '../helper/contract';
 import type { DatabaseMeta } from '../types';
-import { setupSecureDb, trackChanges } from '../utilities';
 import type { DefineSecureDbOptions, SecureDbOptions } from './types';
 
 export class SecureNoSqlDb<
@@ -22,6 +27,8 @@ export class SecureNoSqlDb<
   public readonly meta: DatabaseMeta;
 
   protected trackChanges: SecureDbContract['trackChanges'];
+  public encrypt: SecureDbContract['encrypt'];
+  public decrypt: SecureDbContract['decrypt'];
 
   protected constructor(options: SecureDbOptions<Docs>) {
     super(options);
@@ -37,6 +44,8 @@ export class SecureNoSqlDb<
     this.trackChanges = trackChanges.bind(
       this as unknown as TrackChangesParams
     );
+    this.encrypt = encrypt.bind(this as unknown as EncryptDbParams);
+    this.decrypt = decrypt.bind(this as unknown as DecryptDbParams);
   }
 
   public document<

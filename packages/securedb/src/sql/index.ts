@@ -6,9 +6,14 @@ import {
 } from '@ignisia/sql';
 import type { DatabaseOptions } from '@ignisia/sql/dist/database/types';
 import { Dialect } from '@ignisia/sql/dist/table/constants';
-import type { SecureDbContract, TrackChangesParams } from '../contract';
+import { decrypt, encrypt, setupSecureDb, trackChanges } from '../helper';
+import type {
+  DecryptDbParams,
+  EncryptDbParams,
+  SecureDbContract,
+  TrackChangesParams,
+} from '../helper/contract';
 import type { DatabaseMeta } from '../types';
-import { setupSecureDb, trackChanges } from '../utilities';
 import type { DefineSecureDbOptions, SecureDbOptions } from './types';
 
 export class SecureSqlDb<
@@ -24,6 +29,8 @@ export class SecureSqlDb<
   public readonly meta: DatabaseMeta;
 
   protected trackChanges: SecureDbContract['trackChanges'];
+  public encrypt: SecureDbContract['encrypt'];
+  public decrypt: SecureDbContract['decrypt'];
 
   protected constructor(options: SecureDbOptions<DbDialect, Tables>) {
     super(options);
@@ -39,6 +46,8 @@ export class SecureSqlDb<
     this.trackChanges = trackChanges.bind(
       this as unknown as TrackChangesParams
     );
+    this.encrypt = encrypt.bind(this as unknown as EncryptDbParams);
+    this.decrypt = decrypt.bind(this as unknown as DecryptDbParams);
   }
 
   public table<
