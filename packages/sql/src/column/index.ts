@@ -157,8 +157,7 @@ export class Column<
 
     const correctType = ColumnTypeMapping[this.type][this.definition.dialect];
 
-    let sql =
-      correctType + (this.length !== undefined ? `(${this.length})` : '');
+    let sql = correctType + (this.length ? `(${this.length})` : '');
 
     if (this.definition.primaryKey) {
       sql += ' PRIMARY KEY';
