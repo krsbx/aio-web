@@ -11,7 +11,7 @@ export class Database<
   public readonly filename: string;
   public readonly client: Sqlite;
 
-  private constructor(options: DatabaseOptions<Docs>) {
+  protected constructor(options: DatabaseOptions<Docs>) {
     this.docs = options.docs;
     this.filename = options.filename;
     this.client = new Sqlite(this.filename);

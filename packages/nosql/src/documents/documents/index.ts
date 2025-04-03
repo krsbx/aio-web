@@ -32,7 +32,7 @@ export class Documents<
     Paranoid
   >;
 
-  private constructor(
+  protected constructor(
     options: DocumentOptions<
       DocName,
       Fields,

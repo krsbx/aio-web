@@ -38,7 +38,7 @@ export class Field<
     Definition
   >;
 
-  private constructor(options: Options) {
+  protected constructor(options: Options) {
     this.type = options.type;
     this.enums = [];
     this.fields = null as unknown as Fields;

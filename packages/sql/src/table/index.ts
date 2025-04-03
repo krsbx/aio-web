@@ -32,7 +32,7 @@ export class Table<
     Paranoid
   >;
 
-  private constructor(
+  protected constructor(
     options: TableOptions<
       TableName,
       Columns,
