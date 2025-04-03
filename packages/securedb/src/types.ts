@@ -3,3 +3,11 @@ export interface DatabaseMeta {
   lastDecryptedAt: string | Date;
   totalChanges: number;
 }
+
+export interface SetupSecureDbOptions {
+  decryptedFilePath: string;
+  encryptedFilePath: string;
+  metaPath: string;
+  password: string;
+  salt?: string | null;
+}
