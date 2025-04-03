@@ -1,5 +1,5 @@
 {
-  "name": "@ignisia/nosql",
+  "name": "@ignisia/core",
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",

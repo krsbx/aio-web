@@ -3,7 +3,7 @@
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
-    "scripts": {
+  "scripts": {
     "build": "bun run build.ts"
   },
   "devDependencies": {
