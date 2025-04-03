@@ -17,9 +17,12 @@ import type { DatabaseMeta } from '../types';
 import type { DefineSecureDbOptions, SecureDbOptions } from './types';
 
 export class SecureSqlDb<
-  DbDialect extends typeof Dialect.SQLITE,
-  Tables extends Record<string, Table<string, Record<string, Column>>>,
-> extends Database<DbDialect, Tables> {
+    DbDialect extends typeof Dialect.SQLITE,
+    Tables extends Record<string, Table<string, Record<string, Column>>>,
+  >
+  extends Database<DbDialect, Tables>
+  implements AsyncDisposable
+{
   protected decryptedFilePath: string;
   protected encryptedFilePath: string;
   protected password: string;
@@ -68,6 +71,21 @@ export class SecureSqlDb<
     };
 
     return query as unknown as QueryBuilder<TableName, Table>;
+  }
+
+  public async [Symbol.asyncDispose]() {
+    if (!this.isProtected) return;
+
+    console.log('SecureSqlDb disposing...');
+
+    await this.encrypt();
+
+    await Promise.all([
+      Bun.file(this.metaPath).delete(),
+      Bun.file(this.decryptedFilePath).delete(),
+    ]);
+
+    console.log('SecureSqlDb disposed');
   }
 
   public static define<
