@@ -1,4 +1,3 @@
-import type { BunRequest } from 'bun';
 import type { ContextCache, ParsedForm } from './types';
 import { parseFormData, parseQuery } from './parser';
 
@@ -8,15 +7,15 @@ export class ContextRequest<
   Params extends Record<string, string> = NonNullable<unknown>,
   Query extends Record<string, string> = NonNullable<unknown>,
 > {
-  private _request: BunRequest;
+  private _request: Request;
   private _url: URL;
   private _params: Params;
   private _cache: Partial<ContextCache<Values>>;
   private _query: Query;
 
-  public constructor(request: BunRequest) {
+  public constructor(request: Request, params: Params) {
     this._request = request;
-    this._params = request.params as Params;
+    this._params = params;
     this._url = new URL(request.url);
     this._cache = {} as Partial<ContextCache<Values>>;
     this._query = parseQuery(this._url.searchParams) as Query;

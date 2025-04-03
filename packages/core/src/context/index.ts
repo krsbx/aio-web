@@ -1,4 +1,3 @@
-import type { BunRequest } from 'bun';
 import { StatusCode } from './constants';
 import { ContextRequest } from './request';
 
@@ -9,23 +8,35 @@ export class Context<
   Query extends Record<string, string> = NonNullable<unknown>,
   State extends Record<string, unknown> = NonNullable<unknown>,
 > {
-  public readonly request: BunRequest;
+  public readonly request: Request;
 
   private _state: State;
   private _status: StatusCode;
   private _headers: Headers | undefined;
   private _req: ContextRequest<Values, Params, Query>;
+  private _res: Response | null;
 
-  public constructor(request: BunRequest) {
+  public constructor(request: Request, params: Params) {
     this.request = request;
     this._state = {} as State;
     this._status = StatusCode.OK;
     this._headers = undefined;
-    this._req = new ContextRequest<Values, Params, Query>(request);
+    this._req = new ContextRequest<Values, Params, Query>(request, params);
+    this._res = null;
   }
 
   public get req() {
     return this._req;
+  }
+
+  public set res(res: Response | null) {
+    this._res = res;
+  }
+
+  public get res() {
+    if (!this._res) this._res = this.body(null);
+
+    return this._res;
   }
 
   /**
@@ -102,7 +113,7 @@ export class Context<
   public json<Value>(value: Value) {
     this.header('Content-Type', 'application/json', false);
 
-    return Response.json(JSON.stringify(value), {
+    return Response.json(value, {
       status: this._status,
       headers: this._headers,
     });

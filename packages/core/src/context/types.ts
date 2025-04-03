@@ -26,19 +26,6 @@ export type ParsedQuery<T extends Record<string, any> = Record<string, any>> = {
       : T[K];
 };
 
-export type ExtractPathParams<Path extends string> =
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Path extends `${infer Start}:${infer Param}/${infer Rest}`
-    ? {
-        [K in Param | keyof ExtractPathParams<`/${Rest}`>]: string;
-      }
-    : // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Path extends `${infer Start}:${infer Param}`
-      ? {
-          [K in Param]: string;
-        }
-      : NonNullable<unknown>;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ContextCache<T = any> = {
   text: string;
