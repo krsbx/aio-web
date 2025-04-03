@@ -16,8 +16,11 @@ import type { DatabaseMeta } from '../types';
 import type { DefineSecureDbOptions, SecureDbOptions } from './types';
 
 export class SecureNoSqlDb<
-  Docs extends Record<string, Documents<string, Record<string, Field>>>,
-> extends Database<Docs> {
+    Docs extends Record<string, Documents<string, Record<string, Field>>>,
+  >
+  extends Database<Docs>
+  implements AsyncDisposable
+{
   protected decryptedFilePath: string;
   protected encryptedFilePath: string;
   protected password: string;
@@ -66,6 +69,21 @@ export class SecureNoSqlDb<
     };
 
     return query as unknown as QueryBuilder<DocName, Doc>;
+  }
+
+  public async [Symbol.asyncDispose]() {
+    if (!this.isProtected) return;
+
+    console.log('SecureNoSqlDb disposing...');
+
+    await this.encrypt();
+
+    await Promise.all([
+      Bun.file(this.metaPath).delete(),
+      Bun.file(this.decryptedFilePath).delete(),
+    ]);
+
+    console.log('SecureNoSqlDb disposed');
   }
 
   public static define<
