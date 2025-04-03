@@ -6,7 +6,7 @@ export async function build(source: string) {
   await $`rm -rf ${resolve(source, 'dist')}`;
 
   await tsup({
-    splitting: false,
+    splitting: true,
     entryPoints: [resolve(source, 'src/**/*.ts')],
     external: ['bun', 'bun:sqlite'],
     format: ['esm'],
