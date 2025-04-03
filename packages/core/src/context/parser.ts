@@ -82,5 +82,5 @@ export function parseQuery(query: URLSearchParams): ParsedQuery {
     assignDeep(result, parsePath(key), castValue(value));
   }
 
-  return query;
+  return result;
 }
