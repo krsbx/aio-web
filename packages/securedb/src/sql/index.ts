@@ -1,10 +1,15 @@
-import { type Column, Database, QueryBuilder, type Table } from '@ignisia/sql';
-import { Dialect } from '@ignisia/sql/dist/table/constants';
-import type { DefineSecureDbOptions, SecureDbOptions } from './types';
-import type { DatabaseMeta } from '../types';
-import { isFileExists, readMeta, writeMeta } from '../utilities';
-import { decryptFile, encryptFile } from '@ignisia/encryption';
+import {
+  type Column,
+  Database,
+  type QueryBuilder,
+  type Table,
+} from '@ignisia/sql';
 import type { DatabaseOptions } from '@ignisia/sql/dist/database/types';
+import { Dialect } from '@ignisia/sql/dist/table/constants';
+import type { SecureDbContract, TrackChangesParams } from '../contract';
+import type { DatabaseMeta } from '../types';
+import { setupSecureDb, trackChanges } from '../utilities';
+import type { DefineSecureDbOptions, SecureDbOptions } from './types';
 
 export class SecureSqlDb<
   DbDialect extends typeof Dialect.SQLITE,
@@ -18,6 +23,8 @@ export class SecureSqlDb<
   public readonly metaPath: string;
   public readonly meta: DatabaseMeta;
 
+  protected trackChanges: SecureDbContract['trackChanges'];
+
   protected constructor(options: SecureDbOptions<DbDialect, Tables>) {
     super(options);
 
@@ -28,24 +35,10 @@ export class SecureSqlDb<
     this.meta = options.meta;
     this.salt = options.salt ?? null;
     this.isProtected = !!options.password;
-  }
 
-  protected async trackChange() {
-    this.meta.totalChanges++;
-
-    if (this.meta.totalChanges % 5 === 0) {
-      await encryptFile({
-        input: this.decryptedFilePath,
-        output: this.encryptedFilePath,
-        salt: this.salt,
-        password: this.password,
-      });
-
-      this.meta.lastEncryptedAt = new Date();
-      this.meta.totalChanges = 0;
-    }
-
-    await writeMeta(this.metaPath, this.meta);
+    this.trackChanges = trackChanges.bind(
+      this as unknown as TrackChangesParams
+    );
   }
 
   public table<
@@ -59,7 +52,7 @@ export class SecureSqlDb<
       const result = exec.call(query);
 
       if (this.isProtected) {
-        await this.trackChange();
+        await this.trackChanges();
       }
 
       return result;
@@ -98,31 +91,17 @@ export class SecureSqlDb<
     const metaPath = config.filename + '.meta.json';
 
     if ('password' in options) {
-      return readMeta(metaPath).then(
-        async ({ isExists: isMetaExists, meta }) => {
-          if (
-            !(await isFileExists(decryptedFilePath)) &&
-            (await isFileExists(encryptedFilePath))
-          ) {
-            await decryptFile({
-              input: encryptedFilePath,
-              output: decryptedFilePath,
-              ...options,
-            });
-          }
-
-          if (!isMetaExists) {
-            await writeMeta(metaPath, meta);
-          }
-
-          return new SecureSqlDb({
-            decryptedFilePath,
-            encryptedFilePath,
-            metaPath,
-            meta: meta,
+      return setupSecureDb({
+        encryptedFilePath,
+        decryptedFilePath,
+        metaPath,
+        ...options,
+      }).then(
+        async (config) =>
+          new SecureSqlDb({
+            ...config,
             ...options,
-          });
-        }
+          })
       );
     }
 
