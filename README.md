@@ -24,6 +24,6 @@ An all-in-one tooling for your web development needs. Everything you need in one
 
 - [ ] Add support for replica-set mechanism for the NoSQL adapters.
 
-- [ ] Add support for password protected database for the NoSQL adapters.
+- [x] Add support for password protected database for the NoSQL adapters.
 
-- [ ] Add support for password protected database for the SQL (SQLite) adapters.
+- [x] Add support for password protected database for the SQL (SQLite) adapters.
