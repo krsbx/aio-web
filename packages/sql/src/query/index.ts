@@ -25,7 +25,7 @@ import type {
 import { getParanoid, getTimestamp } from './utilities';
 
 export class QueryBuilder<
-  Alias extends string,
+  Alias extends TableRef['name'],
   TableRef extends Table<string, Record<string, Column>>,
   JoinedTables extends Record<
     string,
@@ -180,7 +180,7 @@ export class QueryBuilder<
       aggregates: null,
       joins: null,
       distinct: null,
-      baseAlias: null,
+      baseAlias: table.name,
       joinedTables: null,
       withDeleted: null,
     } as Definition;

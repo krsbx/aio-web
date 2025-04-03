@@ -50,7 +50,7 @@ export class Documents<
   }
 
   public query() {
-    return new QueryBuilder(this).alias(this.name);
+    return new QueryBuilder(this);
   }
 
   public infer(): this['_output'] {

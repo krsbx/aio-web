@@ -25,7 +25,7 @@ import type {
 import { getParanoid, getTimestamp } from './utilities';
 
 export class QueryBuilder<
-  Alias extends string,
+  Alias extends DocRef['name'],
   DocRef extends Documents<string, Record<string, Field>>,
   JoinedDocs extends Record<
     string,
@@ -180,7 +180,7 @@ export class QueryBuilder<
       aggregates: null,
       joins: null,
       distinct: null,
-      baseAlias: null,
+      baseAlias: doc.name,
       joinedDocs: null,
       withDeleted: null,
     } as Definition;

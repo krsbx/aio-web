@@ -112,6 +112,6 @@ export class Table<
   }
 
   public query() {
-    return new QueryBuilder(this).alias(this.name);
+    return new QueryBuilder(this);
   }
 }
