@@ -9,10 +9,10 @@ export class Migration<
   Tables extends Record<string, Table<string, Record<string, Column>>>,
 > {
   public readonly db: Database<DbDialect, Tables>;
-  private _up: (() => Promise<void>) | null;
-  private _down: (() => Promise<void>) | null;
+  protected _up: (() => Promise<void>) | null;
+  protected _down: (() => Promise<void>) | null;
 
-  private constructor(options: MigrationOptions<DbDialect, Tables>) {
+  protected constructor(options: MigrationOptions<DbDialect, Tables>) {
     this.db = options.db;
 
     this._up = options.up;

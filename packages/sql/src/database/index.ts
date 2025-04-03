@@ -95,7 +95,7 @@ export class Database<
     Definition
   >['dropColumnNotNull'];
 
-  private constructor(options: DatabaseOptions<DbDialect, Tables>) {
+  protected constructor(options: DatabaseOptions<DbDialect, Tables>) {
     this.dialect = options.dialect;
     this.tables = options.tables ?? ({} as Tables);
     this.defintion = {

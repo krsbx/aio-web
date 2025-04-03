@@ -7,9 +7,9 @@ export class KeyValue {
   public readonly filepath: string;
   public readonly db: Database;
   public readonly ttl: number;
-  private readonly sql: ReturnType<typeof getSql>;
+  protected readonly sql: ReturnType<typeof getSql>;
 
-  private constructor(options: KeyValueConfig) {
+  protected constructor(options: KeyValueConfig) {
     this.filepath = options.filepath;
     this.db = new Database(this.filepath);
     this.ttl = options.ttl || 3;
@@ -18,7 +18,7 @@ export class KeyValue {
     this.setup();
   }
 
-  private setup() {
+  protected setup() {
     this.db.run('PRAGMA journal_mode = WAL');
     this.db.run('PRAGMA synchronous = NORMAL');
     this.db.run('PRAGMA temp_store = MEMORY');
@@ -38,7 +38,7 @@ export class KeyValue {
     this.db.run(`CREATE INDEX IF NOT EXISTS kv_store_ttl ON kv_store (ttl);`);
   }
 
-  private compress<Value = any>(value: Value): Uint8Array {
+  protected compress<Value = any>(value: Value): Uint8Array {
     const stringified = JSON.stringify(value);
     const buffer = Buffer.from(stringified);
     const compressed = Bun.deflateSync(buffer);
@@ -46,7 +46,7 @@ export class KeyValue {
     return compressed;
   }
 
-  private decompress<Value = any>(buffer: Uint8Array): Value {
+  protected decompress<Value = any>(buffer: Uint8Array): Value {
     const decompressed = Bun.inflateSync(buffer).toString();
 
     return JSON.parse(decompressed);
@@ -96,10 +96,10 @@ export class KeyValue {
     return this.decompress(data.value);
   }
 
-  private getRawItems(): RawItem[];
-  private getRawItems(key: string): RawItem[];
-  private getRawItems(keys: string[]): RawItem[];
-  private getRawItems(key: string | string[] | null = null): RawItem[] {
+  protected getRawItems(): RawItem[];
+  protected getRawItems(key: string): RawItem[];
+  protected getRawItems(keys: string[]): RawItem[];
+  protected getRawItems(key: string | string[] | null = null): RawItem[] {
     let results: RawItem[] = [];
 
     if (Array.isArray(key)) {
@@ -208,9 +208,9 @@ export class KeyValue {
     return this.sql.countExpired.get({ now: Date.now() })!.count;
   }
 
-  private getRawKeys(): RawKey[];
-  private getRawKeys(key: string): RawKey[];
-  private getRawKeys(key?: string) {
+  protected getRawKeys(): RawKey[];
+  protected getRawKeys(key: string): RawKey[];
+  protected getRawKeys(key?: string) {
     let records: { key: string; ttl: number | null }[] = [];
 
     if (key) {

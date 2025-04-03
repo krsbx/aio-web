@@ -33,7 +33,7 @@ export class Column<
   public readonly enums: readonly Value[];
   public readonly _output!: ValueSelector<Definition, Value>;
 
-  private constructor(options: Options) {
+  protected constructor(options: Options) {
     this.type = options.type;
     this.enums = [];
     this.length = null;
