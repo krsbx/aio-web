@@ -1,5 +1,5 @@
 import type { ContextCache, ParsedForm } from './types';
-import { parseFormData, parseQuery } from './parser';
+import { parseCookies, parseFormData, parseQuery } from './parser';
 
 export class ContextRequest<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-constraint
@@ -95,6 +95,20 @@ export class ContextRequest<
     }
 
     return this._cache.parsedForm as FinalValue;
+  }
+
+  public cookies(): Record<string, string>;
+  public cookies(key: string): string;
+  public cookies(key?: string) {
+    if (!this._cache.cookies) {
+      this._cache.cookies = parseCookies(this._request.headers.get('cookie'));
+    }
+
+    if (key) {
+      return this._cache.cookies[key];
+    }
+
+    return this._cache.cookies;
   }
 
   public get url() {

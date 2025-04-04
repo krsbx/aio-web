@@ -84,3 +84,21 @@ export function parseQuery(query: URLSearchParams): ParsedQuery {
 
   return result;
 }
+
+export function parseCookies(
+  cookieHeader: string | null
+): Record<string, string> {
+  const cookies: Record<string, string> = {};
+
+  if (!cookieHeader) return cookies;
+
+  for (const cookie of cookieHeader.split(';')) {
+    const [key, value] = cookie.trim().split('=');
+
+    if (key && value !== undefined) {
+      cookies[key] = decodeURIComponent(value);
+    }
+  }
+
+  return cookies;
+}

@@ -1,4 +1,5 @@
 import { StatusCode } from './constants';
+import { ContextCookie } from './cookie';
 import { ContextRequest } from './request';
 
 export class Context<
@@ -13,6 +14,7 @@ export class Context<
   private _state: State;
   private _status: StatusCode;
   private _headers: Headers | undefined;
+  private _cookie: ContextCookie | null;
   private _req: ContextRequest<Values, Params, Query>;
   private _res: Response | null;
 
@@ -21,12 +23,21 @@ export class Context<
     this._state = {} as State;
     this._status = StatusCode.OK;
     this._headers = undefined;
+    this._cookie = null;
     this._req = new ContextRequest<Values, Params, Query>(request, params);
     this._res = null;
   }
 
   public get req() {
     return this._req;
+  }
+
+  public get cookie() {
+    if (!this._cookie) {
+      this._cookie = new ContextCookie(this);
+    }
+
+    return this._cookie;
   }
 
   public set res(res: Response | null) {

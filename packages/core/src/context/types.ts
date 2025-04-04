@@ -27,7 +27,7 @@ export type ParsedQuery<T extends Record<string, any> = Record<string, any>> = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ContextCache<T = any> = {
+export interface ContextCache<T = any> {
   text: string;
   json: T;
   arrayBuffer: ArrayBuffer;
@@ -35,4 +35,14 @@ export type ContextCache<T = any> = {
   blob: Blob;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parsedForm: T extends Record<string, any> ? ParsedForm<T> : never;
-};
+  cookies: Record<string, string>;
+}
+
+export interface CookieOptions {
+  Path: string;
+  HttpOnly: boolean;
+  Secure: boolean;
+  SameSite: 'Strict' | 'Lax' | 'None';
+  MaxAge: number;
+  Expires: Date;
+}
