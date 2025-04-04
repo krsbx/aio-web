@@ -103,7 +103,7 @@ export class Context<
   public body(value: BodyInit | null, contentType: string): Response;
   public body(value: BodyInit | null, contentType?: string) {
     if (contentType) {
-      this.header('Content-Type', contentType);
+      this.header('Content-Type', contentType, false);
     }
 
     return new Response(value, {
@@ -113,30 +113,21 @@ export class Context<
   }
 
   public text(value: string) {
-    this.header('Content-Type', 'text/plain', false);
-
-    return new Response(value, {
-      status: this._status,
-      headers: this._headers,
-    });
+    return this.body(value, 'text/plain');
   }
 
   public json<Value>(value: Value) {
-    this.header('Content-Type', 'application/json', false);
-
-    return Response.json(value, {
-      status: this._status,
-      headers: this._headers,
-    });
+    return this.body(JSON.stringify(value), 'application/json');
   }
 
   public html(value: string) {
-    this.header('Content-Type', 'text/html', false);
+    return this.body(value, 'text/html');
+  }
 
-    return new Response(value, {
-      status: this._status,
-      headers: this._headers,
-    });
+  public noContent() {
+    this.status(StatusCode.NO_CONTENT);
+
+    return this.body(null);
   }
 
   public notFound(): Response;
@@ -144,14 +135,9 @@ export class Context<
   public notFound(message?: string) {
     this.status(StatusCode.NOT_FOUND);
 
-    return new Response(
-      JSON.stringify({
-        message: message ?? 'Not Found',
-      }),
-      {
-        status: this._status,
-      }
-    );
+    return this.json({
+      message: message ?? 'Not Found',
+    });
   }
 
   public redirect(url: string): Response;
