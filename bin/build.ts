@@ -2,7 +2,12 @@ import { $ } from 'bun';
 
 const prerequisites = ['packages/utils'];
 
-const parallels = ['packages/encryption', 'packages/nosql', 'packages/sql'];
+const parallels = [
+  'packages/encryption',
+  'packages/nosql',
+  'packages/sql',
+  'packages/core',
+];
 
 const series = ['packages/securedb'];
 
