@@ -1,5 +1,14 @@
+import type { ServeOptions } from 'bun';
+import { Context } from '../context';
 import { composer } from './composer';
-import type { ExtractPathParams, Handler, Middleware, Route } from './types';
+import type {
+  ExtractPathParams,
+  Handler,
+  Middleware,
+  OnError,
+  OnNotFound,
+  Route,
+} from './types';
 import { joinPaths } from './utilities';
 
 export class Router<BasePath extends string> {
@@ -7,6 +16,9 @@ export class Router<BasePath extends string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public routes: Route<any, any, any, any>[];
   private middlewares: Middleware[];
+  private _onError: OnError | null;
+  private _onNotFound: OnNotFound | null;
+
   private pathMiddlewares: Record<string, Middleware[]>;
 
   public constructor(basePath: BasePath = '' as BasePath) {
@@ -14,6 +26,8 @@ export class Router<BasePath extends string> {
     this.middlewares = [];
     this.pathMiddlewares = {};
     this.basePath = basePath as BasePath;
+    this._onError = null;
+    this._onNotFound = null;
   }
 
   public use<
@@ -446,6 +460,14 @@ export class Router<BasePath extends string> {
     }
   }
 
+  public onError(onError: OnError) {
+    this._onError = onError;
+  }
+
+  public onNotFound(onNotFound: OnNotFound) {
+    this._onNotFound = onNotFound;
+  }
+
   public match(method: string, url: string) {
     for (const route of this.routes) {
       if (route.method !== method) continue;
@@ -474,6 +496,10 @@ export class Router<BasePath extends string> {
     const found = this.match(req.method, url.pathname);
 
     if (!found) {
+      if (this._onNotFound) {
+        return this._onNotFound(new Context(req, {}));
+      }
+
       return new Response('Not Found', { status: 404 });
     }
 
@@ -481,7 +507,19 @@ export class Router<BasePath extends string> {
       request: req,
       middlewares: this.middlewares,
       pathMiddlewares: this.pathMiddlewares,
+      onError: this._onError,
       ...found,
+    });
+  }
+
+  public fetch = (req: Request) => {
+    return this.handle(req);
+  };
+
+  public listen(options?: Omit<ServeOptions, 'fetch'>) {
+    return Bun.serve({
+      fetch: this.fetch,
+      ...options,
     });
   }
 }

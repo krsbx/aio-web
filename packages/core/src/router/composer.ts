@@ -1,4 +1,5 @@
 import { Context } from '../context';
+import { StatusCode } from '../context/constants';
 import type { ComposerOptions } from './types';
 
 export async function composer({
@@ -7,6 +8,7 @@ export async function composer({
   route,
   middlewares,
   pathMiddlewares,
+  onError,
 }: ComposerOptions) {
   const ctx = new Context(request, params);
 
@@ -24,22 +26,37 @@ export async function composer({
 
   mws.push(...route.middleware);
 
-  const dispatch = async (index: number): Promise<void> => {
-    if (index <= i) return;
+  try {
+    const dispatch = async (index: number): Promise<void> => {
+      if (index <= i) return;
 
-    i = index;
+      i = index;
 
-    const fn =
-      mws[index] ||
-      (async () => {
-        const res = await route.handler(ctx);
-        ctx.res = res;
-      });
+      const fn =
+        mws[index] ||
+        (async () => {
+          const res = await route.handler(ctx);
+          ctx.res = res;
+        });
 
-    await fn(ctx, () => dispatch(index + 1));
-  };
+      await fn(ctx, () => dispatch(index + 1));
+    };
 
-  await dispatch(0);
+    await dispatch(0);
 
-  return ctx.res!;
+    return ctx.res!;
+  } catch (error) {
+    if (onError) {
+      return onError(error, ctx);
+    }
+
+    return Response.json(
+      {
+        message: 'Internal Server Error',
+      },
+      {
+        status: StatusCode.INTERNAL_SERVER_ERROR,
+      }
+    );
+  }
 }
