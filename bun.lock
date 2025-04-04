@@ -60,6 +60,7 @@
     "packages/forge": {
       "name": "@ignisia/forge",
       "devDependencies": {
+        "@ignisia/core": "workspace:*",
         "@ignisia/utils": "workspace:*",
         "@types/bun": "latest",
       },

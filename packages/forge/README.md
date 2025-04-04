@@ -1,15 +1,16 @@
 # @ignisia/forge
 
-To install dependencies:
+# New Project Structure
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run src/index.ts
-```
-
-This project was created using `bun init` in bun v1.2.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+- api - Contains the API for the projects
+  - user.ts - Translated as /user
+  - user/index.ts - Translated as /user
+  - user/[userId].ts - Translated as /user/:userId
+  - project.ts - Translated as /project
+  - project/[projectId].ts - Translated as /project/:projectId
+- pages - Contains the pages for the projects
+  - index.ts - Translated as /
+  - user.ts - Translated as /user
+  - user/index.ts - Translated as /user
+  - user/[userId].ts - Translated as /user/:userId
+  - project.ts - Translated as /project
