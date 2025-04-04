@@ -59,6 +59,16 @@
         "typescript": "^5",
       },
     },
+    "packages/forge": {
+      "name": "@ignisia/forge",
+      "devDependencies": {
+        "@ignisia/utils": "workspace:*",
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
     "packages/nosql": {
       "name": "@ignisia/nosql",
       "version": "0.1.0",
@@ -259,6 +269,8 @@
     "@ignisia/core": ["@ignisia/core@workspace:packages/core"],
 
     "@ignisia/encryption": ["@ignisia/encryption@workspace:packages/encryption"],
+
+    "@ignisia/forge": ["@ignisia/forge@workspace:packages/forge"],
 
     "@ignisia/nosql": ["@ignisia/nosql@workspace:packages/nosql"],
 
