@@ -1,6 +1,8 @@
 import type { ServeOptions } from 'bun';
 import { Context } from '../context';
 import { composer } from './composer';
+import type { RouterHelperContract } from './contract';
+import { match, register } from './helper';
 import type {
   ExtractPathParams,
   Handler,
@@ -13,8 +15,11 @@ import { joinPaths } from './utilities';
 
 export class Router<BasePath extends string> {
   public basePath: BasePath;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public routes: Route<any, any, any, any>[];
+  public readonly staticRoutes: Route[];
+  public readonly staticRoutesMap: Map<string, Route>;
+  public readonly dynamicRoutes: Route[];
+  public readonly wildcardRoutes: Route[];
+
   private middlewares: Middleware[];
   private _onError: OnError | null;
   private _onNotFound: OnNotFound | null;
@@ -22,14 +27,23 @@ export class Router<BasePath extends string> {
   private pathMiddlewares: Record<string, Middleware[]>;
   public composedMiddlewares: Record<string, Middleware[]>;
 
+  public match: RouterHelperContract<BasePath>['match'];
+  public register: RouterHelperContract<BasePath>['register'];
+
   public constructor(basePath: BasePath = '' as BasePath) {
-    this.routes = [];
+    this.staticRoutes = [];
+    this.staticRoutesMap = new Map();
+    this.dynamicRoutes = [];
+    this.wildcardRoutes = [];
     this.middlewares = [];
     this.pathMiddlewares = {};
     this.composedMiddlewares = {};
     this.basePath = basePath as BasePath;
     this._onError = null;
     this._onNotFound = null;
+
+    this.match = match.bind(this);
+    this.register = register.bind(this);
   }
 
   public use<
@@ -88,42 +102,6 @@ export class Router<BasePath extends string> {
     combined.push(...routeMiddleware);
 
     this.composedMiddlewares[path] = combined;
-  }
-
-  private register<
-    V,
-    P extends Record<string, string> = NonNullable<unknown>,
-    Q extends Record<string, string> = NonNullable<unknown>,
-    S extends Record<string, unknown> = NonNullable<unknown>,
-  >(
-    method: string,
-    path: string,
-    handler: Handler<V, P, Q, S>,
-    middleware: Middleware<V, P, Q, S>[] = []
-  ) {
-    const pathWithBase = joinPaths(this.basePath, path);
-
-    const keys: string[] = [];
-    const pattern = new RegExp(
-      '^' +
-        pathWithBase.replace(/\/:(\w+)/g, (_, key) => {
-          keys.push(key);
-
-          return '/([^/]+)';
-        }) +
-        '$'
-    );
-
-    this.routes.push({
-      method,
-      path: pathWithBase,
-      handler,
-      middleware,
-      pattern,
-      keys,
-    });
-
-    this.resolveMiddlewares(pathWithBase, middleware as Middleware[]);
   }
 
   public get<
@@ -454,20 +432,23 @@ export class Router<BasePath extends string> {
       (router: Router<FullPath>) => void,
     ]
   ): void {
-    const callback: (router: Router<FullPath>) => void = mws.pop() as (
-      router: Router<FullPath>
-    ) => void;
+    const callback = mws.pop() as (router: Router<FullPath>) => void;
     const middlewares = mws as unknown as Middleware[];
 
-    const subRouter = new Router<FullPath>(
-      joinPaths(this.basePath, path) as FullPath
-    );
+    const fullPath = joinPaths(this.basePath, path) as FullPath;
+    const subRouter = new Router(fullPath);
 
     subRouter.middlewares.push(...this.middlewares, ...middlewares);
+
     callback(subRouter);
 
     for (const route of subRouter.routes) {
-      this.routes.push(route);
+      this.register(
+        route.method,
+        route.path.replace(fullPath, ''), // strip off base path
+        route.handler,
+        route.middleware
+      );
     }
 
     for (const subPath in subRouter.pathMiddlewares) {
@@ -483,6 +464,14 @@ export class Router<BasePath extends string> {
     }
   }
 
+  public get routes() {
+    return [
+      ...this.staticRoutes,
+      ...this.dynamicRoutes,
+      ...this.wildcardRoutes,
+    ];
+  }
+
   public onError(onError: OnError) {
     this._onError = onError;
   }
@@ -491,32 +480,11 @@ export class Router<BasePath extends string> {
     this._onNotFound = onNotFound;
   }
 
-  public match(method: string, url: string) {
-    for (const route of this.routes) {
-      if (route.method !== method) continue;
-
-      const match = route.pattern.exec(url);
-
-      if (!match) continue;
-
-      const params: Record<string, string> = {};
-
-      route.keys.forEach((key, i) => {
-        params[key] = decodeURIComponent(match[i + 1]);
-      });
-
-      return {
-        route,
-        params,
-      };
-    }
-
-    return null;
-  }
-
   public async handle(req: Request): Promise<Response> {
     const pathStart = req.url.indexOf('/', req.url.indexOf('://') + 3);
-    const pathname = req.url.slice(pathStart).split('?')[0];
+
+    const pathname =
+      req.url.slice(pathStart).split('?')[0].replace(/\/+$/, '') || '/';
     const found = this.match(req.method, pathname);
 
     if (!found) {

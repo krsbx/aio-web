@@ -20,10 +20,11 @@ export type Handler<
 > = (ctx: Context<V, P, Q, S>) => Response | Promise<Response>;
 
 export interface Route<
-  V,
-  P extends Record<string, string>,
-  Q extends Record<string, string>,
-  S extends Record<string, unknown>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  V = any,
+  P extends Record<string, string> = NonNullable<unknown>,
+  Q extends Record<string, string> = NonNullable<unknown>,
+  S extends Record<string, unknown> = NonNullable<unknown>,
 > {
   method: string;
   path: string;
