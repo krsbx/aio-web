@@ -7,24 +7,11 @@ export async function composer({
   params,
   route,
   middlewares,
-  pathMiddlewares,
   onError,
 }: ComposerOptions) {
   const ctx = new Context(request, params);
 
   let i = -1;
-
-  const mws = [...middlewares];
-
-  const pathMws = Object.entries(pathMiddlewares).filter(([prefix]) =>
-    route.path.startsWith(prefix)
-  );
-
-  if (pathMws.length) {
-    mws.push(...pathMws.flatMap(([, mws]) => mws));
-  }
-
-  mws.push(...route.middleware);
 
   try {
     const dispatch = async (index: number): Promise<void> => {
@@ -33,7 +20,7 @@ export async function composer({
       i = index;
 
       const fn =
-        mws[index] ||
+        middlewares[index] ||
         (async () => {
           const res = await route.handler(ctx);
           ctx.res = res;

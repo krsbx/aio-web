@@ -20,11 +20,13 @@ export class Router<BasePath extends string> {
   private _onNotFound: OnNotFound | null;
 
   private pathMiddlewares: Record<string, Middleware[]>;
+  public composedMiddlewares: Record<string, Middleware[]>;
 
   public constructor(basePath: BasePath = '' as BasePath) {
     this.routes = [];
     this.middlewares = [];
     this.pathMiddlewares = {};
+    this.composedMiddlewares = {};
     this.basePath = basePath as BasePath;
     this._onError = null;
     this._onNotFound = null;
@@ -69,6 +71,25 @@ export class Router<BasePath extends string> {
     }
   }
 
+  private resolveMiddlewares(path: string, routeMiddleware: Middleware[]) {
+    const combined: Middleware[] = [...this.middlewares];
+
+    // Sort pathMiddlewares keys from longest to shortest
+    const sortedPaths = Object.keys(this.pathMiddlewares).sort(
+      (a, b) => b.length - a.length
+    );
+
+    for (const prefix of sortedPaths) {
+      if (path.startsWith(prefix)) {
+        combined.push(...this.pathMiddlewares[prefix]);
+      }
+    }
+
+    combined.push(...routeMiddleware);
+
+    this.composedMiddlewares[path] = combined;
+  }
+
   private register<
     V,
     P extends Record<string, string> = NonNullable<unknown>,
@@ -101,6 +122,8 @@ export class Router<BasePath extends string> {
       pattern,
       keys,
     });
+
+    this.resolveMiddlewares(pathWithBase, middleware as Middleware[]);
   }
 
   public get<
@@ -492,8 +515,9 @@ export class Router<BasePath extends string> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const url = new URL(req.url);
-    const found = this.match(req.method, url.pathname);
+    const pathStart = req.url.indexOf('/', req.url.indexOf('://') + 3);
+    const pathname = req.url.slice(pathStart).split('?')[0];
+    const found = this.match(req.method, pathname);
 
     if (!found) {
       if (this._onNotFound) {
@@ -505,10 +529,10 @@ export class Router<BasePath extends string> {
 
     return composer({
       request: req,
-      middlewares: this.middlewares,
-      pathMiddlewares: this.pathMiddlewares,
+      middlewares: this.composedMiddlewares[found.route.path],
       onError: this._onError,
-      ...found,
+      params: found.params,
+      route: found.route,
     });
   }
 

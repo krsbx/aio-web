@@ -8,17 +8,17 @@ export class ContextRequest<
   Query extends Record<string, string> = NonNullable<unknown>,
 > {
   private _request: Request;
-  private _url: URL;
+  private _url: URL | null;
   private _params: Params;
   private _cache: Partial<ContextCache<Values>>;
-  private _query: Query;
+  private _query: Query | null;
 
   public constructor(request: Request, params: Params) {
     this._request = request;
     this._params = params;
-    this._url = new URL(request.url);
+    this._url = null;
     this._cache = {} as Partial<ContextCache<Values>>;
-    this._query = parseQuery(this._url.searchParams) as Query;
+    this._query = null;
   }
 
   public params(): Params;
@@ -32,6 +32,10 @@ export class ContextRequest<
   public query(): Query;
   public query<K extends keyof Query>(key: K): Query[K];
   public query<K extends keyof Query>(key?: K) {
+    if (!this._query) {
+      this._query = parseQuery(this.url.searchParams) as Query;
+    }
+
     if (key) return this._query[key];
 
     return this._query;
@@ -112,7 +116,11 @@ export class ContextRequest<
   }
 
   public get url() {
-    return this._url.toString();
+    if (!this._url) {
+      this._url = new URL(this._request.url);
+    }
+
+    return this._url;
   }
 
   public get method() {
