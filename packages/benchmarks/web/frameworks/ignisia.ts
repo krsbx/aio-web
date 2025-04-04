@@ -1,4 +1,4 @@
-import { Router } from '@ignisia/core';
+import { Router } from '../../../core/src';
 import { PORT_ALLOCATION } from '../utilities/config';
 
 const app = new Router();

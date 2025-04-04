@@ -1,7 +1,7 @@
 # Autocannon Benchmarks
 
 **Runtime**: bun
-**Date**: April 4, 2025 04:18:50 PM +07:00
+**Date**: April 4, 2025 05:10:46 PM +07:00
 **CPU**: M2
 **RAM**: 16384.00 MB
 **Connections**: 100
@@ -12,6 +12,7 @@
 
 | Framework | Total Requests | RPS (req/sec) | P50 Latency (ms) | P75 Latency (ms) | P90 Latency (ms) | P99 Latency (ms) | Avg Latency (ms) | Min Latency (ms) | Max Latency (ms) |
 | --------- | -------------- | ------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- |
-| Ignisia   | 887716.00      | 29580.67      | 53 ms            | 62 ms            | 103 ms           | 124 ms           | 59.65 ms         | 5 ms             | 159 ms           |
-| Hono      | 1345204.00     | 44810.26      | 405 ms           | 644 ms           | 1043 ms          | 1827 ms          | 533.56 ms        | 6 ms             | 4927 ms          |
-| Bun       | 1391174.00     | 46357.01      | 429 ms           | 697 ms           | 1081 ms          | 1885 ms          | 537.13 ms        | 10 ms            | 5691 ms          |
+| Ignisia   | 928373.00      | 30925.15      | 31 ms            | 35 ms            | 93 ms            | 111 ms           | 43.08 ms         | 6 ms             | 229 ms           |
+| Hono      | 1267747.00     | 42230.08      | 476 ms           | 934 ms           | 1757 ms          | 3869 ms          | 756.57 ms        | 18 ms            | 8318 ms          |
+| Bun       | 1467198.00     | 48890.30      | 255 ms           | 314 ms           | 435 ms           | 703 ms           | 250.22 ms        | 9 ms             | 2920 ms          |
+| Elysia    | 22247.00       | 715.57        | 422 ms           | 2464 ms          | 7471 ms          | 8287 ms          | 2158.04 ms       | 18 ms            | 15330 ms         |
