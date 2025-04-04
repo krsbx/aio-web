@@ -22,16 +22,16 @@ export class ContextRequest<
   }
 
   public params(): Params;
-  public params<K extends keyof Params>(key: K): Params[K];
-  public params<K extends keyof Params>(key?: K) {
+  public params<K extends keyof Params | (string & {})>(key: K): Params[K];
+  public params<K extends keyof Params | (string & {})>(key?: K) {
     if (key) return this._params[key];
 
     return this._params;
   }
 
   public query(): Query;
-  public query<K extends keyof Query>(key: K): Query[K];
-  public query<K extends keyof Query>(key?: K) {
+  public query<K extends keyof Query | (string & {})>(key: K): Query[K];
+  public query<K extends keyof Query | (string & {})>(key?: K) {
     if (!this._query) {
       this._query = parseQuery(this.url.searchParams) as Query;
     }
