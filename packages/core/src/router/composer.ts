@@ -14,8 +14,12 @@ export async function composer({
 
   const mws = [...middlewares];
 
-  if (pathMiddlewares[route.path]) {
-    mws.push(...pathMiddlewares[route.path]);
+  const pathMws = Object.entries(pathMiddlewares).filter(([prefix]) =>
+    route.path.startsWith(prefix)
+  );
+
+  if (pathMws.length) {
+    mws.push(...pathMws.flatMap(([, mws]) => mws));
   }
 
   mws.push(...route.middleware);

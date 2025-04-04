@@ -1,5 +1,6 @@
 import { composer } from './composer';
-import type { Middleware, Route, Handler, ExtractPathParams } from './types';
+import type { ExtractPathParams, Handler, Middleware, Route } from './types';
+import { joinPaths } from './utilities';
 
 export class Router<BasePath extends string> {
   public basePath: BasePath;
@@ -41,7 +42,7 @@ export class Router<BasePath extends string> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   >(...args: any[]) {
     if (typeof args[0] === 'string') {
-      const path = args[0];
+      const path = joinPaths(this.basePath, args[0]);
       const mws = args.slice(1) as Middleware<Values, Params, Query, State>[];
 
       if (!this.pathMiddlewares[path]) {
@@ -65,7 +66,7 @@ export class Router<BasePath extends string> {
     handler: Handler<V, P, Q, S>,
     middleware: Middleware<V, P, Q, S>[] = []
   ) {
-    const pathWithBase = `${this.basePath}${path}`;
+    const pathWithBase = joinPaths(this.basePath, path);
 
     const keys: string[] = [];
     const pattern = new RegExp(
@@ -422,7 +423,7 @@ export class Router<BasePath extends string> {
     const middlewares = mws as unknown as Middleware[];
 
     const subRouter = new Router<FullPath>(
-      `${this.basePath}${path}` as FullPath
+      joinPaths(this.basePath, path) as FullPath
     );
 
     subRouter.middlewares.push(...this.middlewares, ...middlewares);
