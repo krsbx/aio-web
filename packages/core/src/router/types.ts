@@ -52,7 +52,6 @@ export interface ComposerOptions {
   route: Route<any, any, any, any>;
   params: Record<string, string>;
   middlewares: Middleware[];
-  pathMiddlewares: Record<string, Middleware[]>;
   onError: OnError | null;
 }
 
