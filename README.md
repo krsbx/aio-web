@@ -4,29 +4,29 @@ An all-in-one tooling for your web development needs. Everything you need in one
 
 ## Features
 
-- [x] [@ignisia/sql]('./packages/sql')
+- [x] [@ignisia/sql](./packages/sql)
 
 > SQL Database Query Builder for [**Bun**](https://bun.sh) SQL and SQLite.
 
-- [x] [@ignisia/nosql]('./packages/nosql')
+- [x] [@ignisia/nosql](./packages/nosql)
 
 > NoSQL Database Query Builder for [**Bun**](https://bun.sh), built on top of [**SQLite**](https://sqlite.org/).
 
-- [ ] [@ignisia/storage]('./packages/storage')
+- [ ] [@ignisia/storage](./packages/storage)
 
 > Bun File Storage adapter, built on top of Bun File System and S3.
 
-- [x] [@ignisia/core]('./packages/core')
+- [x] [@ignisia/core](./packages/core)
 
 > Web Framework built on top of [**Bun**](https://bun.sh) HTTP Server and WebSocket Server.
 
-- [x] [@ignisia/encryption]('./packages/encryption')
+- [x] [@ignisia/encryption](./packages/encryption)
 
-> Encryption utilities for SQLite [@ignisia/securedb]('./packages/securedb').
+> Encryption utilities for SQLite [@ignisia/securedb](./packages/securedb).
 
-- [x] [@ignisia/securedb]('./packages/securedb')
+- [x] [@ignisia/securedb](./packages/securedb)
 
-> Password protected SQLite for [@ignisia/sql]('./packages/sql') and [@ignisia/nosql]('./packages/nosql').
+> Password protected SQLite for [@ignisia/sql](./packages/sql) and [@ignisia/nosql](./packages/nosql).
 
 ## Plan
 
