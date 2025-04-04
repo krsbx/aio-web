@@ -18,17 +18,20 @@ export async function benchmark(framework: string, port: number) {
 }
 
 export async function benchmarks() {
-  const results = await Promise.all(
-    FRAMEWORK_PORTS.map(async ({ framework, port }) => {
-      const childProcess = loadFramework(framework.toLowerCase());
+  const results: autocannon.Result[] = [];
 
-      const result = await benchmark(framework, port);
+  for (const { framework, port } of FRAMEWORK_PORTS) {
+    const childProcess = loadFramework(framework.toLowerCase());
 
-      if (childProcess.pid) kill(childProcess.pid, 'SIGKILL');
+    const result = await benchmark(framework, port);
 
-      return result;
-    })
-  );
+    if (childProcess.pid) kill(childProcess.pid, 'SIGKILL');
+
+    results.push(result);
+
+    // Sleep for 3 seconds
+    await Bun.sleep(3000);
+  }
 
   return results;
 }
