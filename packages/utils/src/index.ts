@@ -1,8 +1,8 @@
 import { $ } from 'bun';
 import { resolve } from 'node:path';
-import { build as tsup } from 'tsup';
+import { build as tsup, type Options } from 'tsup';
 
-export async function build(source: string) {
+export async function build(source: string, options: Options = {}) {
   await $`rm -rf ${resolve(source, 'dist')}`;
 
   await tsup({
@@ -14,6 +14,7 @@ export async function build(source: string) {
     minify: false,
     sourcemap: false,
     dts: true,
+    ...options,
   });
 
   process.exit();
