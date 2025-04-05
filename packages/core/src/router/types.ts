@@ -30,7 +30,7 @@ export interface Route<
   method: ApiMethod;
   path: string;
   handler: Handler<V, P, Q, S>;
-  middleware: Middleware<V, P, Q, S>[];
+  middlewares: Middleware<V, P, Q, S>[];
 }
 
 export type ExtractPathParams<Path extends string> =
@@ -45,3 +45,10 @@ export type ExtractPathParams<Path extends string> =
           [K in Param]: string;
         }
       : NonNullable<unknown>;
+
+export interface ResolveMiddlewareOptions {
+  path: string;
+  globalMiddlewares: Middleware[];
+  pathMiddlewares: Record<string, Middleware[]>;
+  middlewares: Middleware[];
+}

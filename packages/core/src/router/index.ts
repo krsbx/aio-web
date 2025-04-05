@@ -10,7 +10,6 @@ export class Router<BasePath extends string> {
   public readonly routesTree: TrieNode;
   public readonly middlewares: Middleware[];
   public readonly pathMiddlewares: Record<string, Middleware[]>;
-  public readonly composedMiddlewares: Record<string, Middleware[]>;
 
   public register: RouterHelperContract<BasePath>['register'];
 
@@ -19,7 +18,6 @@ export class Router<BasePath extends string> {
 
     this.middlewares = [];
     this.pathMiddlewares = {};
-    this.composedMiddlewares = {};
     this.basePath = basePath as BasePath;
 
     this.register = register.bind(this);
@@ -375,7 +373,7 @@ export class Router<BasePath extends string> {
         subRoute.method,
         subRoute.path.replace(fullPath, ''),
         subRoute.handler,
-        subRoute.middleware
+        subRoute.middlewares
       );
     }
 

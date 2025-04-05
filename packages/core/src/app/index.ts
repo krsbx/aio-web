@@ -50,7 +50,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
 
     return composer({
       request: req,
-      middlewares: this.composedMiddlewares[found.route.path]!,
+      middlewares: found.route.middlewares,
       onError: this._onError,
       params: found.params,
       route: found.route,
@@ -68,7 +68,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
       routes[path][route.method] = async (req: BunRequest) =>
         composer({
           request: req,
-          middlewares: this.composedMiddlewares[path]!,
+          middlewares: route.middlewares,
           onError: this._onError,
           params: req.params,
           route: route,

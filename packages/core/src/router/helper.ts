@@ -1,29 +1,30 @@
 import type { Router } from '.';
 import type { ApiMethod } from '../app/constants';
-import type { Handler, Middleware, Route } from './types';
+import type {
+  Handler,
+  Middleware,
+  ResolveMiddlewareOptions,
+  Route,
+} from './types';
 import { joinPaths } from './utilities';
 
-function resolveMiddlewares<BasePath extends string>(
-  this: Router<BasePath>,
-  path: string,
-  middlewares: Middleware[]
-) {
-  const combined = [...this.middlewares];
+function resolveMiddlewares(options: ResolveMiddlewareOptions) {
+  const combined = [...options.globalMiddlewares];
 
   // Sort pathMiddlewares keys from longest to shortest
-  const sortedPaths = Object.keys(this.pathMiddlewares).sort(
+  const sortedPaths = Object.keys(options.pathMiddlewares).sort(
     (a, b) => b.length - a.length
   );
 
   for (const prefix of sortedPaths) {
-    if (path.startsWith(prefix)) {
-      combined.push(...this.pathMiddlewares[prefix]);
+    if (options.path.startsWith(prefix)) {
+      combined.push(...options.pathMiddlewares[prefix]);
     }
   }
 
-  combined.push(...middlewares);
+  combined.push(...options.middlewares);
 
-  this.composedMiddlewares[path] = combined;
+  return combined;
 }
 
 export function register<
@@ -37,7 +38,7 @@ export function register<
   method: ApiMethod,
   path: string,
   handler: Handler<V, P, Q, S>,
-  middleware: Middleware<V, P, Q, S>[]
+  middlewares: Middleware[]
 ) {
   const pathWithBase = joinPaths(this.basePath, path);
   const parts = pathWithBase.split('/').filter(Boolean);
@@ -46,12 +47,15 @@ export function register<
     method,
     path: pathWithBase,
     handler,
-    middleware,
+    middlewares: resolveMiddlewares({
+      globalMiddlewares: this.middlewares,
+      middlewares: middlewares,
+      pathMiddlewares: this.pathMiddlewares,
+      path,
+    }),
   } as Route;
 
   this.routesTree.insert(parts, routeEntry);
-
-  resolveMiddlewares.call(this, pathWithBase, middleware as Middleware[]);
 
   return this;
 }
