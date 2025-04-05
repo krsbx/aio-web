@@ -69,7 +69,8 @@ export function prettifyMarkdown(markdown: string) {
 export async function writeToMarkdown(
   distPath: string,
   results: autocannon.Result[],
-  runtime: 'node' | 'bun'
+  runtime: 'node' | 'bun',
+  suffix: string = ''
 ) {
   const date = dayjs().format('MMMM D, YYYY hh:mm:ss A Z');
   const markdown = constructMarkdown(results);
@@ -89,7 +90,7 @@ export async function writeToMarkdown(
     markdown,
   ].join('\n');
   const prettifiedMarkdown = await prettifyMarkdown(content);
-  const fileName = `benchmark-${runtime}.md`;
+  const fileName = `benchmark${suffix ? `-${suffix}` : ''}.md`;
   const finalPath = path.join(distPath, fileName);
 
   if (await isExists(finalPath)) {
