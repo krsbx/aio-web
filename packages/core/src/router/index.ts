@@ -1,3 +1,4 @@
+import { ApiMethod, ApiMethods } from '../app/constants';
 import type { RouterHelperContract } from './contract';
 import { register } from './helper';
 import type { ExtractPathParams, Handler, Middleware, Route } from './types';
@@ -108,7 +109,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    return this.register('GET', path, handler, middleware);
+    return this.register(ApiMethod.GET, path, handler, middleware);
   }
 
   public post<
@@ -150,7 +151,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    return this.register('POST', path, handler, middleware);
+    return this.register(ApiMethod.POST, path, handler, middleware);
   }
 
   public put<
@@ -192,7 +193,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    return this.register('PUT', path, handler, middleware);
+    return this.register(ApiMethod.PUT, path, handler, middleware);
   }
 
   public patch<
@@ -234,7 +235,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    return this.register('PATCH', path, handler, middleware);
+    return this.register(ApiMethod.PATCH, path, handler, middleware);
   }
 
   public delete<
@@ -276,7 +277,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    return this.register('DELETE', path, handler, middleware);
+    return this.register(ApiMethod.DELETE, path, handler, middleware);
   }
 
   public options<
@@ -318,7 +319,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    return this.register('OPTIONS', path, handler, middleware);
+    return this.register(ApiMethod.OPTIONS, path, handler, middleware);
   }
 
   public all<
@@ -360,7 +361,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    for (const method of ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
+    for (const method of ApiMethods) {
       this.register(method, path, handler, middleware);
     }
 

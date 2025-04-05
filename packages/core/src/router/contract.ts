@@ -1,4 +1,5 @@
 import type { Router } from '.';
+import type { ApiMethod } from '../app/constants';
 import type { Handler, Middleware } from './types';
 
 export interface RouterHelperContract<BasePath extends string> {
@@ -9,7 +10,7 @@ export interface RouterHelperContract<BasePath extends string> {
     S extends Record<string, unknown> = NonNullable<unknown>,
   >(
     this: Router<BasePath>,
-    method: string,
+    method: ApiMethod,
     path: string,
     handler: Handler<V, P, Q, S>,
     middleware: Middleware<V, P, Q, S>[]
