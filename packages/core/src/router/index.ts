@@ -1,15 +1,13 @@
 import { ApiMethod, ApiMethods } from '../app/constants';
 import type { RouterHelperContract } from './contract';
 import { register } from './helper';
-import type { ExtractPathParams, Handler, Middleware, Route } from './types';
+import { TrieNode } from './trie';
+import type { ExtractPathParams, Handler, Middleware } from './types';
 import { joinPaths } from './utilities';
 
 export class Router<BasePath extends string> {
   public basePath: BasePath;
-  public readonly staticRoutes: Route[];
-  public readonly staticRoutesMap: Map<string, Route>;
-  public readonly dynamicRoutes: Route[];
-  public readonly wildcardRoutes: Route[];
+  public readonly routesTree: TrieNode;
   public readonly middlewares: Middleware[];
   public readonly pathMiddlewares: Record<string, Middleware[]>;
   public readonly composedMiddlewares: Record<string, Middleware[]>;
@@ -17,10 +15,8 @@ export class Router<BasePath extends string> {
   public register: RouterHelperContract<BasePath>['register'];
 
   public constructor(basePath: BasePath = '' as BasePath) {
-    this.staticRoutes = [];
-    this.staticRoutesMap = new Map();
-    this.dynamicRoutes = [];
-    this.wildcardRoutes = [];
+    this.routesTree = new TrieNode();
+
     this.middlewares = [];
     this.pathMiddlewares = {};
     this.composedMiddlewares = {};
@@ -442,10 +438,6 @@ export class Router<BasePath extends string> {
   }
 
   public get routes() {
-    return [
-      ...this.staticRoutes,
-      ...this.dynamicRoutes,
-      ...this.wildcardRoutes,
-    ];
+    return this.routesTree.collectRoutes(this.basePath);
   }
 }

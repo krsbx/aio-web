@@ -33,17 +33,14 @@ export async function composer({
 
     return ctx.res!;
   } catch (error) {
+    ctx.status(StatusCode.INTERNAL_SERVER_ERROR);
+
     if (onError) {
       return onError(error, ctx);
     }
 
-    return Response.json(
-      {
-        message: 'Internal Server Error',
-      },
-      {
-        status: StatusCode.INTERNAL_SERVER_ERROR,
-      }
-    );
+    return ctx.json({
+      message: 'Internal Server Error',
+    });
   }
 }
