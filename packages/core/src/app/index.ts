@@ -5,7 +5,7 @@ import { composer } from './composer';
 import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
 import type { ApiMethod } from './constants';
 import { StatusCode } from '../context/constants';
-import { extractPathname } from './utilitites';
+import { extractPathParts } from './utilitites';
 
 export class Ignisia<BasePath extends string> extends Router<BasePath> {
   protected _onError: OnError | null;
@@ -18,8 +18,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
     this._onNotFound = null;
   }
 
-  public match(method: ApiMethod, url: string) {
-    const parts = url.split('/').filter(Boolean);
+  public match(method: ApiMethod, parts: string[]) {
     return this.routesTree.match(parts, method);
   }
 
@@ -32,8 +31,8 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const pathname = extractPathname(req.url);
-    const found = this.match(req.method as ApiMethod, pathname);
+    const parts = extractPathParts(req);
+    const found = this.match(req.method as ApiMethod, parts);
 
     if (!found) {
       if (this._onNotFound) {
