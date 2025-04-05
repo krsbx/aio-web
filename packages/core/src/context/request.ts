@@ -1,8 +1,9 @@
-import type { ContextCache, ParsedForm } from './types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { parseCookies, parseFormData, parseQuery } from './parser';
+import type { ContextCache, ParsedForm } from './types';
 
 export class ContextRequest<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-constraint
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
   Values extends any = any,
   Params extends Record<string, string> = NonNullable<unknown>,
   Query extends Record<string, string> = NonNullable<unknown>,
@@ -22,7 +23,10 @@ export class ContextRequest<
   }
 
   public params(): Params;
-  public params<K extends keyof Params | (string & {})>(key: K): Params[K];
+  public params<
+    K extends keyof Params | (string & {}),
+    V extends K extends keyof Params ? Params[K] : string,
+  >(key: K): V;
   public params<K extends keyof Params | (string & {})>(key?: K) {
     if (key) return this._params[key];
 
@@ -30,7 +34,10 @@ export class ContextRequest<
   }
 
   public query(): Query;
-  public query<K extends keyof Query | (string & {})>(key: K): Query[K];
+  public query<
+    K extends keyof Query | (string & {}),
+    V extends K extends keyof Query ? Query[K] : string,
+  >(key: K): V;
   public query<K extends keyof Query | (string & {})>(key?: K) {
     if (!this._query) {
       this._query = parseQuery(this.url.searchParams) as Query;
@@ -41,12 +48,12 @@ export class ContextRequest<
     return this._query;
   }
 
-  public async json(): Promise<Values> {
+  public async json<T extends Values = any>(): Promise<T> {
     if (!this._cache.json) {
       this._cache.json = await this._request.json();
     }
 
-    return this._cache.json!;
+    return this._cache.json as T;
   }
 
   public async text(): Promise<string> {
@@ -74,14 +81,13 @@ export class ContextRequest<
   }
 
   public async formData<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    FinalValue extends Values extends Record<string, any>
-      ? ParsedForm<Values>
-      : never,
+    T extends Values = any,
+    FinalValue extends T extends Record<string, any>
+      ? ParsedForm<T>
+      : never = T extends Record<string, any> ? ParsedForm<T> : never,
   >(): Promise<FinalValue>;
   public async formData(raw: true): Promise<FormData>;
   public async formData<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     FinalValue extends Values extends Record<string, any>
       ? ParsedForm<Values>
       : never,

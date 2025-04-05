@@ -1,16 +1,6 @@
-import type { ServeOptions } from 'bun';
-import { Context } from '../context';
-import { composer } from './composer';
 import type { RouterHelperContract } from './contract';
-import { match, register } from './helper';
-import type {
-  ExtractPathParams,
-  Handler,
-  Middleware,
-  OnError,
-  OnNotFound,
-  Route,
-} from './types';
+import { register } from './helper';
+import type { ExtractPathParams, Handler, Middleware, Route } from './types';
 import { joinPaths } from './utilities';
 
 export class Router<BasePath extends string> {
@@ -19,15 +9,10 @@ export class Router<BasePath extends string> {
   public readonly staticRoutesMap: Map<string, Route>;
   public readonly dynamicRoutes: Route[];
   public readonly wildcardRoutes: Route[];
+  public readonly middlewares: Middleware[];
+  public readonly pathMiddlewares: Record<string, Middleware[]>;
+  public readonly composedMiddlewares: Record<string, Middleware[]>;
 
-  private middlewares: Middleware[];
-  private _onError: OnError | null;
-  private _onNotFound: OnNotFound | null;
-
-  private pathMiddlewares: Record<string, Middleware[]>;
-  public composedMiddlewares: Record<string, Middleware[]>;
-
-  public match: RouterHelperContract<BasePath>['match'];
   public register: RouterHelperContract<BasePath>['register'];
 
   public constructor(basePath: BasePath = '' as BasePath) {
@@ -39,10 +24,7 @@ export class Router<BasePath extends string> {
     this.pathMiddlewares = {};
     this.composedMiddlewares = {};
     this.basePath = basePath as BasePath;
-    this._onError = null;
-    this._onNotFound = null;
 
-    this.match = match.bind(this);
     this.register = register.bind(this);
   }
 
@@ -53,7 +35,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(...mws: Middleware<Values, Params, Query, State>[]): void;
+  >(...mws: Middleware<Values, Params, Query, State>[]): this;
   public use<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -61,7 +43,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, ...mws: Middleware<Values, Params, Query, State>[]): void;
+  >(path: Path, ...mws: Middleware<Values, Params, Query, State>[]): this;
   public use<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -83,25 +65,8 @@ export class Router<BasePath extends string> {
     } else {
       this.middlewares.push(...(args as Middleware[]));
     }
-  }
 
-  private resolveMiddlewares(path: string, routeMiddleware: Middleware[]) {
-    const combined: Middleware[] = [...this.middlewares];
-
-    // Sort pathMiddlewares keys from longest to shortest
-    const sortedPaths = Object.keys(this.pathMiddlewares).sort(
-      (a, b) => b.length - a.length
-    );
-
-    for (const prefix of sortedPaths) {
-      if (path.startsWith(prefix)) {
-        combined.push(...this.pathMiddlewares[prefix]);
-      }
-    }
-
-    combined.push(...routeMiddleware);
-
-    this.composedMiddlewares[path] = combined;
+    return this;
   }
 
   public get<
@@ -111,7 +76,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public get<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -125,7 +90,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
-  ): void;
+  ): this;
   public get<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -143,7 +108,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    this.register('GET', path, handler, middleware);
+    return this.register('GET', path, handler, middleware);
   }
 
   public post<
@@ -153,21 +118,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
-  public post<
-    Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
-  >(
-    path: Path,
-    ...mws: [
-      ...Middleware<Values, Params, Query, State>[],
-      Handler<Values, Params, Query, State>,
-    ]
-  ): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public post<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -181,11 +132,25 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
+  ): this;
+  public post<
+    Path extends string,
+    FullPath extends `${BasePath}${Path}`,
+    Values,
+    Params extends ExtractPathParams<FullPath>,
+    Query extends Record<string, string>,
+    State extends Record<string, unknown>,
+  >(
+    path: Path,
+    ...mws: [
+      ...Middleware<Values, Params, Query, State>[],
+      Handler<Values, Params, Query, State>,
+    ]
   ) {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    this.register('POST', path, handler, middleware);
+    return this.register('POST', path, handler, middleware);
   }
 
   public put<
@@ -195,7 +160,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public put<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -209,7 +174,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
-  ): void;
+  ): this;
   public put<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -227,7 +192,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    this.register('PUT', path, handler, middleware);
+    return this.register('PUT', path, handler, middleware);
   }
 
   public patch<
@@ -237,7 +202,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public patch<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -251,7 +216,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
-  ): void;
+  ): this;
   public patch<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -269,7 +234,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    this.register('PATCH', path, handler, middleware);
+    return this.register('PATCH', path, handler, middleware);
   }
 
   public delete<
@@ -279,7 +244,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public delete<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -293,7 +258,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
-  ): void;
+  ): this;
   public delete<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -311,7 +276,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    this.register('DELETE', path, handler, middleware);
+    return this.register('DELETE', path, handler, middleware);
   }
 
   public options<
@@ -321,7 +286,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public options<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -335,7 +300,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
-  ): void;
+  ): this;
   public options<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -353,7 +318,7 @@ export class Router<BasePath extends string> {
     const handler = mws.pop() as Handler<Values, Params, Query, State>;
     const middleware = mws as Middleware<Values, Params, Query, State>[];
 
-    this.register('OPTIONS', path, handler, middleware);
+    return this.register('OPTIONS', path, handler, middleware);
   }
 
   public all<
@@ -363,7 +328,7 @@ export class Router<BasePath extends string> {
     Params extends ExtractPathParams<FullPath>,
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
-  >(path: Path, handler: Handler<Values, Params, Query, State>): void;
+  >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public all<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -377,7 +342,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       Handler<Values, Params, Query, State>,
     ]
-  ): void;
+  ): this;
   public all<
     Path extends string,
     FullPath extends `${BasePath}${Path}`,
@@ -398,12 +363,42 @@ export class Router<BasePath extends string> {
     for (const method of ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
       this.register(method, path, handler, middleware);
     }
+
+    return this;
+  }
+
+  public route<Path extends string, FullPath extends `${BasePath}${Path}`>(
+    path: Path,
+    route: Router<Path>
+  ): this {
+    const fullPath = joinPaths(this.basePath, path) as FullPath;
+
+    for (const subRoute of route.routes) {
+      this.register(
+        subRoute.method,
+        subRoute.path.replace(fullPath, ''),
+        subRoute.handler,
+        subRoute.middleware
+      );
+    }
+
+    for (const subPath in route.pathMiddlewares) {
+      const fullPath = `${this.basePath}${path}${subPath}`;
+
+      if (!this.pathMiddlewares[fullPath]) {
+        this.pathMiddlewares[fullPath] = [];
+      }
+
+      this.pathMiddlewares[fullPath].push(...route.pathMiddlewares[subPath]);
+    }
+
+    return this;
   }
 
   public group<
     GroupPath extends string,
     FullPath extends `${BasePath}${GroupPath}`,
-  >(path: GroupPath, router: (router: Router<FullPath>) => void): void;
+  >(path: GroupPath, router: (router: Router<FullPath>) => void): this;
   public group<
     GroupPath extends string,
     FullPath extends `${BasePath}${GroupPath}`,
@@ -417,7 +412,7 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       (router: Router<FullPath>) => void,
     ]
-  ): void;
+  ): this;
   public group<
     GroupPath extends string,
     FullPath extends `${BasePath}${GroupPath}`,
@@ -431,8 +426,8 @@ export class Router<BasePath extends string> {
       ...Middleware<Values, Params, Query, State>[],
       (router: Router<FullPath>) => void,
     ]
-  ): void {
-    const callback = mws.pop() as (router: Router<FullPath>) => void;
+  ): this {
+    const callback = mws.pop() as (router: Router<FullPath>) => this;
     const middlewares = mws as unknown as Middleware[];
 
     const fullPath = joinPaths(this.basePath, path) as FullPath;
@@ -442,26 +437,7 @@ export class Router<BasePath extends string> {
 
     callback(subRouter);
 
-    for (const route of subRouter.routes) {
-      this.register(
-        route.method,
-        route.path.replace(fullPath, ''), // strip off base path
-        route.handler,
-        route.middleware
-      );
-    }
-
-    for (const subPath in subRouter.pathMiddlewares) {
-      const fullPath = `${this.basePath}${path}${subPath}`;
-
-      if (!this.pathMiddlewares[fullPath]) {
-        this.pathMiddlewares[fullPath] = [];
-      }
-
-      this.pathMiddlewares[fullPath].push(
-        ...subRouter.pathMiddlewares[subPath]
-      );
-    }
+    return this.route(path as unknown as FullPath, subRouter);
   }
 
   public get routes() {
@@ -470,48 +446,5 @@ export class Router<BasePath extends string> {
       ...this.dynamicRoutes,
       ...this.wildcardRoutes,
     ];
-  }
-
-  public onError(onError: OnError) {
-    this._onError = onError;
-  }
-
-  public onNotFound(onNotFound: OnNotFound) {
-    this._onNotFound = onNotFound;
-  }
-
-  public async handle(req: Request): Promise<Response> {
-    const pathStart = req.url.indexOf('/', req.url.indexOf('://') + 3);
-
-    const pathname =
-      req.url.slice(pathStart).split('?')[0].replace(/\/+$/, '') || '/';
-    const found = this.match(req.method, pathname);
-
-    if (!found) {
-      if (this._onNotFound) {
-        return this._onNotFound(new Context(req, {}));
-      }
-
-      return new Response('Not Found', { status: 404 });
-    }
-
-    return composer({
-      request: req,
-      middlewares: this.composedMiddlewares[found.route.path],
-      onError: this._onError,
-      params: found.params,
-      route: found.route,
-    });
-  }
-
-  public fetch = (req: Request) => {
-    return this.handle(req);
-  };
-
-  public listen(options?: Omit<ServeOptions, 'fetch'>) {
-    return Bun.serve({
-      fetch: this.fetch,
-      ...options,
-    });
   }
 }
