@@ -11,27 +11,25 @@ export async function composer({
 }: ComposerOptions) {
   const ctx = new Context(request, params);
 
-  let i = -1;
-
   try {
-    const dispatch = async (index: number): Promise<void> => {
-      if (index <= i) return;
+    let index = 0;
 
-      i = index;
+    while (index < middlewares.length) {
+      const mw = middlewares[index];
+      let nextCalled = false;
 
-      const fn =
-        middlewares[index] ||
-        (async () => {
-          const res = await route.handler(ctx);
-          ctx.res = res;
-        });
+      await mw(ctx, async () => {
+        nextCalled = true;
+        index++;
+      });
 
-      await fn(ctx, () => dispatch(index + 1));
-    };
+      if (!nextCalled) break;
+    }
 
-    await dispatch(0);
+    const res = await route.handler(ctx);
+    ctx.res = res;
 
-    return ctx.res!;
+    return ctx.res;
   } catch (error) {
     ctx.status(StatusCode.INTERNAL_SERVER_ERROR);
 
