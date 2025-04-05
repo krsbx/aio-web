@@ -1,3 +1,4 @@
+import type { ApiMethod } from '../app/constants';
 import type { Context } from '../context';
 
 export type Middleware<
@@ -26,7 +27,7 @@ export interface Route<
   Q extends Record<string, string> = NonNullable<unknown>,
   S extends Record<string, unknown> = NonNullable<unknown>,
 > {
-  method: string;
+  method: ApiMethod;
   path: string;
   handler: Handler<V, P, Q, S>;
   middleware: Middleware<V, P, Q, S>[];
