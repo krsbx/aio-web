@@ -5,6 +5,7 @@ import { composer } from './composer';
 import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
 import type { ApiMethod } from './constants';
 import { StatusCode } from '../context/constants';
+import { extractPathname } from './utilitites';
 
 export class Ignisia<BasePath extends string> extends Router<BasePath> {
   protected _onError: OnError | null;
@@ -31,10 +32,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const pathStart = req.url.indexOf('/', req.url.indexOf('://') + 3);
-
-    const pathname =
-      req.url.slice(pathStart).split('?')[0]!.replace(/\/+$/, '') || '/';
+    const pathname = extractPathname(req.url);
     const found = this.match(req.method as ApiMethod, pathname);
 
     if (!found) {
