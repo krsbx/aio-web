@@ -41,40 +41,11 @@ export function register<
   const pathWithBase = joinPaths(this.basePath, path);
   const parts = pathWithBase.split('/').filter(Boolean);
 
-  const keys: string[] = [];
-  let patternStr = '^';
-
-  if (pathWithBase === '*') {
-    patternStr = '.*';
-  } else {
-    const segments = pathWithBase.split('/').filter(Boolean);
-
-    for (const segment of segments) {
-      if (segment === '*') {
-        const wildcardKey = `wildcard${keys.length}`;
-        keys.push(wildcardKey);
-        patternStr += '/(.*?)';
-      } else if (segment.startsWith(':')) {
-        const key = segment.slice(1);
-        keys.push(key);
-        patternStr += '/([^/]+)';
-      } else {
-        patternStr += '/' + segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      }
-    }
-
-    patternStr += '/?$'; // Optional trailing slash
-  }
-
-  const pattern = new RegExp(patternStr);
-
   const routeEntry = {
     method,
     path: pathWithBase,
     handler,
     middleware,
-    pattern,
-    keys,
   } as Route;
 
   this.routesTree.insert(parts, routeEntry);

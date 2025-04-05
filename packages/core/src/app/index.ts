@@ -61,12 +61,14 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
     const routes: NativeRoutes = {};
 
     for (const route of this.routes) {
-      if (!routes[route.path]) routes[route.path] = {};
+      const path = route.path.startsWith('/') ? route.path : `/${route.path}`;
 
-      routes[route.path][route.method] = async (req: BunRequest) =>
+      if (!routes[path]) routes[path] = {};
+
+      routes[path][route.method] = async (req: BunRequest) =>
         composer({
           request: req,
-          middlewares: this.composedMiddlewares[route.path]!,
+          middlewares: this.composedMiddlewares[path]!,
           onError: this._onError,
           params: req.params,
           route: route,
@@ -82,10 +84,10 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
 
   /**
    * Listen on the specified port, defaulting to 3000
-   * By default will use Bun's fetch instead of routes
+   * By default will use Bun's routes instead of fetch
    */
   public listen({
-    routes: isWithRoutes = false,
+    routes: isWithRoutes = true,
     ...options
   }: ListenOptions = {}) {
     return Bun.serve({
