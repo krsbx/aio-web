@@ -8,6 +8,8 @@ import type { Page } from './types/page';
 export function toRoutePath(path: string) {
   const normalizedPath = path
     .replace(/^\/+/, '') // remove leading slashes
+    .replace(/^pages\//, '') // remove pages/
+    .replace(/^api\//, '') // remove api/
     .replace(/\.(tsx|ts|js|jsx)$/, '') // remove extension
     .replace(/\/index$/, '') // remove trailing /index
     .replace(/\[(.+?)\]/g, ':$1'); // convert [param] to :param
