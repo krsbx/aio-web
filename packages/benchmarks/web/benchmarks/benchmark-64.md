@@ -1,19 +1,19 @@
 # Autocannon Benchmarks
 
 **Runtime**: bun
-**Date**: April 5, 2025 04:56:58 PM +07:00
+**Date**: April 5, 2025 05:42:58 PM +07:00
 **CPU**: M2
 **RAM**: 16384.00 MB
-**Connections**: 100
+**Connections**: 64
 **Duration**: 30 seconds
 **Pipelining**: 10
 
 ## Results
 
-| Framework   | Total Requests | RPS (req/sec) | P50 Latency (ms) | P75 Latency (ms) | P90 Latency (ms) | P99 Latency (ms) | Avg Latency (ms) | Min Latency (ms) | Max Latency (ms) |
-| ----------- | -------------- | ------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- |
-| Ignisia     | 931083.00      | 31025.76      | 47 ms            | 65 ms            | 91 ms            | 117 ms           | 57.4 ms          | 6 ms             | 155 ms           |
-| Ignisia-Bun | 1684101.00     | 56117.99      | 244 ms           | 333 ms           | 464 ms           | 705 ms           | 266.59 ms        | 8 ms             | 3611 ms          |
-| Hono        | 1290608.00     | 43005.93      | 770 ms           | 1055 ms          | 1461 ms          | 2053 ms          | 791.67 ms        | 2 ms             | 6409 ms          |
-| Bun         | 1593302.00     | 53092.37      | 147 ms           | 220 ms           | 241 ms           | 342 ms           | 173.48 ms        | 7 ms             | 695 ms           |
-| Elysia      | 40791.00       | 1331.30       | 3385 ms          | 5595 ms          | 7666 ms          | 15664 ms         | 3571.94 ms       | 111 ms           | 16773 ms         |
+| Framework   | Total Requests | RPS (req/sec) | Failed Requests | P50 Latency (ms) | P75 Latency (ms) | P90 Latency (ms) | P99 Latency (ms) | Avg Latency (ms) | Min Latency (ms) | Max Latency (ms) |
+| ----------- | -------------- | ------------- | --------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- |
+| Ignisia     | 922796.00      | 30749.62      | 0.00            | 83 ms            | 124 ms           | 136 ms           | 166 ms           | 96.35 ms         | 6 ms             | 229 ms           |
+| Ignisia-Bun | 941838.00      | 31384.14      | 0.00            | 366 ms           | 471 ms           | 826 ms           | 2557 ms          | 480.62 ms        | 7 ms             | 6587 ms          |
+| Hono        | 1448323.00     | 48261.35      | 0.00            | 460 ms           | 635 ms           | 924 ms           | 2290 ms          | 522.99 ms        | 9 ms             | 2813 ms          |
+| Bun         | 1538795.00     | 51276.07      | 0.00            | 193 ms           | 244 ms           | 349 ms           | 779 ms           | 215.12 ms        | 5 ms             | 1862 ms          |
+| Elysia      | 8240.00        | 270.52        | 0.00            | 808 ms           | 1356 ms          | 2061 ms          | 16442 ms         | 2124.73 ms       | 134 ms           | 16559 ms         |

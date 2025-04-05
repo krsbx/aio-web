@@ -11,6 +11,7 @@ export function constructResult(result: autocannon.Result) {
     framework: result.title || '',
     total: result.requests.total,
     rps: result.requests.total / result.duration,
+    failed: result['4xx'] + result['5xx'],
     latency: {
       p50: result.latency.p50,
       p75: result.latency.p75,
@@ -29,6 +30,7 @@ export function constructMarkdown(results: autocannon.Result[]) {
     'Framework',
     'Total Requests',
     'RPS (req/sec)',
+    'Failed Requests',
     'P50 Latency (ms)',
     'P75 Latency (ms)',
     'P90 Latency (ms)',
@@ -45,6 +47,7 @@ export function constructMarkdown(results: autocannon.Result[]) {
       result.framework,
       result.total.toFixed(2),
       result.rps.toFixed(2),
+      result.failed.toFixed(2),
       `${result.latency.p50} ms`,
       `${result.latency.p75} ms`,
       `${result.latency.p90} ms`,
@@ -70,7 +73,7 @@ export async function writeToMarkdown(
   distPath: string,
   results: autocannon.Result[],
   runtime: 'node' | 'bun',
-  suffix: string = ''
+  connections: number = BENCHMARK.CONNECTIONS
 ) {
   const date = dayjs().format('MMMM D, YYYY hh:mm:ss A Z');
   const markdown = constructMarkdown(results);
@@ -81,7 +84,7 @@ export async function writeToMarkdown(
     `**Date**: ${date}`,
     `**CPU**: ${(await system.cpu()).brand}`,
     `**RAM**: ${((await system.mem()).total / 1024 / 1024).toFixed(2)} MB`,
-    `**Connections**: ${BENCHMARK.CONNECTIONS}`,
+    `**Connections**: ${connections}`,
     `**Duration**: ${BENCHMARK.DURATION} seconds`,
     `**Pipelining**: ${BENCHMARK.PIPELINING}`,
     '',
@@ -90,7 +93,7 @@ export async function writeToMarkdown(
     markdown,
   ].join('\n');
   const prettifiedMarkdown = await prettifyMarkdown(content);
-  const fileName = `benchmark${suffix ? `-${suffix}` : ''}.md`;
+  const fileName = `benchmark-${connections}.md`;
   const finalPath = path.join(distPath, fileName);
 
   if (await isExists(finalPath)) {

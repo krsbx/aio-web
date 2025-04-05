@@ -33,8 +33,6 @@ export async function benchmarks(connections: number = BENCHMARK.CONNECTIONS) {
 
     results.push(result);
 
-    console.log();
-
     // Sleep for 3 seconds
     await Bun.sleep(3000);
   }
