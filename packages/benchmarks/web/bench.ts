@@ -11,8 +11,10 @@ for (const connection of connections) {
     path.resolve(__dirname, 'benchmarks'),
     result,
     'bun',
-    connection.toString()
+    connection
   );
+
+  console.log();
 }
 
 process.exit(0);
