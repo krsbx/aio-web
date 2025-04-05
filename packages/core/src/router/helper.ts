@@ -1,4 +1,5 @@
 import type { Router } from '.';
+import type { ApiMethod } from '../app/constants';
 import type { Handler, Middleware, Route } from './types';
 import { joinPaths } from './utilities';
 
@@ -33,7 +34,7 @@ export function register<
   S extends Record<string, unknown> = NonNullable<unknown>,
 >(
   this: Router<BasePath>,
-  method: string,
+  method: ApiMethod,
   path: string,
   handler: Handler<V, P, Q, S>,
   middleware: Middleware<V, P, Q, S>[]

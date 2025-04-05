@@ -15,7 +15,9 @@ export class Context<
   private _status: StatusCode;
   private _headers: Headers | undefined;
   private _cookie: ContextCookie | null;
-  private _req: ContextRequest<Values, Params, Query>;
+  private _params: Params;
+  private _request: Request;
+  private _req: ContextRequest<Values, Params, Query> | null;
   private _res: Response | null;
 
   public constructor(request: Request, params: Params) {
@@ -24,11 +26,17 @@ export class Context<
     this._status = StatusCode.OK;
     this._headers = undefined;
     this._cookie = null;
-    this._req = new ContextRequest<Values, Params, Query>(request, params);
+    this._request = request;
+    this._params = params;
+    this._req = null;
     this._res = null;
   }
 
   public get req() {
+    if (!this._req) {
+      this._req = new ContextRequest(this._request, this._params);
+    }
+
     return this._req;
   }
 
