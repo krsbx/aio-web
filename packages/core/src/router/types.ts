@@ -31,8 +31,6 @@ export interface Route<
   path: string;
   handler: Handler<V, P, Q, S>;
   middleware: Middleware<V, P, Q, S>[];
-  pattern: RegExp;
-  keys: string[];
 }
 
 export type ExtractPathParams<Path extends string> =
