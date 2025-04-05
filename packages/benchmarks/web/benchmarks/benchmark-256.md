@@ -1,7 +1,7 @@
 # Autocannon Benchmarks
 
 **Runtime**: bun
-**Date**: April 5, 2025 02:44:16 PM +07:00
+**Date**: April 5, 2025 04:59:44 PM +07:00
 **CPU**: M2
 **RAM**: 16384.00 MB
 **Connections**: 100
@@ -12,8 +12,8 @@
 
 | Framework   | Total Requests | RPS (req/sec) | P50 Latency (ms) | P75 Latency (ms) | P90 Latency (ms) | P99 Latency (ms) | Avg Latency (ms) | Min Latency (ms) | Max Latency (ms) |
 | ----------- | -------------- | ------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- | ---------------- |
-| Ignisia     | 940790.00      | 31349.22      | 1486 ms          | 2096 ms          | 3010 ms          | 4185 ms          | 1625.76 ms       | 17 ms            | 7165 ms          |
-| Ignisia-Bun | 1002426.00     | 33403.07      | 1037 ms          | 1514 ms          | 2032 ms          | 3606 ms          | 1173.1 ms        | 16 ms            | 6558 ms          |
-| Hono        | 1328429.00     | 44251.47      | 644 ms           | 860 ms           | 1147 ms          | 1886 ms          | 703.27 ms        | 11 ms            | 5712 ms          |
-| Bun         | 1531355.00     | 51028.16      | 505 ms           | 629 ms           | 936 ms           | 1930 ms          | 544.88 ms        | 4 ms             | 3494 ms          |
-| Elysia      | 86332.00       | 2788.50       | 1500 ms          | 2598 ms          | 4055 ms          | 7102 ms          | 1921.95 ms       | 18 ms            | 15085 ms         |
+| Ignisia     | 936792.00      | 31215.99      | 1578 ms          | 2328 ms          | 3144 ms          | 4719 ms          | 1717.71 ms       | 13 ms            | 6490 ms          |
+| Ignisia-Bun | 1531777.00     | 51042.22      | 585 ms           | 1115 ms          | 1546 ms          | 2588 ms          | 762.66 ms        | 9 ms             | 4506 ms          |
+| Hono        | 1300693.00     | 43341.99      | 751 ms           | 1283 ms          | 1867 ms          | 3092 ms          | 929.77 ms        | 12 ms            | 5801 ms          |
+| Bun         | 1483389.00     | 49429.82      | 473 ms           | 726 ms           | 1150 ms          | 2041 ms          | 560.79 ms        | 8 ms             | 5659 ms          |
+| Elysia      | 11359.00       | 367.72        | 523 ms           | 1449 ms          | 16815 ms         | 19007 ms         | 2524.73 ms       | 45 ms            | 19026 ms         |
