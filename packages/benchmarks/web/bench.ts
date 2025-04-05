@@ -2,8 +2,17 @@ import path from 'node:path';
 import { benchmarks } from './utilities/benchmark';
 import { writeToMarkdown } from './utilities/writer';
 
-benchmarks().then(async (result) => {
-  await writeToMarkdown(path.resolve(__dirname, 'benchmarks'), result, 'bun');
+const connections = [64, 256, 512];
 
-  process.exit(0);
-});
+for (const connection of connections) {
+  const result = await benchmarks(connection);
+
+  await writeToMarkdown(
+    path.resolve(__dirname, 'benchmarks'),
+    result,
+    'bun',
+    connection.toString()
+  );
+}
+
+process.exit(0);
