@@ -2,22 +2,24 @@ import type { BunRequest } from 'bun';
 import { Context } from '../context';
 import { Router } from '../router';
 import { composer } from './composer';
-import type { AppHelperContract } from './contract';
-import { match } from './helper';
 import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
+import type { ApiMethod } from './constants';
+import { StatusCode } from '../context/constants';
 
 export class Ignisia<BasePath extends string> extends Router<BasePath> {
   protected _onError: OnError | null;
   protected _onNotFound: OnNotFound | null;
-
-  public match: AppHelperContract<BasePath>['match'];
 
   public constructor(basePath: BasePath = '' as BasePath) {
     super(basePath);
 
     this._onError = null;
     this._onNotFound = null;
-    this.match = match.bind(this);
+  }
+
+  public match(method: ApiMethod, url: string) {
+    const parts = url.split('/').filter(Boolean);
+    return this.routesTree.match(parts, method);
   }
 
   public onError(onError: OnError) {
@@ -33,11 +35,14 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
 
     const pathname =
       req.url.slice(pathStart).split('?')[0]!.replace(/\/+$/, '') || '/';
-    const found = this.match(req.method, pathname);
+    const found = this.match(req.method as ApiMethod, pathname);
 
     if (!found) {
       if (this._onNotFound) {
-        return this._onNotFound(new Context(req, {}));
+        const ctx = new Context(req, {});
+        ctx.status(StatusCode.NOT_FOUND);
+
+        return this._onNotFound(ctx);
       }
 
       return new Response('Not Found', { status: 404 });

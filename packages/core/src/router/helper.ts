@@ -39,6 +39,7 @@ export function register<
   middleware: Middleware<V, P, Q, S>[]
 ) {
   const pathWithBase = joinPaths(this.basePath, path);
+  const parts = pathWithBase.split('/').filter(Boolean);
 
   const keys: string[] = [];
   let patternStr = '^';
@@ -76,14 +77,7 @@ export function register<
     keys,
   } as Route;
 
-  if (pathWithBase.includes('*')) {
-    this.wildcardRoutes.push(routeEntry);
-  } else if (keys.length > 0) {
-    this.dynamicRoutes.push(routeEntry);
-  } else {
-    this.staticRoutes.push(routeEntry);
-    this.staticRoutesMap.set(`${method}:${pathWithBase}`, routeEntry);
-  }
+  this.routesTree.insert(parts, routeEntry);
 
   resolveMiddlewares.call(this, pathWithBase, middleware as Middleware[]);
 
