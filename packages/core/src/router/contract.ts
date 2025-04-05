@@ -1,15 +1,7 @@
 import type { Router } from '.';
-import type { Handler, Middleware, Route } from './types';
+import type { Handler, Middleware } from './types';
 
 export interface RouterHelperContract<BasePath extends string> {
-  match(
-    this: Router<BasePath>,
-    method: string,
-    url: string
-  ): {
-    route: Route;
-    params: Record<string, string>;
-  } | null;
   register<
     V,
     P extends Record<string, string> = NonNullable<unknown>,
@@ -21,5 +13,5 @@ export interface RouterHelperContract<BasePath extends string> {
     path: string,
     handler: Handler<V, P, Q, S>,
     middleware: Middleware<V, P, Q, S>[]
-  ): void;
+  ): this;
 }

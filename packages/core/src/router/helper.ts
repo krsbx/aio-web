@@ -2,47 +2,27 @@ import type { Router } from '.';
 import type { Handler, Middleware, Route } from './types';
 import { joinPaths } from './utilities';
 
-function findRoutes(routes: Route[], method: string, url: string) {
-  for (const route of routes) {
-    if (route.method !== method) continue;
+function resolveMiddlewares<BasePath extends string>(
+  this: Router<BasePath>,
+  path: string,
+  middlewares: Middleware[]
+) {
+  const combined = [...this.middlewares];
 
-    const match = route.pattern.exec(url);
+  // Sort pathMiddlewares keys from longest to shortest
+  const sortedPaths = Object.keys(this.pathMiddlewares).sort(
+    (a, b) => b.length - a.length
+  );
 
-    if (!match) continue;
-
-    const params: Record<string, string> = {};
-
-    route.keys.forEach((key, i) => {
-      const value = match[i + 1];
-      if (value !== undefined) {
-        params[key] = decodeURIComponent(value);
-      }
-    });
-
-    return { route, params };
+  for (const prefix of sortedPaths) {
+    if (path.startsWith(prefix)) {
+      combined.push(...this.pathMiddlewares[prefix]);
+    }
   }
 
-  return null;
-}
+  combined.push(...middlewares);
 
-export function match<BasePath extends string>(
-  this: Router<BasePath>,
-  method: string,
-  url: string
-) {
-  const staticHit = this.staticRoutesMap.get(`${method}:${url}`);
-
-  if (staticHit) return { route: staticHit, params: {} };
-
-  const dynamicHit = findRoutes(this.dynamicRoutes, method, url);
-
-  if (dynamicHit) return dynamicHit;
-
-  const wildcardHit = findRoutes(this.wildcardRoutes, method, url);
-
-  if (wildcardHit) return wildcardHit;
-
-  return null;
+  this.composedMiddlewares[path] = combined;
 }
 
 export function register<
@@ -105,7 +85,7 @@ export function register<
     this.staticRoutesMap.set(`${method}:${pathWithBase}`, routeEntry);
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  this.resolveMiddlewares(pathWithBase, middleware as Middleware[]);
+  resolveMiddlewares.call(this, pathWithBase, middleware as Middleware[]);
+
+  return this;
 }
