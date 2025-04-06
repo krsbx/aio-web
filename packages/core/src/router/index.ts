@@ -415,7 +415,7 @@ export class Router<BasePath extends string> {
     const fullPath = joinPaths(this.basePath, path) as FullPath;
     const subRouter = new Router(fullPath);
 
-    subRouter.middlewares.push(...this.middlewares, ...middlewares);
+    subRouter.middlewares.push(...middlewares);
 
     callback(subRouter);
 
