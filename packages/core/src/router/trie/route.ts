@@ -3,31 +3,31 @@ import type { MatchResult } from '../../app/types';
 import type { Route } from '../types';
 
 export class TrieRouteNode {
-  public children: Map<string, TrieRouteNode>;
+  public children: Record<string, TrieRouteNode>;
   public paramChild: TrieRouteNode | null;
   public wildcardChild: TrieRouteNode | null;
   public paramName: string | null;
   public wildcardName: string | null;
-  public routes: Map<string, Route>;
+  public routes: Partial<Record<ApiMethod, Route>>;
 
   public constructor() {
-    this.children = new Map();
+    this.children = Object.create(null);
     this.paramChild = null;
     this.wildcardChild = null;
     this.paramName = null;
     this.wildcardName = null;
-    this.routes = new Map();
+    this.routes = Object.create(null);
   }
 
   public collectRoutes(path = '') {
     const routes: Route[] = [];
 
-    for (const [, route] of this.routes.entries()) {
+    for (const [, route] of Object.entries(this.routes)) {
       route.path = path;
       routes.push(route);
     }
 
-    for (const [segment, child] of this.children) {
+    for (const [segment, child] of Object.entries(this.children)) {
       routes.push(...child.collectRoutes(`${path}/${segment}`));
     }
 
@@ -67,14 +67,13 @@ export class TrieRouteNode {
 
         node = node.paramChild;
       } else {
-        if (!node.children.has(part))
-          node.children.set(part, new TrieRouteNode());
+        if (!node.children[part]) node.children[part] = new TrieRouteNode();
 
-        node = node.children.get(part)!;
+        node = node.children[part];
       }
     }
 
-    node.routes.set(route.method, route);
+    node.routes[route.method] = route;
   }
 
   public match(parts: string[], method: ApiMethod): MatchResult | null {
@@ -83,8 +82,8 @@ export class TrieRouteNode {
     const params: Record<string, string> = {};
 
     for (const part of parts) {
-      if (node.children.has(part)) {
-        node = node.children.get(part)!;
+      if (node.children[part]) {
+        node = node.children[part];
       } else if (node.paramChild) {
         params[node.paramChild.paramName!] = part;
         node = node.paramChild;
@@ -96,7 +95,7 @@ export class TrieRouteNode {
       }
     }
 
-    const route = node.routes.get(method);
+    const route = node.routes[method];
 
     if (!route) return null;
 

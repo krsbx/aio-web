@@ -1,11 +1,11 @@
 import type { Middleware } from '../types';
 
 export class TrieMiddlewareNode {
-  public children: Map<string, TrieMiddlewareNode>;
+  public children: Record<string, TrieMiddlewareNode>;
   public middlewares: Middleware[];
 
   public constructor() {
-    this.children = new Map();
+    this.children = Object.create(null);
     this.middlewares = [];
   }
 
@@ -14,10 +14,9 @@ export class TrieMiddlewareNode {
     let node: TrieMiddlewareNode = this;
 
     for (const part of parts) {
-      if (!node.children.has(part))
-        node.children.set(part, new TrieMiddlewareNode());
+      if (!node.children[part]) node.children[part] = new TrieMiddlewareNode();
 
-      node = node.children.get(part)!;
+      node = node.children[part];
     }
 
     node.middlewares.push(...middlewares);
@@ -33,7 +32,7 @@ export class TrieMiddlewareNode {
 
       middlewares.push(...node.middlewares);
 
-      node = node.children.get(part)!;
+      node = node.children[part];
     }
 
     return middlewares;
