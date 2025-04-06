@@ -55,12 +55,12 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public bunRoutes() {
-    const routes: NativeRoutes = {};
+    const routes: NativeRoutes = Object.create(null);
 
     for (const route of this.routes) {
       const path = route.path.startsWith('/') ? route.path : `/${route.path}`;
 
-      if (!routes[path]) routes[path] = {};
+      if (!routes[path]) routes[path] = Object.create(null);
 
       routes[path][route.method] = async (req: BunRequest) =>
         composer({

@@ -66,7 +66,7 @@ function parsePath(key: string): string[] {
 }
 
 export function parseFormData(form: FormData): ParsedForm {
-  const result: ParsedForm = {};
+  const result: ParsedForm = Object.create(null);
 
   for (const [key, value] of form.entries()) {
     assignDeep(result, parsePath(key), castValue(value));
@@ -76,7 +76,7 @@ export function parseFormData(form: FormData): ParsedForm {
 }
 
 export function parseQuery(query: URLSearchParams): ParsedQuery {
-  const result: ParsedQuery = {};
+  const result: ParsedQuery = Object.create(null);
 
   for (const [key, value] of query.entries()) {
     assignDeep(result, parsePath(key), castValue(value));
@@ -88,7 +88,7 @@ export function parseQuery(query: URLSearchParams): ParsedQuery {
 export function parseCookies(
   cookieHeader: string | null
 ): Record<string, string> {
-  const cookies: Record<string, string> = {};
+  const cookies: Record<string, string> = Object.create(null);
 
   if (!cookieHeader) return cookies;
 
