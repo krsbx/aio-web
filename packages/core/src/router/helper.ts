@@ -6,7 +6,7 @@ import type {
   ResolveMiddlewareOptions,
   Route,
 } from './types';
-import { joinPaths } from './utilities';
+import { joinPaths, extractPathParts } from '../utilities';
 
 function resolveMiddlewares(options: ResolveMiddlewareOptions) {
   const combined = [...options.globalMiddlewares];
@@ -41,7 +41,7 @@ export function register<
   middlewares: Middleware[]
 ) {
   const pathWithBase = joinPaths(this.basePath, path);
-  const parts = pathWithBase.split('/').filter(Boolean);
+  const parts = extractPathParts(pathWithBase);
 
   const routeEntry = {
     method,

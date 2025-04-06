@@ -1,3 +1,11 @@
+export function joinPaths(...paths: string[]) {
+  return paths
+    .map((p) => p.replace(/(^\/+|\/+$)/g, '')) // trim slashes
+    .filter(Boolean)
+    .join('/')
+    .replace(/^/, '/');
+}
+
 export function extractPathname(url: string): string {
   const pathStart = url.indexOf('/', url.indexOf('://') + 3);
   const pathname = url.slice(pathStart).split('?')[0]?.replace?.(/\/+$/, '');
@@ -5,8 +13,7 @@ export function extractPathname(url: string): string {
   return pathname || '/';
 }
 
-export function extractPathParts(req: Request): string[] {
-  const url = req.url;
+export function extractPathParts(url: string): string[] {
   const start = url.indexOf('/', url.indexOf('://') + 3);
 
   let end = url.indexOf('?', start);
@@ -22,6 +29,7 @@ export function extractPathParts(req: Request): string[] {
       if (i > segmentStart) {
         parts.push(url.slice(segmentStart, i));
       }
+
       segmentStart = i + 1;
     }
   }

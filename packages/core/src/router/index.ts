@@ -3,7 +3,7 @@ import type { RouterHelperContract } from './contract';
 import { register } from './helper';
 import { TrieNode } from './trie';
 import type { ExtractPathParams, Handler, Middleware } from './types';
-import { joinPaths } from './utilities';
+import { joinPaths } from '../utilities';
 
 export class Router<BasePath extends string> {
   public basePath: BasePath;
