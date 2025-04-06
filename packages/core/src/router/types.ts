@@ -1,5 +1,6 @@
 import type { ApiMethod } from '../app/constants';
 import type { Context } from '../context';
+import type { TrieMiddlewareNode } from './trie';
 
 export type Middleware<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,8 +48,8 @@ export type ExtractPathParams<Path extends string> =
       : NonNullable<unknown>;
 
 export interface ResolveMiddlewareOptions {
-  path: string;
+  parts: string[];
   globalMiddlewares: Middleware[];
-  pathMiddlewares: Record<string, Middleware[]>;
+  pathMiddlewares: TrieMiddlewareNode;
   middlewares: Middleware[];
 }

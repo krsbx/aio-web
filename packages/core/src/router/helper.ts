@@ -1,28 +1,19 @@
 import type { Router } from '.';
 import type { ApiMethod } from '../app/constants';
+import { extractPathPartsForRegister, joinPaths } from '../utilities';
 import type {
   Handler,
   Middleware,
   ResolveMiddlewareOptions,
   Route,
 } from './types';
-import { joinPaths, extractPathParts } from '../utilities';
 
 function resolveMiddlewares(options: ResolveMiddlewareOptions) {
-  const combined = [...options.globalMiddlewares];
-
-  // Sort pathMiddlewares keys from longest to shortest
-  const sortedPaths = Object.keys(options.pathMiddlewares).sort(
-    (a, b) => b.length - a.length
-  );
-
-  for (const prefix of sortedPaths) {
-    if (options.path.startsWith(prefix)) {
-      combined.push(...options.pathMiddlewares[prefix]);
-    }
-  }
-
-  combined.push(...options.middlewares);
+  const combined = [
+    ...options.globalMiddlewares,
+    ...options.pathMiddlewares.collect(options.parts),
+    ...options.middlewares,
+  ];
 
   return combined;
 }
@@ -41,7 +32,7 @@ export function register<
   middlewares: Middleware[]
 ) {
   const pathWithBase = joinPaths(this.basePath, path);
-  const parts = extractPathParts(pathWithBase);
+  const parts = extractPathPartsForRegister(pathWithBase);
 
   const routeEntry = {
     method,
@@ -51,7 +42,7 @@ export function register<
       globalMiddlewares: this.middlewares,
       middlewares: middlewares,
       pathMiddlewares: this.pathMiddlewares,
-      path,
+      parts,
     }),
   } as Route;
 

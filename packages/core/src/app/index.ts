@@ -2,7 +2,7 @@ import type { BunRequest } from 'bun';
 import { Context } from '../context';
 import { StatusCode } from '../context/constants';
 import { Router } from '../router';
-import { extractPathParts } from '../utilities';
+import { extractRegisteredPathParts } from '../utilities';
 import { composer } from './composer';
 import type { ApiMethod } from './constants';
 import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
@@ -31,7 +31,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const parts = extractPathParts(req.url);
+    const parts = extractRegisteredPathParts(req.url);
     const found = this.match(req.method as ApiMethod, parts);
 
     if (!found) {

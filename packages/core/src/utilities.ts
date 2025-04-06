@@ -13,7 +13,25 @@ export function extractPathname(url: string): string {
   return pathname || '/';
 }
 
-export function extractPathParts(url: string): string[] {
+export function extractPathPartsForRegister(path: string): string[] {
+  const parts: string[] = [];
+
+  let segmentStart = 1;
+
+  for (let i = segmentStart; i <= path.length; i++) {
+    if (i === path.length || path[i] === '/') {
+      if (i > segmentStart) {
+        parts.push(path.slice(segmentStart, i));
+      }
+
+      segmentStart = i + 1;
+    }
+  }
+
+  return parts;
+}
+
+export function extractRegisteredPathParts(url: string) {
   const start = url.indexOf('/', url.indexOf('://') + 3);
 
   let end = url.indexOf('?', start);

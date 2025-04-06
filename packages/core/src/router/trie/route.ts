@@ -1,11 +1,11 @@
-import type { ApiMethod } from '../app/constants';
-import type { MatchResult } from '../app/types';
-import type { Route } from './types';
+import type { ApiMethod } from '../../app/constants';
+import type { MatchResult } from '../../app/types';
+import type { Route } from '../types';
 
-export class TrieNode {
-  public children: Map<string, TrieNode>;
-  public paramChild: TrieNode | null;
-  public wildcardChild: TrieNode | null;
+export class TrieRouteNode {
+  public children: Map<string, TrieRouteNode>;
+  public paramChild: TrieRouteNode | null;
+  public wildcardChild: TrieRouteNode | null;
   public paramName: string | null;
   public wildcardName: string | null;
   public routes: Map<string, Route>;
@@ -49,25 +49,26 @@ export class TrieNode {
 
   public insert(parts: string[], route: Route) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let node: TrieNode = this;
+    let node: TrieRouteNode = this;
     let wildcardIndex = 0;
 
     for (const part of parts) {
       if (part === '*') {
-        if (!node.wildcardChild) node.wildcardChild = new TrieNode();
+        if (!node.wildcardChild) node.wildcardChild = new TrieRouteNode();
 
         node.wildcardChild.wildcardName = `wildcard${wildcardIndex}`;
         wildcardIndex++;
 
         node = node.wildcardChild;
       } else if (part.startsWith(':')) {
-        if (!node.paramChild) node.paramChild = new TrieNode();
+        if (!node.paramChild) node.paramChild = new TrieRouteNode();
 
         node.paramChild.paramName = part.slice(1);
 
         node = node.paramChild;
       } else {
-        if (!node.children.has(part)) node.children.set(part, new TrieNode());
+        if (!node.children.has(part))
+          node.children.set(part, new TrieRouteNode());
 
         node = node.children.get(part)!;
       }
@@ -78,7 +79,7 @@ export class TrieNode {
 
   public match(parts: string[], method: ApiMethod): MatchResult | null {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let node: TrieNode = this;
+    let node: TrieRouteNode = this;
     const params: Record<string, string> = {};
 
     for (const part of parts) {
