@@ -13,15 +13,17 @@ export async function composer({
 
   try {
     let index = 0;
+    let nextCalled = false;
+
+    async function next() {
+      nextCalled = true;
+      index++;
+    }
 
     while (index < middlewares.length) {
       const mw = middlewares[index];
-      let nextCalled = false;
 
-      await mw(ctx, async () => {
-        nextCalled = true;
-        index++;
-      });
+      await mw(ctx, next);
 
       if (!nextCalled) break;
     }
