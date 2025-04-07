@@ -1,5 +1,5 @@
-import { Context } from '../context';
 import { StatusCode } from '../context/constants';
+import { createContext } from '../context/factory';
 import type { ComposerOptions } from './types';
 
 export async function composer({
@@ -9,7 +9,7 @@ export async function composer({
   middlewares,
   onError,
 }: ComposerOptions) {
-  const ctx = new Context(request, params);
+  const ctx = createContext(request, params);
 
   try {
     let index = 0;
