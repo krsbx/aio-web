@@ -1,3 +1,4 @@
+import { generateHeaderEntries } from '../utilities';
 import { StatusCode } from './constants';
 import { ContextCookie } from './cookie';
 import { ContextRequest } from './request';
@@ -9,11 +10,9 @@ export class Context<
   Query extends Record<string, string> = NonNullable<unknown>,
   State extends Record<string, unknown> = NonNullable<unknown>,
 > {
-  public readonly request: Request;
-
   private _state: State;
   private _status: StatusCode;
-  private _headers: Headers | undefined;
+  private _headers: Record<string, string[]> | undefined;
   private _cookie: ContextCookie | null;
   private _params: Params;
   private _request: Request;
@@ -21,8 +20,7 @@ export class Context<
   private _res: Response | null;
 
   public constructor(request: Request, params: Params) {
-    this.request = request;
-    this._state = {} as State;
+    this._state = Object.create(null) as State;
     this._status = StatusCode.OK;
     this._headers = undefined;
     this._cookie = null;
@@ -53,7 +51,7 @@ export class Context<
   }
 
   public get res() {
-    if (!this._res) this._res = this.body(null);
+    if (!this._res) this._res = new Response('404 Not Found', { status: 404 });
 
     return this._res;
   }
@@ -72,13 +70,15 @@ export class Context<
   public header(key: string, value: string, append: false): Context;
   public header(key: string, value: string, append = true) {
     if (!this._headers) {
-      this._headers = new Headers();
+      this._headers = Object.create(null) as Record<string, string[]>;
     }
 
     if (append) {
-      this._headers.append(key, value);
+      if (!this._headers[key]) this._headers[key] = [];
+
+      this._headers[key].push(value);
     } else {
-      this._headers.set(key, value);
+      this._headers[key] = [value];
     }
 
     return this;
@@ -116,7 +116,7 @@ export class Context<
 
     return new Response(value, {
       status: this._status,
-      headers: this._headers,
+      headers: this._headers ? generateHeaderEntries(this._headers) : undefined,
     });
   }
 
@@ -154,9 +154,6 @@ export class Context<
     this.status(statusCode ?? StatusCode.MOVED_PERMANENTLY);
     this.header('Location', url);
 
-    return new Response(null, {
-      status: this._status,
-      headers: this._headers,
-    });
+    return this.body(null);
   }
 }

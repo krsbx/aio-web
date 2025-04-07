@@ -54,3 +54,19 @@ export function extractRegisteredPathParts(url: string) {
 
   return parts;
 }
+
+export function generateHeaderEntries(
+  headers: Record<string, string[]>
+): [string, string][] {
+  const entries: [string, string][] = [];
+
+  for (const key in headers) {
+    const values = headers[key];
+
+    for (let i = 0; i < values.length; i++) {
+      entries.push([key, values[i]]);
+    }
+  }
+
+  return entries;
+}
