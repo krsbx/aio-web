@@ -15,17 +15,22 @@ export async function composer({
     let index = 0;
     let nextCalled = false;
 
-    async function next() {
+    function next() {
       nextCalled = true;
-      index++;
     }
 
     while (index < middlewares.length) {
-      const mw = middlewares[index];
+      nextCalled = false;
 
-      await mw(ctx, next);
+      const res = await middlewares[index](ctx, next);
+
+      if (res instanceof Response) {
+        return res;
+      }
 
       if (!nextCalled) break;
+
+      index++;
     }
 
     const res = await route.handler(ctx);
@@ -33,14 +38,15 @@ export async function composer({
 
     return ctx.res;
   } catch (error) {
-    ctx.status(StatusCode.INTERNAL_SERVER_ERROR);
-
     if (onError) {
       return onError(error, ctx);
     }
 
-    return ctx.json({
-      message: 'Internal Server Error',
-    });
+    return Response.json(
+      { message: 'Internal Server Error' },
+      {
+        status: StatusCode.INTERNAL_SERVER_ERROR,
+      }
+    );
   }
 }

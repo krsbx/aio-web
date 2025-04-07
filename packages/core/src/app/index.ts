@@ -1,6 +1,5 @@
 import type { BunRequest } from 'bun';
 import { Context } from '../context';
-import { StatusCode } from '../context/constants';
 import { Router } from '../router';
 import { extractRegisteredPathParts } from '../utilities';
 import { composer } from './composer';
@@ -37,7 +36,6 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
     if (!found) {
       if (this._onNotFound) {
         const ctx = new Context(req, {});
-        ctx.status(StatusCode.NOT_FOUND);
 
         return this._onNotFound(ctx);
       }

@@ -10,8 +10,8 @@ export type Middleware<
   S extends Record<string, unknown> = NonNullable<unknown>,
 > = (
   ctx: Context<V, P, Q, S>,
-  next: () => Promise<void>
-) => Promise<void> | void;
+  next: () => Promise<void | Response> | void | Response
+) => Promise<void | Response> | void | Response;
 
 export type Handler<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
