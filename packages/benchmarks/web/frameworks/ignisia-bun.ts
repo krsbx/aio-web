@@ -14,4 +14,5 @@ console.log(
 app.listen({
   routes: true,
   port: PORT_ALLOCATION.IGNISIA_ROUTES,
+  development: false,
 });

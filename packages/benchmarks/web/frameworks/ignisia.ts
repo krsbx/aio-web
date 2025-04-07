@@ -12,4 +12,5 @@ console.log(`Ignisia server listening on port ${PORT_ALLOCATION.IGNISIA}`);
 app.listen({
   routes: false,
   port: PORT_ALLOCATION.IGNISIA,
+  development: false,
 });
