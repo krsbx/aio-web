@@ -49,7 +49,7 @@ export function createContextRequest<
   let url: URL | null = null;
   let query: Query | null = null;
 
-  const ctxReq = {
+  const ctxReq: CookieRequest<Values, Params, Query> = {
     params<
       K extends keyof Params | (string & {}),
       V extends K extends keyof Params ? Params[K] : string,
@@ -132,7 +132,7 @@ export function createContextRequest<
     get method() {
       return request.method;
     },
-  } satisfies CookieRequest<Values, Params, Query>;
+  };
 
   return ctxReq;
 }

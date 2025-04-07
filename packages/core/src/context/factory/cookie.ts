@@ -46,7 +46,7 @@ export function createContextCookie(ctx: Context) {
     }
   > = {};
 
-  const cookieCtx = {
+  const cookieCtx: ContextCookie = {
     get(key) {
       return cookie[key];
     },
@@ -75,7 +75,7 @@ export function createContextCookie(ctx: Context) {
 
       this.set(key, '', {}, false);
     },
-  } satisfies ContextCookie;
+  };
 
   return cookieCtx;
 }

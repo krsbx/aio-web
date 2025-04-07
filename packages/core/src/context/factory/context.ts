@@ -61,7 +61,7 @@ export function createContext<
   > | null = null;
   let res: Response | null = null;
 
-  const ctx = {
+  const ctx: Context<Values, Params, Query, State> = {
     get req() {
       if (!req) {
         req = createContextRequest<Values, Params, Query>(request, params);
@@ -147,7 +147,7 @@ export function createContext<
 
       return this.body(null);
     },
-  } satisfies Context<Values, Params, Query, State>;
+  };
 
   return ctx;
 }
