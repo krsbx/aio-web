@@ -12,7 +12,7 @@ export class Context<
 > {
   private _state: State;
   private _status: StatusCode;
-  private _headers: Record<string, string[]> | undefined;
+  private _headers: Record<string, string[]> | null;
   private _cookie: ContextCookie | null;
   private _params: Params;
   private _request: Request;
@@ -20,9 +20,9 @@ export class Context<
   private _res: Response | null;
 
   public constructor(request: Request, params: Params) {
-    this._state = Object.create(null) as State;
+    this._state = {} as State;
     this._status = StatusCode.OK;
-    this._headers = undefined;
+    this._headers = null;
     this._cookie = null;
     this._request = request;
     this._params = params;
@@ -70,7 +70,7 @@ export class Context<
   public header(key: string, value: string, append: false): Context;
   public header(key: string, value: string, append = true) {
     if (!this._headers) {
-      this._headers = Object.create(null) as Record<string, string[]>;
+      this._headers = {};
     }
 
     if (append) {

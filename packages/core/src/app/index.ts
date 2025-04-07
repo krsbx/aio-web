@@ -42,7 +42,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
         return this._onNotFound(ctx);
       }
 
-      return new Response('Not Found', { status: 404 });
+      return new Response('404 Not Found', { status: 404 });
     }
 
     return composer({
@@ -55,12 +55,12 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public bunRoutes() {
-    const routes: NativeRoutes = Object.create(null);
+    const routes: NativeRoutes = {};
 
     for (const route of this.routes) {
       const path = route.path.startsWith('/') ? route.path : `/${route.path}`;
 
-      if (!routes[path]) routes[path] = Object.create(null);
+      if (!routes[path]) routes[path] = {};
 
       routes[path][route.method] = async (req: BunRequest) =>
         composer({

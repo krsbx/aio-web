@@ -37,7 +37,7 @@ function assignDeep(obj: ParsedForm, keys: string[], value: ParsedFormValue) {
       }
     } else {
       if (!current[key] || typeof current[key] !== 'object') {
-        current[key] = Object.create(null);
+        current[key] = {};
       }
 
       current = current[key];
@@ -67,7 +67,7 @@ function parsePath(key: string): string[] {
 }
 
 export function parseFormData(form: FormData): ParsedForm {
-  const result: ParsedForm = Object.create(null);
+  const result: ParsedForm = {};
 
   for (const [key, value] of form.entries()) {
     assignDeep(result, parsePath(key), castValue(value));
@@ -77,7 +77,7 @@ export function parseFormData(form: FormData): ParsedForm {
 }
 
 export function parseQuery(query: URLSearchParams): ParsedQuery {
-  const result: ParsedQuery = Object.create(null);
+  const result: ParsedQuery = {};
 
   for (const [key, value] of query.entries()) {
     assignDeep(result, parsePath(key), castValue(value));
@@ -89,7 +89,7 @@ export function parseQuery(query: URLSearchParams): ParsedQuery {
 export function parseCookies(
   cookieHeader: string | null
 ): Record<string, string> {
-  const cookies: Record<string, string> = Object.create(null);
+  const cookies: Record<string, string> = {};
 
   if (!cookieHeader) return cookies;
 

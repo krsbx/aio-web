@@ -11,12 +11,12 @@ export class TrieRouteNode {
   public routes: Partial<Record<ApiMethod, Route>>;
 
   public constructor() {
-    this.children = Object.create(null);
+    this.children = {};
     this.paramChild = null;
     this.wildcardChild = null;
     this.paramName = null;
     this.wildcardName = null;
-    this.routes = Object.create(null);
+    this.routes = {};
   }
 
   public collectRoutes(path = '') {
@@ -83,7 +83,7 @@ export class TrieRouteNode {
   public match(parts: string[], method: ApiMethod): MatchResult | null {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: TrieRouteNode = this;
-    const params: Record<string, string> = Object.create(null);
+    const params: Record<string, string> = {};
 
     for (const part of parts) {
       if (node.children[part]) {

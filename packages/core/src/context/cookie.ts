@@ -13,7 +13,7 @@ export class ContextCookie {
 
   public constructor(ctx: Context) {
     this._ctx = ctx;
-    this._cookie = Object.create(null);
+    this._cookie = {};
   }
 
   public get(key: string) {

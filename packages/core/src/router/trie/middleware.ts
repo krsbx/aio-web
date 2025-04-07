@@ -5,7 +5,7 @@ export class TrieMiddlewareNode {
   public middlewares: Middleware[];
 
   public constructor() {
-    this.children = Object.create(null);
+    this.children = {};
     this.middlewares = [];
   }
 
