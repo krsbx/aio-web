@@ -10,11 +10,11 @@ export interface ContextCookie {
   /**
    * Set the cookie on the headers
    */
-  set(key: string, value: string): void;
+  set(key: string, value: string): this;
   /**
    * Set the cookie on the headers with the given options
    */
-  set(key: string, value: string, options: Partial<CookieOptions>): void;
+  set(key: string, value: string, options: Partial<CookieOptions>): this;
   /**
    * Set the cookie on the headers with the given options
    */
@@ -23,7 +23,7 @@ export interface ContextCookie {
     value: string,
     options: Partial<CookieOptions>,
     set: true
-  ): void;
+  ): this;
   /**
    * Set the cookie on the headers with the given options, set = false means dont track the changes
    */
@@ -32,9 +32,9 @@ export interface ContextCookie {
     value: string,
     options: Partial<CookieOptions>,
     set: false
-  ): void;
+  ): this;
 
-  delete(key: string): void;
+  delete(key: string): this;
 }
 
 export function createContextCookie(ctx: Context) {
@@ -69,11 +69,13 @@ export function createContextCookie(ctx: Context) {
         parts.push(`Expires=${options.Expires.toUTCString()}`);
 
       ctx.header('Set-Cookie', parts.join('; '));
+
+      return this;
     },
     delete(key) {
       delete cookie[key];
 
-      this.set(key, '', {}, false);
+      return this.set(key, '', {}, false);
     },
   };
 

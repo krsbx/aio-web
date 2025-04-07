@@ -15,20 +15,20 @@ export interface Context<
   get res(): Response | null;
   set res(newRes: Response | null);
   get<Key extends keyof State, Value extends State[Key]>(key: Key): Value;
-  set<Key extends string, Value>(key: Key, value: Value): void;
+  set<Key extends string, Value>(key: Key, value: Value): this;
   /**
    * Append response headers by default
    */
-  header(key: string, value: string): void;
+  header(key: string, value: string): this;
   /**
    * Specify to append the response headers
    */
-  header(key: string, value: string, append: true): void;
+  header(key: string, value: string, append: true): this;
   /**
    * Prevent appending the response headers
    */
-  header(key: string, value: string, append: false): void;
-  status(newStatus: StatusCode): void;
+  header(key: string, value: string, append: false): this;
+  status(newStatus: StatusCode): this;
 
   body(value: BodyInit | null): Response;
   body(value: BodyInit | null, contentType: string): Response;
@@ -91,23 +91,28 @@ export function createContext<
     header(key, value, append: boolean = true) {
       if (!headers) headers = {};
 
-      if (!append) {
+      if (append) {
+        if (!headers[key]) headers[key] = [];
+
+        headers[key].push(value);
+      } else {
         headers[key] = [value];
-        return;
       }
 
-      if (!headers[key]) headers[key] = [];
-
-      headers[key].push(value);
+      return this;
     },
     status(newStatus) {
       status = newStatus;
+
+      return this;
     },
     set(key, value) {
       state = {
         ...state,
         [key]: value,
       };
+
+      return this;
     },
     get<Key extends keyof State, Value extends State[Key]>(key: Key) {
       return state[key] as Value;
