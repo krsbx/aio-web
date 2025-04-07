@@ -18,7 +18,7 @@ export class ContextRequest<
     this._request = request;
     this._params = params;
     this._url = null;
-    this._cache = {} as Partial<ContextCache<Values>>;
+    this._cache = Object.create(null);
     this._query = null;
   }
 

@@ -22,13 +22,17 @@ export class TrieRouteNode {
   public collectRoutes(path = '') {
     const routes: Route[] = [];
 
-    for (const [, route] of Object.entries(this.routes)) {
+    for (const method in this.routes) {
+      const route = this.routes[method as ApiMethod]!;
+
       route.path = path;
       routes.push(route);
     }
 
-    for (const [segment, child] of Object.entries(this.children)) {
-      routes.push(...child.collectRoutes(`${path}/${segment}`));
+    for (const segment in this.children) {
+      routes.push(
+        ...this.children[segment].collectRoutes(`${path}/${segment}`)
+      );
     }
 
     if (this.paramChild) {
@@ -79,7 +83,7 @@ export class TrieRouteNode {
   public match(parts: string[], method: ApiMethod): MatchResult | null {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let node: TrieRouteNode = this;
-    const params: Record<string, string> = {};
+    const params: Record<string, string> = Object.create(null);
 
     for (const part of parts) {
       if (node.children[part]) {

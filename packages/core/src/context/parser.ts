@@ -37,8 +37,9 @@ function assignDeep(obj: ParsedForm, keys: string[], value: ParsedFormValue) {
       }
     } else {
       if (!current[key] || typeof current[key] !== 'object') {
-        current[key] = {};
+        current[key] = Object.create(null);
       }
+
       current = current[key];
     }
   }
