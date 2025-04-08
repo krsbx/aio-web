@@ -58,17 +58,17 @@ export function createContextCookie(ctx: Context) {
         };
       }
 
-      const parts = [`${key}=${encodeURIComponent(value)}`];
-      if (options.Path) parts.push(`Path=${options.Path}`);
-      if (options.HttpOnly) parts.push('HttpOnly');
-      if (options.Secure) parts.push('Secure');
-      if (options.SameSite) parts.push(`SameSite=${options.SameSite}`);
+      let str = `${key}=${encodeURIComponent(value)}`;
+      if (options.Path) str += `; Path=${options.Path}`;
+      if (options.HttpOnly) str += '; HttpOnly';
+      if (options.Secure) str += '; Secure';
+      if (options.SameSite) str += `; SameSite=${options.SameSite}`;
       if (typeof options.MaxAge === 'number')
-        parts.push(`Max-Age=${options.MaxAge}`);
+        str += `; Max-Age=${options.MaxAge}`;
       if (options.Expires instanceof Date)
-        parts.push(`Expires=${options.Expires.toUTCString()}`);
+        str += `; Expires=${options.Expires.toUTCString()}`;
 
-      ctx.header('Set-Cookie', parts.join('; '));
+      ctx.header('Set-Cookie', str);
 
       return this;
     },

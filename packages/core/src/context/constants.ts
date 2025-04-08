@@ -1,13 +1,3 @@
-export const FormValueMap: Record<string, boolean | null> = Object.create(
-  null,
-  {
-    true: { value: true },
-    false: { value: false },
-    null: { value: null },
-    undefined: { value: undefined },
-  }
-);
-
 export const InfoStatusCode = {
   CONTINUE: 100,
   SWITCHING_PROTOCOLS: 101,

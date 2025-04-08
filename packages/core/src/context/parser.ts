@@ -1,4 +1,3 @@
-import { FormValueMap } from './constants';
 import type {
   ParsedForm,
   ParsedFormValue,
@@ -9,13 +8,13 @@ import type {
 function castValue(value: string | File): ParsedFormValue | ParsedQueryValue {
   if (value instanceof File) return value;
 
-  const primitive = FormValueMap[value as keyof typeof FormValueMap];
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  if (value === 'null') return null;
+  if (value === 'undefined') return undefined;
 
-  if (primitive !== undefined) return primitive;
-
-  const number = +value;
-
-  return !isNaN(number) ? number : value;
+  const num = +value;
+  return isNaN(num) ? value : num;
 }
 
 function assignDeep(obj: ParsedForm, keys: string[], value: ParsedFormValue) {
