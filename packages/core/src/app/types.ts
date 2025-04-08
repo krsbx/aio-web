@@ -1,5 +1,5 @@
 import type { BunRequest, ServeOptions } from 'bun';
-import type { Context } from '../context/factory';
+import type { Context } from '../context';
 import type { Middleware, Route } from '../router/types';
 import type { ApiMethod } from './constants';
 

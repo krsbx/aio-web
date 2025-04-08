@@ -1,5 +1,5 @@
 import type { ApiMethod } from '../app/constants';
-import type { Context } from '../context/factory';
+import type { Context } from '../context';
 import type { TrieMiddlewareNode } from './trie';
 
 export type Middleware<
