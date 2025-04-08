@@ -1,4 +1,4 @@
-import { Ignisia } from '@ignisia/core';
+import { Ignisia } from '../../../core/src';
 import { PORT_ALLOCATION } from '../utilities/config';
 
 const app = new Ignisia();
@@ -14,4 +14,5 @@ console.log(
 app.listen({
   routes: true,
   port: PORT_ALLOCATION.IGNISIA_ROUTES,
+  development: false,
 });

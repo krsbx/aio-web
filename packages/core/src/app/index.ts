@@ -1,10 +1,10 @@
 import type { BunRequest } from 'bun';
 import { Context } from '../context';
 import { Router } from '../router';
+import { extractRegisteredPathParts } from '../utilities';
 import { composer } from './composer';
-import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
 import type { ApiMethod } from './constants';
-import { StatusCode } from '../context/constants';
+import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
 
 export class Ignisia<BasePath extends string> extends Router<BasePath> {
   protected _onError: OnError | null;
@@ -17,8 +17,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
     this._onNotFound = null;
   }
 
-  public match(method: ApiMethod, url: string) {
-    const parts = url.split('/').filter(Boolean);
+  public match(method: ApiMethod, parts: string[]) {
     return this.routesTree.match(parts, method);
   }
 
@@ -31,26 +30,22 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const pathStart = req.url.indexOf('/', req.url.indexOf('://') + 3);
-
-    const pathname =
-      req.url.slice(pathStart).split('?')[0]!.replace(/\/+$/, '') || '/';
-    const found = this.match(req.method as ApiMethod, pathname);
+    const parts = extractRegisteredPathParts(req.url);
+    const found = this.match(req.method as ApiMethod, parts);
 
     if (!found) {
       if (this._onNotFound) {
         const ctx = new Context(req, {});
-        ctx.status(StatusCode.NOT_FOUND);
 
         return this._onNotFound(ctx);
       }
 
-      return new Response('Not Found', { status: 404 });
+      return new Response('404 Not Found', { status: 404 });
     }
 
     return composer({
       request: req,
-      middlewares: this.composedMiddlewares[found.route.path]!,
+      middlewares: found.route.middlewares,
       onError: this._onError,
       params: found.params,
       route: found.route,
@@ -68,7 +63,7 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
       routes[path][route.method] = async (req: BunRequest) =>
         composer({
           request: req,
-          middlewares: this.composedMiddlewares[path]!,
+          middlewares: route.middlewares,
           onError: this._onError,
           params: req.params,
           route: route,

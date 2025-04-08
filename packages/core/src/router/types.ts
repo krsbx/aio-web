@@ -1,5 +1,6 @@
 import type { ApiMethod } from '../app/constants';
 import type { Context } from '../context';
+import type { TrieMiddlewareNode } from './trie';
 
 export type Middleware<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,8 +10,8 @@ export type Middleware<
   S extends Record<string, unknown> = NonNullable<unknown>,
 > = (
   ctx: Context<V, P, Q, S>,
-  next: () => Promise<void>
-) => Promise<void> | void;
+  next: () => Promise<void | Response> | void | Response
+) => Promise<void | Response> | void | Response;
 
 export type Handler<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,7 +31,7 @@ export interface Route<
   method: ApiMethod;
   path: string;
   handler: Handler<V, P, Q, S>;
-  middleware: Middleware<V, P, Q, S>[];
+  middlewares: Middleware<V, P, Q, S>[];
 }
 
 export type ExtractPathParams<Path extends string> =
@@ -45,3 +46,10 @@ export type ExtractPathParams<Path extends string> =
           [K in Param]: string;
         }
       : NonNullable<unknown>;
+
+export interface ResolveMiddlewareOptions {
+  parts: string[];
+  globalMiddlewares: Middleware[];
+  pathMiddlewares: TrieMiddlewareNode;
+  middlewares: Middleware[];
+}

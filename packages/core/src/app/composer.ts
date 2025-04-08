@@ -11,36 +11,42 @@ export async function composer({
 }: ComposerOptions) {
   const ctx = new Context(request, params);
 
-  let i = -1;
-
   try {
-    const dispatch = async (index: number): Promise<void> => {
-      if (index <= i) return;
+    let index = 0;
+    let nextCalled = false;
 
-      i = index;
+    function next() {
+      nextCalled = true;
+    }
 
-      const fn =
-        middlewares[index] ||
-        (async () => {
-          const res = await route.handler(ctx);
-          ctx.res = res;
-        });
+    while (index < middlewares.length) {
+      nextCalled = false;
 
-      await fn(ctx, () => dispatch(index + 1));
-    };
+      const res = await middlewares[index](ctx, next);
 
-    await dispatch(0);
+      if (res instanceof Response) {
+        return res;
+      }
 
-    return ctx.res!;
+      if (!nextCalled) break;
+
+      index++;
+    }
+
+    const res = await route.handler(ctx);
+    ctx.res = res;
+
+    return ctx.res;
   } catch (error) {
-    ctx.status(StatusCode.INTERNAL_SERVER_ERROR);
-
     if (onError) {
       return onError(error, ctx);
     }
 
-    return ctx.json({
-      message: 'Internal Server Error',
-    });
+    return Response.json(
+      { message: 'Internal Server Error' },
+      {
+        status: StatusCode.INTERNAL_SERVER_ERROR,
+      }
+    );
   }
 }

@@ -1,28 +1,21 @@
 import type { Router } from '.';
-import type { Handler, Middleware, Route } from './types';
-import { joinPaths } from './utilities';
+import type { ApiMethod } from '../app/constants';
+import { extractPathPartsForRegister, joinPaths } from '../utilities';
+import type {
+  Handler,
+  Middleware,
+  ResolveMiddlewareOptions,
+  Route,
+} from './types';
 
-function resolveMiddlewares<BasePath extends string>(
-  this: Router<BasePath>,
-  path: string,
-  middlewares: Middleware[]
-) {
-  const combined = [...this.middlewares];
+function resolveMiddlewares(options: ResolveMiddlewareOptions) {
+  const combined = [
+    ...options.globalMiddlewares,
+    ...options.pathMiddlewares.collect(options.parts),
+    ...options.middlewares,
+  ];
 
-  // Sort pathMiddlewares keys from longest to shortest
-  const sortedPaths = Object.keys(this.pathMiddlewares).sort(
-    (a, b) => b.length - a.length
-  );
-
-  for (const prefix of sortedPaths) {
-    if (path.startsWith(prefix)) {
-      combined.push(...this.pathMiddlewares[prefix]);
-    }
-  }
-
-  combined.push(...middlewares);
-
-  this.composedMiddlewares[path] = combined;
+  return combined;
 }
 
 export function register<
@@ -33,24 +26,27 @@ export function register<
   S extends Record<string, unknown> = NonNullable<unknown>,
 >(
   this: Router<BasePath>,
-  method: string,
+  method: ApiMethod,
   path: string,
   handler: Handler<V, P, Q, S>,
-  middleware: Middleware<V, P, Q, S>[]
+  middlewares: Middleware[]
 ) {
   const pathWithBase = joinPaths(this.basePath, path);
-  const parts = pathWithBase.split('/').filter(Boolean);
+  const parts = extractPathPartsForRegister(pathWithBase);
 
   const routeEntry = {
     method,
     path: pathWithBase,
     handler,
-    middleware,
+    middlewares: resolveMiddlewares({
+      globalMiddlewares: this.middlewares,
+      middlewares: middlewares,
+      pathMiddlewares: this.pathMiddlewares,
+      parts,
+    }),
   } as Route;
 
   this.routesTree.insert(parts, routeEntry);
-
-  resolveMiddlewares.call(this, pathWithBase, middleware as Middleware[]);
 
   return this;
 }

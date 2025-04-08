@@ -1,34 +1,38 @@
-import type { ApiMethod } from '../app/constants';
-import type { MatchResult } from '../app/types';
-import type { Route } from './types';
+import type { ApiMethod } from '../../app/constants';
+import type { MatchResult } from '../../app/types';
+import type { Route } from '../types';
 
-export class TrieNode {
-  public children: Map<string, TrieNode>;
-  public paramChild: TrieNode | null;
-  public wildcardChild: TrieNode | null;
+export class TrieRouteNode {
+  public children: Record<string, TrieRouteNode>;
+  public paramChild: TrieRouteNode | null;
+  public wildcardChild: TrieRouteNode | null;
   public paramName: string | null;
   public wildcardName: string | null;
-  public routes: Map<string, Route>;
+  public routes: Partial<Record<ApiMethod, Route>>;
 
   public constructor() {
-    this.children = new Map();
+    this.children = {};
     this.paramChild = null;
     this.wildcardChild = null;
     this.paramName = null;
     this.wildcardName = null;
-    this.routes = new Map();
+    this.routes = {};
   }
 
   public collectRoutes(path = '') {
     const routes: Route[] = [];
 
-    for (const [, route] of this.routes.entries()) {
+    for (const method in this.routes) {
+      const route = this.routes[method as ApiMethod]!;
+
       route.path = path;
       routes.push(route);
     }
 
-    for (const [segment, child] of this.children) {
-      routes.push(...child.collectRoutes(`${path}/${segment}`));
+    for (const segment in this.children) {
+      routes.push(
+        ...this.children[segment].collectRoutes(`${path}/${segment}`)
+      );
     }
 
     if (this.paramChild) {
@@ -49,41 +53,41 @@ export class TrieNode {
 
   public insert(parts: string[], route: Route) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let node: TrieNode = this;
+    let node: TrieRouteNode = this;
     let wildcardIndex = 0;
 
     for (const part of parts) {
       if (part === '*') {
-        if (!node.wildcardChild) node.wildcardChild = new TrieNode();
+        if (!node.wildcardChild) node.wildcardChild = new TrieRouteNode();
 
         node.wildcardChild.wildcardName = `wildcard${wildcardIndex}`;
         wildcardIndex++;
 
         node = node.wildcardChild;
       } else if (part.startsWith(':')) {
-        if (!node.paramChild) node.paramChild = new TrieNode();
+        if (!node.paramChild) node.paramChild = new TrieRouteNode();
 
         node.paramChild.paramName = part.slice(1);
 
         node = node.paramChild;
       } else {
-        if (!node.children.has(part)) node.children.set(part, new TrieNode());
+        if (!node.children[part]) node.children[part] = new TrieRouteNode();
 
-        node = node.children.get(part)!;
+        node = node.children[part];
       }
     }
 
-    node.routes.set(route.method, route);
+    node.routes[route.method] = route;
   }
 
   public match(parts: string[], method: ApiMethod): MatchResult | null {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let node: TrieNode = this;
+    let node: TrieRouteNode = this;
     const params: Record<string, string> = {};
 
     for (const part of parts) {
-      if (node.children.has(part)) {
-        node = node.children.get(part)!;
+      if (node.children[part]) {
+        node = node.children[part];
       } else if (node.paramChild) {
         params[node.paramChild.paramName!] = part;
         node = node.paramChild;
@@ -95,7 +99,7 @@ export class TrieNode {
       }
     }
 
-    const route = node.routes.get(method);
+    const route = node.routes[method];
 
     if (!route) return null;
 

@@ -1,25 +1,23 @@
 import { ApiMethod, ApiMethods } from '../app/constants';
+import { extractPathPartsForRegister, joinPaths } from '../utilities';
 import type { RouterHelperContract } from './contract';
 import { register } from './helper';
-import { TrieNode } from './trie';
+import { TrieMiddlewareNode, TrieRouteNode } from './trie';
 import type { ExtractPathParams, Handler, Middleware } from './types';
-import { joinPaths } from './utilities';
 
 export class Router<BasePath extends string> {
   public basePath: BasePath;
-  public readonly routesTree: TrieNode;
+  public readonly routesTree: TrieRouteNode;
   public readonly middlewares: Middleware[];
-  public readonly pathMiddlewares: Record<string, Middleware[]>;
-  public readonly composedMiddlewares: Record<string, Middleware[]>;
+  public readonly pathMiddlewares: TrieMiddlewareNode;
 
   public register: RouterHelperContract<BasePath>['register'];
 
   public constructor(basePath: BasePath = '' as BasePath) {
-    this.routesTree = new TrieNode();
+    this.routesTree = new TrieRouteNode();
 
     this.middlewares = [];
-    this.pathMiddlewares = {};
-    this.composedMiddlewares = {};
+    this.pathMiddlewares = new TrieMiddlewareNode();
     this.basePath = basePath as BasePath;
 
     this.register = register.bind(this);
@@ -41,24 +39,14 @@ export class Router<BasePath extends string> {
     Query extends Record<string, string>,
     State extends Record<string, unknown>,
   >(path: Path, ...mws: Middleware<Values, Params, Query, State>[]): this;
-  public use<
-    Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  >(...args: any[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public use(...args: any[]) {
     if (typeof args[0] === 'string') {
       const path = joinPaths(this.basePath, args[0]);
-      const mws = args.slice(1) as Middleware<Values, Params, Query, State>[];
+      const parts = extractPathPartsForRegister(path);
+      const mws = args.slice(1) as Middleware[];
 
-      if (!this.pathMiddlewares[path]) {
-        this.pathMiddlewares[path] = [];
-      }
-
-      this.pathMiddlewares[path].push(...(mws as Middleware[]));
+      this.pathMiddlewares.insert(parts, mws);
     } else {
       this.middlewares.push(...(args as Middleware[]));
     }
@@ -375,18 +363,15 @@ export class Router<BasePath extends string> {
         subRoute.method,
         subRoute.path.replace(fullPath, ''),
         subRoute.handler,
-        subRoute.middleware
+        subRoute.middlewares
       );
     }
 
     for (const subPath in route.pathMiddlewares) {
       const fullPath = `${this.basePath}${path}${subPath}`;
+      const parts = extractPathPartsForRegister(fullPath);
 
-      if (!this.pathMiddlewares[fullPath]) {
-        this.pathMiddlewares[fullPath] = [];
-      }
-
-      this.pathMiddlewares[fullPath].push(...route.pathMiddlewares[subPath]);
+      this.pathMiddlewares.insert(parts, route.pathMiddlewares.collect(parts));
     }
 
     return this;
@@ -430,7 +415,7 @@ export class Router<BasePath extends string> {
     const fullPath = joinPaths(this.basePath, path) as FullPath;
     const subRouter = new Router(fullPath);
 
-    subRouter.middlewares.push(...this.middlewares, ...middlewares);
+    subRouter.middlewares.push(...middlewares);
 
     callback(subRouter);
 
