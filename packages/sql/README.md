@@ -19,14 +19,14 @@ bun add @ignisia/sql
 import { Table, Column, Database } from '@ignisia/sql';
 
 // Define a table
-const users = Table.define(
+const users = Table.define({
   name: 'users',
+  dialect: 'postgres',
   columns: {
     // Define a column called "id"
     id: Column.define({
       type: 'SERIAL',
-    })
-      .primaryKey(),
+    }).primaryKey(),
     name: Column.define({
       type: 'TEXT',
       length: 255,
@@ -47,7 +47,7 @@ const users = Table.define(
   // By default the name of the created at column called "createdAt" and the name of the updated at column called "updatedAt"
   // Pass an object with `createdAt` and `updatedAt` to rename them
   timestamp: true,
-);
+});
 
 // Define a database
 const db = Database.define({
@@ -57,7 +57,7 @@ const db = Database.define({
   config: {
     host: 'localhost',
     port: 5432,
-    username: 'postgres',
+    user: 'postgres',
     password: 'postgres',
     database: 'my_database',
   },
@@ -65,13 +65,13 @@ const db = Database.define({
   //  This will automatically assign db properties to each table so it can do query
   tables: {
     users,
-  }
+  },
 });
 
 // Using the database
 
 // Fetch all users
-const listUsers = await db.table('users').select().query()
+const listUsers = await db.table('users').select().query();
 // ^ Add .limit before the .query() to limit the number of results
 // ^ Add .offset before the .query() to offset the results
 // ^ Add .orderBy before the .query() to order the results
@@ -93,7 +93,7 @@ const newUsers = await db.table('users').insert(
 );
 
 // Delete a user
-const deletedUsers = await db.table('users').delete()
+const deletedUsers = await db.table('users').delete();
 // ^ Add .where before the .query() to filter the deleted rows
 
 // Update a user
