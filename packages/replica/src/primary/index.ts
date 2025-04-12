@@ -1,7 +1,7 @@
-import type { ReplicaInstanceType } from '../constants';
+import { ReplicaInstanceType } from '../constants';
 import type { ReplicaDatabaseReplica } from '../replica';
 import type { AcceptedPrimaryInstance, ReplicaInstanceMap } from '../types';
-import type { PrimaryDatabaseReplicaOptions } from './types';
+import type { OnQueryRun, PrimaryDatabaseReplicaOptions } from './types';
 
 export class PrimaryDatabaseReplica {
   protected _instance: AcceptedPrimaryInstance;
@@ -21,6 +21,33 @@ export class PrimaryDatabaseReplica {
 
   public get replicas() {
     return this._replicas;
+  }
+
+  public onQuery(options: OnQueryRun) {
+    this._replicas.forEach((replica) => {
+      if (replica.type === ReplicaInstanceType.FILE) {
+        if (options.type === 'SELECT') return;
+
+        (replica.instance as AcceptedPrimaryInstance).client.exec(
+          options.query,
+          options.params
+        );
+
+        return;
+      }
+
+      (replica.instance as Bun.ServerWebSocket).send(
+        JSON.stringify({
+          action: '@ignisia/replica',
+          payload: {
+            query: options.query,
+            params: options.params,
+            type: options.type,
+          },
+        }),
+        true
+      );
+    });
   }
 
   public static define(options: PrimaryDatabaseReplicaOptions) {

@@ -18,7 +18,7 @@ export type AcceptedPrimaryInstance =
 
 export type ReplicaInstanceMap = {
   [K in ReplicaInstanceType]: K extends typeof ReplicaInstanceType.FILE
-    ? `file://${string}`
+    ? AcceptedPrimaryInstance
     : K extends typeof ReplicaInstanceType.SOCKET
       ? WebSocket
       : never;
