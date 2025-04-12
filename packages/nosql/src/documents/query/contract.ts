@@ -1,6 +1,6 @@
 import type { QueryBuilder } from '.';
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 import type { addCondition, addRawCondition } from './condition';
 import type {
   AcceptedOperator,
@@ -17,8 +17,8 @@ import type {
 
 export interface QueryTransformerContract<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -92,8 +92,8 @@ export interface QueryTransformerContract<
 
 export interface QueryConditionContract<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,

@@ -1,6 +1,6 @@
 import type { UnionToIntersection } from '../../types';
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 import type {
   AcceptedOperator,
   AggregationFunction,
@@ -10,8 +10,8 @@ import type {
 
 export type FieldSelector<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
 > =
   | `${Alias}.${keyof DocRef['fields'] & string}`
   | `${Alias}.*`
@@ -23,8 +23,8 @@ export type FieldSelector<
 
 export type StrictFieldSelector<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
 > =
   | `${Alias}.${keyof DocRef['fields'] & string}`
   | {
@@ -120,10 +120,10 @@ export type AggregateField<
 
 export interface QueryDefinition<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
+  DocRef extends Document<string, Record<string, Field>>,
   JoinedDocs extends Record<
     string,
-    Documents<string, Record<string, Field>>
+    Document<string, Record<string, Field>>
   > = NonNullable<unknown>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs> = FieldSelector<
     Alias,
@@ -151,7 +151,7 @@ export interface QueryDefinition<
 }
 
 type InsertUpdateDeleteQueryOutput<
-  DocRef extends Documents<string, Record<string, Field>>,
+  DocRef extends Document<string, Record<string, Field>>,
 > = {
   [K in keyof DocRef['fields']]: DocRef['fields'][K]['_output'];
 };
@@ -159,8 +159,8 @@ type InsertUpdateDeleteQueryOutput<
 type InferAliasedField<
   Current extends AliasedField<string, string>,
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
 > = Current extends {
   field: `${infer DocAlias}.${infer FieldName}`;
   as: `${infer ColAlias}`;
@@ -181,8 +181,8 @@ type InferAliasedField<
 type InferRawField<
   Current extends string,
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
 > = Current extends `${infer DocAlias}.${infer FieldName}`
   ? DocAlias extends keyof JoinedDocs
     ? {
@@ -213,8 +213,8 @@ type InferRawField<
 
 type InferSelectQueryOutput<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
 > = Definition extends { select: infer Select }
@@ -234,8 +234,8 @@ type InferSelectQueryOutput<
 type InferAggregateField<
   Current extends AggregateField<string>,
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
 > = Current extends {
   field: `${infer DocAlias}.${infer FieldName}`;
   as: `${infer ColAlias}`;
@@ -258,8 +258,8 @@ type InferAggregateField<
 
 type InferAggregateQueryOutput<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
 > = Definition extends { aggregates: infer Aggregates }
@@ -280,8 +280,8 @@ type InferAggregateQueryOutput<
 
 export type SelectQueryOutput<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
 > = InferSelectQueryOutput<
@@ -301,8 +301,8 @@ export type SelectQueryOutput<
 
 export type QueryOutput<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
 > = Definition extends { queryType: infer Type }

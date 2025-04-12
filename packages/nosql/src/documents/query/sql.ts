@@ -1,6 +1,6 @@
 import type { QueryBuilder } from '.';
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 import {
   buildDeleteQuery,
   buildInsertQuery,
@@ -27,8 +27,8 @@ export function buildQuery(query: string) {
 
 export function toQuery<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -128,8 +128,8 @@ export function toQuery<
 
 export function toString<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -147,8 +147,8 @@ export function toString<
 
 export async function exec<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -162,11 +162,11 @@ export async function exec<
   >,
   Output extends Query['_output'] = Query['_output'],
 >(this: Query) {
-  if (!this.doc.database) throw new Error('Database client not defined');
+  if (!this.doc.client) throw new Error('Database client not defined');
 
   const { query, params } = this.toQuery();
 
-  const result = await this.doc.database.exec<never[]>(query, params);
+  const result = await this.doc.client.exec<never[]>(query, params);
 
   return result.map((r) =>
     parseAliasedRow({

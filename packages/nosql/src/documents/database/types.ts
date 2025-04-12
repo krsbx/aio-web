@@ -1,12 +1,12 @@
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 
 export interface SqliteConfig {
   filename: string;
 }
 
 export interface DatabaseOptions<
-  Docs extends Record<string, Documents<string, Record<string, Field>>>,
+  Docs extends Record<string, Document<string, Record<string, Field>>>,
 > extends SqliteConfig {
   docs: Docs;
 }

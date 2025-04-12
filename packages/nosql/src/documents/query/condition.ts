@@ -1,6 +1,6 @@
 import type { QueryBuilder } from '.';
-import type { Field } from '../fields';
-import type { Documents } from '../documents';
+import type { Field } from '../field';
+import type { Document } from '../document';
 import {
   AcceptedOperator,
   ConditionClause,
@@ -17,8 +17,8 @@ import { getCondition } from './utilities';
 
 export function addRawCondition<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -76,8 +76,8 @@ export function addRawCondition<
 
 export function rawWhere<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -105,8 +105,8 @@ export function rawWhere<
 
 export function rawOr<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -134,8 +134,8 @@ export function rawOr<
 
 export function rawHaving<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -163,8 +163,8 @@ export function rawHaving<
 
 export function addCondition<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -239,8 +239,8 @@ export function addCondition<
 
 export function where<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -277,8 +277,8 @@ export function where<
 
 export function or<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -315,8 +315,8 @@ export function or<
 
 export function having<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,

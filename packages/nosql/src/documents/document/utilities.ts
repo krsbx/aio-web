@@ -1,4 +1,4 @@
-import { Field } from '../fields';
+import { Field } from '../field';
 import type {
   DocumentOptions,
   MergeTimestampParanoid,

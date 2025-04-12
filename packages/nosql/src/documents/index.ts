@@ -1,4 +1,4 @@
 export { Database } from './database';
-export { Documents } from './documents';
-export { Field } from './fields';
+export { Document } from './document';
+export { Field } from './field';
 export { QueryBuilder } from './query';

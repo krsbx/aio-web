@@ -1,6 +1,6 @@
 import { randomUUIDv7 } from 'bun';
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 import { having, or, rawHaving, rawOr, rawWhere, where } from './condition';
 import { AcceptedJoin, QueryType } from './constants';
 import type {
@@ -26,10 +26,10 @@ import { getParanoid, getTimestamp } from './utilities';
 
 export class QueryBuilder<
   Alias extends DocRef['name'],
-  DocRef extends Documents<string, Record<string, Field>>,
+  DocRef extends Document<string, Record<string, Field>>,
   JoinedDocs extends Record<
     string,
-    Documents<string, Record<string, Field>>
+    Document<string, Record<string, Field>>
   > = NonNullable<unknown>,
   Definition extends Partial<
     QueryDefinition<Alias, DocRef, JoinedDocs>
@@ -206,7 +206,7 @@ export class QueryBuilder<
   }
 
   public leftJoin<
-    JoinDoc extends Documents<string, Record<string, Field>>,
+    JoinDoc extends Document<string, Record<string, Field>>,
     JoinAlias extends string,
     BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
     JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
@@ -227,7 +227,7 @@ export class QueryBuilder<
   }
 
   public rightJoin<
-    JoinDoc extends Documents<string, Record<string, Field>>,
+    JoinDoc extends Document<string, Record<string, Field>>,
     JoinAlias extends string,
     BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
     JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
@@ -248,7 +248,7 @@ export class QueryBuilder<
   }
 
   public innerJoin<
-    JoinDoc extends Documents<string, Record<string, Field>>,
+    JoinDoc extends Document<string, Record<string, Field>>,
     JoinAlias extends string,
     BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
     JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,
@@ -269,7 +269,7 @@ export class QueryBuilder<
   }
 
   public naturalJoin<
-    JoinDoc extends Documents<string, Record<string, Field>>,
+    JoinDoc extends Document<string, Record<string, Field>>,
     JoinAlias extends string,
     BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
     JoinColName extends `${JoinAlias}.${keyof JoinDoc['fields'] & string}`,

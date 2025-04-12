@@ -1,5 +1,5 @@
 import type { DatabaseDialect } from '../database/types';
-import type { Field } from '../fields';
+import type { Field } from '../field';
 import { QueryBuilder } from '../query';
 import type {
   DocumentOptions,
@@ -8,7 +8,7 @@ import type {
 } from './types';
 import { defineFields } from './utilities';
 
-export class Documents<
+export class Document<
   DocName extends string = string,
   Fields extends Record<string, Field> = Record<string, Field>,
   CreatedAt extends string = string,
@@ -18,7 +18,7 @@ export class Documents<
     | boolean,
   Paranoid extends string | boolean = string | boolean,
 > {
-  public database: DatabaseDialect | null;
+  public client: DatabaseDialect | null;
   public readonly name: DocName;
   public readonly fields: Fields;
   public readonly timestamp: Timestamp | null;
@@ -46,7 +46,7 @@ export class Documents<
     this.fields = options.fields;
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
-    this.database = null;
+    this.client = null;
   }
 
   public query() {
@@ -76,7 +76,7 @@ export class Documents<
   ) {
     const fields = defineFields(options);
 
-    const document = new Documents({
+    const document = new Document({
       ...options,
       fields,
     });

@@ -1,11 +1,11 @@
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 import type { QueryBuilder } from '../query';
 import type { DatabaseDialect, DatabaseOptions } from './types';
 import { DatabaseSqlite } from './wrapper';
 
 export class Database<
-  Docs extends Record<string, Documents<string, Record<string, Field>>>,
+  Docs extends Record<string, Document<string, Record<string, Field>>>,
 > {
   public readonly docs: Docs;
   public readonly filename: string;
@@ -18,7 +18,7 @@ export class Database<
 
     for (const doc of Object.values(this.docs)) {
       // Re-assign the database objects
-      doc.database = this.client;
+      doc.client = this.client;
     }
 
     // Create database
@@ -52,7 +52,7 @@ export class Database<
   }
 
   public static define<
-    Docs extends Record<string, Documents<string, Record<string, Field>>>,
+    Docs extends Record<string, Document<string, Record<string, Field>>>,
   >(options: DatabaseOptions<Docs>) {
     return new Database(options);
   }

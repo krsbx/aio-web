@@ -71,10 +71,10 @@ db.delete('foo', 'bar');
 ### Collections/Documents
 
 ```ts
-import { Database, Documents, Field } from '@ignisia/nosql';
+import { Database, Document, Field } from '@ignisia/nosql';
 
 // Define a document
-const users = Documents.define({
+const users = Document.define({
   name: 'users',
   fields: {
     // Define a field called "name"

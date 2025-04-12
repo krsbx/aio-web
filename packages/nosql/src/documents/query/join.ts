@@ -1,6 +1,6 @@
 import type { QueryBuilder } from '.';
-import type { Field } from '../fields';
-import type { Documents } from '../documents';
+import type { Field } from '../field';
+import type { Document } from '../document';
 import type { AcceptedJoin } from './constants';
 import type {
   FieldSelector,
@@ -10,13 +10,13 @@ import type {
 
 export function addJoin<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedColumn extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedColumn extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
   JoinType extends AcceptedJoin,
-  JoinTable extends Documents<string, Record<string, Field>>,
+  JoinTable extends Document<string, Record<string, Field>>,
   JoinAlias extends string,
   BaseColName extends `${Alias}.${keyof DocRef['fields'] & string}`,
   JoinColName extends `${JoinAlias}.${keyof JoinTable['fields'] & string}`,
