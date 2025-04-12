@@ -79,6 +79,10 @@ export class Database<
     return this;
   }
 
+  public async transaction<T, U extends () => Promise<T>>(fn: U) {
+    return this.client.transaction(fn);
+  }
+
   public static define<
     Docs extends Record<string, Document<string, Record<string, Field>>>,
   >(options: DatabaseOptions<Docs>) {
