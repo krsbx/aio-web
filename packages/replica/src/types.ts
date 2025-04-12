@@ -1,4 +1,12 @@
-import type { ReplicaInstanceMap, ReplicaInstanceType } from './constants';
+import type { ReplicaInstanceType } from './constants';
+
+export type ReplicaInstanceMap = {
+  [K in ReplicaInstanceType]: K extends typeof ReplicaInstanceType.FILE
+    ? `file://${string}`
+    : K extends typeof ReplicaInstanceType.SOCKET
+      ? WebSocket
+      : never;
+};
 
 export interface DatabaseReplicaConfig<
   Type extends ReplicaInstanceType,
