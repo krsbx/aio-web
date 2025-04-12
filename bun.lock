@@ -78,6 +78,7 @@
       },
       "devDependencies": {
         "@ignisia/nosql": "workspace:*",
+        "@ignisia/securedb": "workspace:*",
         "@ignisia/sql": "workspace:*",
         "@ignisia/utils": "workspace:*",
         "@types/bun": "latest",

@@ -11,9 +11,10 @@
     "@ignisia/encryption": "workspace:*"
   },
   "devDependencies": {
-    "@ignisia/utils": "workspace:*",
-    "@ignisia/sql": "workspace:*",
     "@ignisia/nosql": "workspace:*",
+    "@ignisia/securedb": "workspace:*",
+    "@ignisia/sql": "workspace:*",
+    "@ignisia/utils": "workspace:*",
     "@types/bun": "latest"
   },
   "peerDependencies": {
