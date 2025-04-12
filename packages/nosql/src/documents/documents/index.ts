@@ -1,4 +1,4 @@
-import type { Database as Sqlite } from 'bun:sqlite';
+import type { DatabaseDialect } from '../database/types';
 import type { Field } from '../fields';
 import { QueryBuilder } from '../query';
 import type {
@@ -18,7 +18,7 @@ export class Documents<
     | boolean,
   Paranoid extends string | boolean = string | boolean,
 > {
-  public database: Sqlite | null;
+  public database: DatabaseDialect | null;
   public readonly name: DocName;
   public readonly fields: Fields;
   public readonly timestamp: Timestamp | null;
