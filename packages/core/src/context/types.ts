@@ -36,6 +36,7 @@ export interface ContextCache<T = any> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parsedForm: T extends Record<string, any> ? ParsedForm<T> : never;
   cookies: Record<string, string>;
+  headers: Record<string, string>;
 }
 
 export interface CookieOptions {
