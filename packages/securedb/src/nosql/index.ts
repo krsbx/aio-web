@@ -1,6 +1,6 @@
 import {
   Database,
-  type Documents,
+  type Document,
   type Field,
   type QueryBuilder,
 } from '@ignisia/nosql/dist/documents';
@@ -16,7 +16,7 @@ import type { DatabaseMeta } from '../types';
 import type { DefineSecureDbOptions, SecureDbOptions } from './types';
 
 export class SecureNoSqlDb<
-    Docs extends Record<string, Documents<string, Record<string, Field>>>,
+    Docs extends Record<string, Document<string, Record<string, Field>>>,
   >
   extends Database<Docs>
   implements AsyncDisposable
@@ -87,13 +87,13 @@ export class SecureNoSqlDb<
   }
 
   public static define<
-    Docs extends Record<string, Documents<string, Record<string, Field>>>,
+    Docs extends Record<string, Document<string, Record<string, Field>>>,
   >(options: DatabaseOptions<Docs>): SecureNoSqlDb<Docs>;
   public static define<
-    Docs extends Record<string, Documents<string, Record<string, Field>>>,
+    Docs extends Record<string, Document<string, Record<string, Field>>>,
   >(options: DefineSecureDbOptions<Docs>): Promise<SecureNoSqlDb<Docs>>;
   public static define<
-    Docs extends Record<string, Documents<string, Record<string, Field>>>,
+    Docs extends Record<string, Document<string, Record<string, Field>>>,
   >(options: DatabaseOptions<Docs> | DefineSecureDbOptions<Docs>) {
     const encryptedFilePath = options.filename + '.enc';
     const decryptedFilePath = options.filename;
