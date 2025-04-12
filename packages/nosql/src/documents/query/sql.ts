@@ -1,4 +1,3 @@
-import type { SQLQueryBindings, Statement } from 'bun:sqlite';
 import type { QueryBuilder } from '.';
 import type { Documents } from '../documents';
 import type { Field } from '../fields';
@@ -167,11 +166,7 @@ export async function exec<
 
   const { query, params } = this.toQuery();
 
-  const statement = this.doc.database.prepare(
-    query,
-    params as SQLQueryBindings[]
-  ) as Statement<never>;
-  const result = statement.all();
+  const result = await this.doc.database.exec<never[]>(query, params);
 
   return result.map((r) =>
     parseAliasedRow({
