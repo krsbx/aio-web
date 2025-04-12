@@ -1,5 +1,7 @@
 import type { Column } from '../column';
 import type { QueryBuilder } from '../query';
+import type { QueryHooksType } from '../query/constants';
+import type { QuerHooks, QueryRunHooks } from '../query/types';
 import { Table } from '../table';
 import { Dialect } from '../table/constants';
 import {
@@ -30,6 +32,7 @@ export class Database<
     DatabaseDefinition<DbDialect>
   > = DatabaseDefinition<DbDialect>,
 > {
+  public readonly hooks: Partial<QuerHooks>;
   public readonly dialect: DbDialect;
   public readonly defintion: Definition;
   public readonly tables: Tables;
@@ -96,6 +99,7 @@ export class Database<
   >['dropColumnNotNull'];
 
   protected constructor(options: DatabaseOptions<DbDialect, Tables>) {
+    this.hooks = {};
     this.dialect = options.dialect;
     this.tables = options.tables ?? ({} as Tables);
     this.defintion = {
@@ -150,9 +154,32 @@ export class Database<
     }
 
     const table = this.tables[tableName];
+    const query = table.query();
+
+    // Bind the hooks from the database class to the query
+    query.hooks.before = this.hooks.before;
+    query.hooks.after = this.hooks.after;
 
     // Fix the type
-    return table.query() as unknown as QueryBuilder<TableName, Table>;
+    return query as unknown as QueryBuilder<TableName, Table>;
+  }
+
+  public addHook(type: QueryHooksType, fn: QueryRunHooks) {
+    if (!this.hooks[type]) {
+      this.hooks[type] = new Set();
+    }
+
+    this.hooks[type].add(fn);
+
+    return this;
+  }
+
+  public removeHook(type: QueryHooksType, fn: QueryRunHooks) {
+    if (this.hooks[type]) {
+      this.hooks[type].delete(fn);
+    }
+
+    return this;
   }
 
   public async transaction<T, U extends () => Promise<T>>(fn: U) {

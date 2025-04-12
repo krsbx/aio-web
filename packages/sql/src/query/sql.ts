@@ -174,7 +174,7 @@ export async function exec<
 
   const { query, params } = this.toQuery();
 
-  if (this.hooks.before.size) {
+  if (this.hooks?.before?.size) {
     for (const hook of this.hooks.before.values()) {
       hook({
         query,
@@ -187,7 +187,7 @@ export async function exec<
 
   const result = await this.table.client.exec<never[]>(query, params);
 
-  if (this.hooks.after.size) {
+  if (this.hooks?.after?.size) {
     for (const hook of this.hooks.after.values()) {
       hook({
         query,
