@@ -1,5 +1,5 @@
-import type { Field } from '../fields';
-import type { Documents } from '.';
+import type { Field } from '../field';
+import type { Document } from '.';
 import type { _id, createdAt, deletedAt, updatedAt } from './utilities';
 
 export interface TimestampOptions<
@@ -68,14 +68,14 @@ export type DocumentOutput<
   UpdatedAt extends string,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
-  Doc extends Documents<
+  Doc extends Document<
     DocName,
     Fields,
     CreatedAt,
     UpdatedAt,
     Timestamp,
     Paranoid
-  > = Documents<DocName, Fields, CreatedAt, UpdatedAt, Timestamp, Paranoid>,
+  > = Document<DocName, Fields, CreatedAt, UpdatedAt, Timestamp, Paranoid>,
 > = {
   [K in keyof Doc['fields'] & string]: Doc['fields'][K]['_output'];
 };

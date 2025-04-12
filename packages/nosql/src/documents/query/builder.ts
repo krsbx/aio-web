@@ -1,7 +1,7 @@
 import { randomUUIDv7 } from 'bun';
 import type { QueryBuilder } from '.';
-import type { Documents } from '../documents';
-import type { Field } from '../fields';
+import type { Document } from '../document';
+import type { Field } from '../field';
 import type {
   FieldSelector,
   QueryDefinition,
@@ -12,8 +12,8 @@ import { getTableSelectName } from './utilities';
 
 export function buildSelectQuery<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -71,8 +71,8 @@ export function buildSelectQuery<
 
 export function buildInsertQuery<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -120,8 +120,8 @@ export function buildInsertQuery<
 
 export function buildUpdateQuery<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -158,8 +158,8 @@ export function buildUpdateQuery<
 
 export function buildDeleteQuery<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedField extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedField extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,

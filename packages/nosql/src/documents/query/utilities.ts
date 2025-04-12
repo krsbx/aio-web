@@ -1,5 +1,5 @@
-import type { Field } from '../fields';
-import type { Documents } from '../documents';
+import type { Field } from '../field';
+import type { Document } from '../document';
 import { AcceptedOperator, QueryType } from './constants';
 import type {
   AliasedField,
@@ -74,7 +74,7 @@ export function getCondition<
 }
 
 export function getTimestamp<
-  DocRef extends Documents<string, Record<string, Field>>,
+  DocRef extends Document<string, Record<string, Field>>,
 >(doc: DocRef) {
   const isWithTimestamp = !!doc.timestamp;
   const timestamp = new Date();
@@ -102,7 +102,7 @@ export function getTimestamp<
 }
 
 export function getParanoid<
-  DocRef extends Documents<string, Record<string, Field>>,
+  DocRef extends Document<string, Record<string, Field>>,
 >(doc: DocRef) {
   const isWithParanoid = !!doc.paranoid;
   const timestamp = new Date();
@@ -123,8 +123,8 @@ export function getParanoid<
 
 export function getWhereConditions<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedColumn extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedColumn extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,
@@ -162,8 +162,8 @@ export function getWhereConditions<
 
 export function getTableSelectName<
   Alias extends string,
-  DocRef extends Documents<string, Record<string, Field>>,
-  JoinedDocs extends Record<string, Documents<string, Record<string, Field>>>,
+  DocRef extends Document<string, Record<string, Field>>,
+  JoinedDocs extends Record<string, Document<string, Record<string, Field>>>,
   Definition extends Partial<QueryDefinition<Alias, DocRef, JoinedDocs>>,
   AllowedColumn extends FieldSelector<Alias, DocRef, JoinedDocs>,
   StrictAllowedColumn extends StrictFieldSelector<Alias, DocRef, JoinedDocs>,

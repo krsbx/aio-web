@@ -1,2 +1,2 @@
-export { Database, Documents, Field, QueryBuilder } from './documents';
+export { Database, Document, Field, QueryBuilder } from './documents';
 export { KeyValue } from './key-value';
