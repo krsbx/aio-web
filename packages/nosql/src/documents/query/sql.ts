@@ -7,7 +7,7 @@ import {
   buildSelectQuery,
   buildUpdateQuery,
 } from './builder';
-import { QueryType } from './constants';
+import { QueryHooksType, QueryType } from './constants';
 import type {
   FieldSelector,
   QueryDefinition,
@@ -166,7 +166,29 @@ export async function exec<
 
   const { query, params } = this.toQuery();
 
+  if (this.hooks?.before?.size) {
+    for (const hook of this.hooks.before.values()) {
+      hook({
+        query,
+        params,
+        type: this.definition.queryType!,
+        hook: QueryHooksType.BEFORE,
+      });
+    }
+  }
+
   const result = await this.doc.client.exec<never[]>(query, params);
+
+  if (this.hooks?.after?.size) {
+    for (const hook of this.hooks.after.values()) {
+      hook({
+        query,
+        params,
+        type: this.definition.queryType!,
+        hook: QueryHooksType.AFTER,
+      });
+    }
+  }
 
   return result.map((r) =>
     parseAliasedRow({
