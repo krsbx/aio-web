@@ -110,7 +110,7 @@ export class Database<
 
     if (options.tables) {
       for (const tableName in options.tables) {
-        options.tables[tableName].database = this.client;
+        options.tables[tableName].client = this.client;
       }
     }
 

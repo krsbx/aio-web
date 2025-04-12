@@ -71,3 +71,11 @@ export const AcceptedJoin = {
 } as const;
 
 export type AcceptedJoin = (typeof AcceptedJoin)[keyof typeof AcceptedJoin];
+
+export const QueryHooksType = {
+  AFTER: 'after',
+  BEFORE: 'before',
+} as const;
+
+export type QueryHooksType =
+  (typeof QueryHooksType)[keyof typeof QueryHooksType];

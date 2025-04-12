@@ -16,7 +16,7 @@ export class Table<
     | boolean,
   Paranoid extends string | boolean = string | boolean,
 > {
-  public database: DatabaseDialect | null;
+  public client: DatabaseDialect | null;
   public readonly dialect: DbDialect;
   public readonly name: TableName;
   public readonly columns: Columns;
@@ -48,7 +48,7 @@ export class Table<
     this.columns = options.columns;
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
-    this.database = null;
+    this.client = null;
 
     for (const column of Object.values(this.columns)) {
       // Set dialect for each column
@@ -87,7 +87,7 @@ export class Table<
     });
   }
 
-  public async create(db: DatabaseDialect | null = this.database) {
+  public async create(db: DatabaseDialect | null = this.client) {
     if (!db) throw new Error('Database client not defined');
 
     const sql = `CREATE TABLE IF NOT EXISTS ${this.name} (${Object.entries(
@@ -101,7 +101,7 @@ export class Table<
     return this;
   }
 
-  public async drop(db: DatabaseDialect | null = this.database) {
+  public async drop(db: DatabaseDialect | null = this.client) {
     if (!db) throw new Error('Database client not defined');
 
     const sql = `DROP TABLE IF EXISTS ${this.name};`;

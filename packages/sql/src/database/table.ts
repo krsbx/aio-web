@@ -49,7 +49,7 @@ export async function createTable<
     ...options,
   });
 
-  table.database = this.client;
+  table.client = this.client;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (this.tables as any)[tableName] = table;

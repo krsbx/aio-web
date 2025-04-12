@@ -48,7 +48,7 @@ export async function runMigration(filePath: string, direction: 'up' | 'down') {
       dialect: migration.db.dialect,
     });
 
-    migrationTable.database = migration.db.client;
+    migrationTable.client = migration.db.client;
 
     // Create the migration table
     await migrationTable.create();
