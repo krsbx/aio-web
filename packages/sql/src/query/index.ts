@@ -46,7 +46,7 @@ export class QueryBuilder<
     JoinedTables
   > = StrictColumnSelector<Alias, TableRef, JoinedTables>,
 > {
-  public readonly hooks: QuerHooks;
+  public readonly hooks: Partial<QuerHooks>;
   public readonly table: TableRef;
   public readonly definition: Definition;
   public readonly _output!: QueryOutput<
@@ -166,10 +166,7 @@ export class QueryBuilder<
   >['having'];
 
   constructor(table: TableRef) {
-    this.hooks = {
-      after: new Set(),
-      before: new Set(),
-    };
+    this.hooks = {};
     this.table = table;
     this.definition = {
       queryType: null,
