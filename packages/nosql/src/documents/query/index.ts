@@ -17,6 +17,7 @@ import type {
   AggregateField,
   AliasedField,
   FieldSelector,
+  QuerHooks,
   QueryDefinition,
   QueryOutput,
   RawField,
@@ -45,6 +46,7 @@ export class QueryBuilder<
     JoinedDocs
   > = StrictFieldSelector<Alias, DocRef, JoinedDocs>,
 > {
+  public readonly hooks: Partial<QuerHooks>;
   public readonly doc: DocRef;
   public readonly definition: Definition;
   public readonly _output!: QueryOutput<
@@ -164,6 +166,7 @@ export class QueryBuilder<
   >['having'];
 
   constructor(doc: DocRef) {
+    this.hooks = {};
     this.doc = doc;
     this.definition = {
       queryType: null,
