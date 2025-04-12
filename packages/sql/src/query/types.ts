@@ -6,6 +6,7 @@ import type {
   AcceptedOperator,
   AggregationFunction,
   OrderBy,
+  QueryHooksType,
   QueryType,
 } from './constants';
 
@@ -328,3 +329,19 @@ export type QueryOutput<
           >[]
         : never
   : never;
+
+export interface QueryRunHooksOptions {
+  query: string;
+  hook: QueryHooksType;
+  params: unknown[] | null | undefined;
+  type: QueryType;
+}
+
+export interface QueryRunHooks {
+  (options: QueryRunHooksOptions): void;
+}
+
+export interface QuerHooks {
+  after: Set<QueryRunHooks>;
+  before: Set<QueryRunHooks>;
+}
