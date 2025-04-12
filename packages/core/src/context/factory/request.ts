@@ -2,19 +2,22 @@
 import { parseCookies, parseFormData, parseQuery } from '../parser';
 import type { ContextCache, ParsedForm } from '../types';
 
-export interface CookieRequest<
+export interface ContextRequest<
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
   Values extends any = any,
   Params extends Record<string, string> = NonNullable<unknown>,
   Query extends Record<string, string> = NonNullable<unknown>,
 > {
-  params(): Params;
-  params<
+  param(): Params;
+  param<
     K extends keyof Params | (string & {}),
     V extends K extends keyof Params ? Params[K] : string,
   >(
     key: K
   ): V;
+
+  header(): Record<string, string>;
+  header(key: string): string | null;
 
   query(): Query;
   query<
@@ -49,8 +52,8 @@ export function createContextRequest<
   let url: URL | null = null;
   let query: Query | null = null;
 
-  const ctxReq: CookieRequest<Values, Params, Query> = {
-    params<
+  const ctxReq: ContextRequest<Values, Params, Query> = {
+    param<
       K extends keyof Params | (string & {}),
       V extends K extends keyof Params ? Params[K] : string,
     >(key?: K) {
@@ -71,6 +74,25 @@ export function createContextRequest<
       }
 
       return query;
+    },
+    header(key?: string) {
+      if (key) {
+        if (cache.headers) {
+          return (cache.headers[key.toLowerCase()] || null) as never;
+        }
+
+        return request.headers.get(key) as never;
+      }
+
+      if (!cache.headers) {
+        cache.headers = {};
+
+        for (const [key, value] of request.headers.entries()) {
+          cache.headers[key.toLowerCase()] = value;
+        }
+      }
+
+      return cache.headers as never;
     },
     async json<T extends Values = any>() {
       if (!cache.json) cache.json = await request.json();
