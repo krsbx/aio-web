@@ -1,5 +1,5 @@
-import type { QueryType as NoSqlQueryType } from '@ignisia/nosql/dist/documents/query/constants';
-import type { QueryType as SqlQueryType } from '@ignisia/sql/dist/query/constants';
+import type { QueryRunHooksOptions as NoSqlQueryRunHooksOptions } from '@ignisia/nosql/dist/documents/query/types';
+import type { QueryRunHooksOptions as SqlQueryRunHooksOptions } from '@ignisia/sql/dist/query/types';
 import type { ReplicaInstanceType } from '../constants';
 import type { ReplicaDatabaseReplica } from '../replica';
 import type { AcceptedPrimaryInstance, ReplicaInstanceMap } from '../types';
@@ -12,8 +12,6 @@ export interface PrimaryDatabaseReplicaOptions {
   >[];
 }
 
-export interface OnQueryRun {
-  query: string;
-  params: unknown[];
-  type: SqlQueryType | NoSqlQueryType;
-}
+export type QueryRunHooksOptions =
+  | NoSqlQueryRunHooksOptions
+  | SqlQueryRunHooksOptions;
