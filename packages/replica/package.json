@@ -1,0 +1,26 @@
+{
+  "name": "@ignisia/replica",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "bun run build.ts"
+  },
+  "dependencies": {
+    "@ignisia/encryption": "workspace:*"
+  },
+  "devDependencies": {
+    "@ignisia/nosql": "workspace:*",
+    "@ignisia/securedb": "workspace:*",
+    "@ignisia/sql": "workspace:*",
+    "@ignisia/utils": "workspace:*",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "files": [
+    "dist"
+  ]
+}

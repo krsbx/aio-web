@@ -50,7 +50,7 @@
     },
     "packages/encryption": {
       "name": "@ignisia/encryption",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@ignisia/utils": "workspace:*",
         "@types/bun": "latest",
@@ -63,6 +63,23 @@
       "name": "@ignisia/nosql",
       "version": "0.1.0",
       "devDependencies": {
+        "@ignisia/utils": "workspace:*",
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
+    "packages/replica": {
+      "name": "@ignisia/replica",
+      "version": "0.1.0",
+      "dependencies": {
+        "@ignisia/encryption": "workspace:*",
+      },
+      "devDependencies": {
+        "@ignisia/nosql": "workspace:*",
+        "@ignisia/securedb": "workspace:*",
+        "@ignisia/sql": "workspace:*",
         "@ignisia/utils": "workspace:*",
         "@types/bun": "latest",
       },
@@ -244,6 +261,8 @@
     "@ignisia/encryption": ["@ignisia/encryption@workspace:packages/encryption"],
 
     "@ignisia/nosql": ["@ignisia/nosql@workspace:packages/nosql"],
+
+    "@ignisia/replica": ["@ignisia/replica@workspace:packages/replica"],
 
     "@ignisia/securedb": ["@ignisia/securedb@workspace:packages/securedb"],
 
