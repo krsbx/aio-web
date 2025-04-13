@@ -26,7 +26,7 @@ export class SecureSqlDb<
   protected decryptedFilePath: string;
   protected encryptedFilePath: string;
   protected password: string;
-  protected salt: string | null;
+  protected salt: string | Uint8Array | null;
   protected isProtected: boolean;
   public readonly metaPath: string;
   public readonly meta: DatabaseMeta;
