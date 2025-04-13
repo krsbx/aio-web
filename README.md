@@ -28,9 +28,15 @@ An all-in-one tooling for your web development needs. Everything you need in one
 
 > Password protected SQLite for [@ignisia/sql](./packages/sql) and [@ignisia/nosql](./packages/nosql).
 
+- [x] [@ignisia/replica](./packages/replica)
+
+> Replica-Set mechanism for [@ignisia/sql](./packages/sql), [@ignisia/nosql](./packages/nosql), and [@ignisia/securedb](./packages/securedb).
+
 ## Plan
 
-- [ ] Add support for replica-set mechanism for the NoSQL adapters.
+- [x] Add support for replica-set mechanism for the NoSQL adapters.
+
+- [x] Add support for replica-set mechanism for the SQL adapters.
 
 - [x] Add support for password protected database for the NoSQL adapters.
 
