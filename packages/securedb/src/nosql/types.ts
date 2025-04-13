@@ -1,16 +1,12 @@
 import type { Document, Field } from '@ignisia/nosql/dist/documents';
 import type { DatabaseOptions } from '@ignisia/nosql/dist/documents/database/types';
-import type { DatabaseMeta } from '../types';
+import type { DatabaseMeta, SetupSecureDbOptions } from '../types';
 
 export interface SecureDbOptions<
   Docs extends Record<string, Document<string, Record<string, Field>>>,
-> extends DatabaseOptions<Docs> {
-  decryptedFilePath: string;
-  encryptedFilePath: string;
-  metaPath: string;
-  password: string;
+> extends DatabaseOptions<Docs>,
+    SetupSecureDbOptions {
   meta: DatabaseMeta;
-  salt?: string | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

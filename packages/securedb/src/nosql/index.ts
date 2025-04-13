@@ -24,7 +24,7 @@ export class SecureNoSqlDb<
   protected decryptedFilePath: string;
   protected encryptedFilePath: string;
   protected password: string;
-  protected salt: string | null;
+  protected salt: string | Uint8Array | null;
   protected isProtected: boolean;
   public readonly metaPath: string;
   public readonly meta: DatabaseMeta;
@@ -59,7 +59,7 @@ export class SecureNoSqlDb<
     const exec = query.exec;
 
     query.exec = async () => {
-      const result = exec.call(query);
+      const result = await exec.call(query);
 
       if (this.isProtected) {
         await this.trackChanges();

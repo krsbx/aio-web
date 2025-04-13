@@ -1,18 +1,12 @@
-import type { DatabaseMeta } from '../types';
+import type { DatabaseMeta, SetupSecureDbOptions } from '../types';
 
-export interface EncryptDbParams {
-  decryptedFilePath: string;
-  encryptedFilePath: string;
-  salt: string | null;
-  password: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface EncryptDbParams
+  extends Omit<SetupSecureDbOptions, 'metaPath'> {}
 
-export interface DecryptDbParams {
-  decryptedFilePath: string;
-  encryptedFilePath: string;
-  salt: string | null;
-  password: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface DecryptDbParams
+  extends Omit<SetupSecureDbOptions, 'metaPath'> {}
 
 export interface TrackChangesParams {
   encrypt: SecureDbContract['encrypt'];
