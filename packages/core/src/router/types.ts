@@ -49,7 +49,6 @@ export type ExtractPathParams<Path extends string> =
 
 export interface ResolveMiddlewareOptions {
   parts: string[];
-  globalMiddlewares: Middleware[];
   pathMiddlewares: TrieMiddlewareNode;
   middlewares: Middleware[];
 }

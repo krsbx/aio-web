@@ -30,6 +30,11 @@ export class Context<
     this._res = null;
   }
 
+  /** Do not call this method, it is for internal use only */
+  public setParams(params: Params) {
+    this._params = params;
+  }
+
   public get req() {
     if (!this._req) {
       this._req = new ContextRequest(this._request, this._params);
