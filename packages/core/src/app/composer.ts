@@ -1,27 +1,4 @@
-import { Context } from '../context';
-import { StatusCode } from '../context/constants';
-import type {
-  ComposerOptions,
-  MiddlewareComposerOptions,
-  OnError,
-} from './types';
-
-async function handleError(
-  err: unknown,
-  onError: OnError | null,
-  ctx: Context
-) {
-  if (onError) {
-    return onError(err, ctx);
-  }
-
-  return Response.json(
-    { message: 'Internal Server Error' },
-    {
-      status: StatusCode.INTERNAL_SERVER_ERROR,
-    }
-  );
-}
+import type { MiddlewareComposerOptions } from './types';
 
 export async function mwComposer({
   ctx,
@@ -47,28 +24,4 @@ export async function mwComposer({
 
     index++;
   }
-}
-
-export async function composer({ ctx, route, middlewares }: ComposerOptions) {
-  const mwRes = await mwComposer({
-    ctx,
-    middlewares,
-  });
-
-  if (mwRes) return mwRes;
-
-  const res = await route.handler(ctx);
-  ctx.res = res;
-
-  return ctx.res;
-}
-
-export function wrapComposer(ctx: Context, onError: OnError | null) {
-  return async <T>(fn: T) => {
-    try {
-      return await fn;
-    } catch (error) {
-      return handleError(error, onError, ctx);
-    }
-  };
 }

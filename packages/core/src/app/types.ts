@@ -12,13 +12,6 @@ export interface MiddlewareComposerOptions {
   middlewares: Middleware[];
 }
 
-export interface ComposerOptions {
-  ctx: Context;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  route: Route<any, any, any, any>;
-  middlewares: Middleware[];
-}
-
 export interface OnError<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   V = any,

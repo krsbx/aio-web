@@ -1,5 +1,5 @@
 import { generateHeaderEntries } from '../utilities';
-import { StatusCode } from './constants';
+import { NotFound, StatusCode } from './constants';
 import { ContextCookie } from './cookie';
 import { ContextRequest } from './request';
 
@@ -33,6 +33,12 @@ export class Context<
   /** Do not call this method, it is for internal use only */
   public setParams(params: Params) {
     this._params = params;
+
+    if (this._req) {
+      this._req.setParams(params);
+    }
+
+    return this;
   }
 
   public get req() {
@@ -56,7 +62,7 @@ export class Context<
   }
 
   public get res() {
-    if (!this._res) this._res = new Response('404 Not Found', { status: 404 });
+    if (!this._res) this._res = NotFound;
 
     return this._res;
   }
@@ -150,6 +156,16 @@ export class Context<
 
     return this.json({
       message: message ?? 'Not Found',
+    });
+  }
+
+  public forbidden(): Response;
+  public forbidden(message: string): Response;
+  public forbidden(message?: string) {
+    this.status(StatusCode.FORBIDDEN);
+
+    return this.json({
+      message: message ?? 'Forbidden',
     });
   }
 

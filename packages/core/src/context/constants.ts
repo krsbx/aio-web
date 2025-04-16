@@ -100,3 +100,17 @@ export const StatusCode = {
 } as const;
 
 export type StatusCode = (typeof StatusCode)[keyof typeof StatusCode];
+
+export const NotFound = Response.json(
+  { message: 'Not Found' },
+  {
+    status: StatusCode.NOT_FOUND,
+  }
+);
+
+export const InternalServerError = Response.json(
+  { message: 'Internal Server Error' },
+  {
+    status: StatusCode.INTERNAL_SERVER_ERROR,
+  }
+);

@@ -22,6 +22,13 @@ export class ContextRequest<
     this._query = null;
   }
 
+  /** Do not call this method, it is for internal use only */
+  public setParams(params: Params) {
+    this._params = params;
+
+    return this;
+  }
+
   public param(): Params;
   public param<
     K extends keyof Params | (string & {}),

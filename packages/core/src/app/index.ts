@@ -1,7 +1,8 @@
 import { Context } from '../context';
+import { InternalServerError, NotFound } from '../context/constants';
 import { Router } from '../router';
 import { extractRegisteredPathParts } from '../utilities';
-import { composer, mwComposer, wrapComposer } from './composer';
+import { mwComposer } from './composer';
 import type { ApiMethod } from './constants';
 import type { ListenOptions, OnError, OnNotFound } from './types';
 
@@ -29,43 +30,48 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const parts = extractRegisteredPathParts(req.url);
     const ctx = new Context(req, {});
 
-    const restWrapper = wrapComposer(ctx, this._onError);
+    try {
+      const parts = extractRegisteredPathParts(req.url);
 
-    if (this.middlewares.length) {
-      const mwRes = await restWrapper(
-        mwComposer({
-          ctx,
-          middlewares: this.middlewares,
-        })
-      );
+      let mwRes = await mwComposer({
+        middlewares: this.middlewares,
+        ctx,
+      });
 
       if (mwRes) return mwRes;
-    }
 
-    const found = this.match(req.method as ApiMethod, parts);
+      const found = this.match(req.method as ApiMethod, parts);
 
-    if (!found) {
-      if (this._onNotFound) {
-        const ctx = new Context(req, {});
+      if (!found) {
+        if (this._onNotFound) {
+          return this._onNotFound(ctx);
+        }
 
-        return this._onNotFound(ctx);
+        return NotFound;
       }
 
-      return new Response('404 Not Found', { status: 404 });
-    }
+      ctx.setParams(found.params);
 
-    ctx.setParams(found.params);
-
-    return restWrapper(
-      composer({
+      mwRes = await mwComposer({
         middlewares: found.route.middlewares,
-        route: found.route,
-        ctx: ctx,
-      })
-    );
+        ctx,
+      });
+
+      if (mwRes) return mwRes;
+
+      const res = await found.route.handler(ctx);
+      ctx.res = res;
+
+      return ctx.res;
+    } catch (error) {
+      if (this._onError) {
+        return this._onError(error, ctx);
+      }
+
+      return InternalServerError;
+    }
   }
 
   public fetch = (req: Request) => {
