@@ -2,8 +2,8 @@
   "name": "@ignisia/replica",
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
+  "version": "0.1.1",
   "type": "module",
-  "version": "0.1.0",
   "exports": {
     ".": {
       "import": "./dist/index.js",

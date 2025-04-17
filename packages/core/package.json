@@ -2,8 +2,8 @@
   "name": "@ignisia/core",
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
+  "version": "0.2.0",
   "type": "module",
-  "version": "0.1.0",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -26,9 +26,17 @@
       "import": "./dist/context/index.js",
       "types": "./dist/context/index.d.ts"
     },
-    "./context/factory": {
-      "import": "./dist/context/factory/index.js",
-      "types": "./dist/context/factory/index.d.ts"
+    "./middlewares": {
+      "import": "./dist/middlewares/index.js",
+      "types": "./dist/middlewares/index.d.ts"
+    },
+    "./middlewares/cors": {
+      "import": "./dist/middlewares/cors/index.js",
+      "types": "./dist/middlewares/cors/index.d.ts"
+    },
+    "./middlewares/serve-static": {
+      "import": "./dist/middlewares/serve-static/index.js",
+      "types": "./dist/middlewares/serve-static/index.d.ts"
     },
     "./router": {
       "import": "./dist/router/index.js",
