@@ -1,5 +1,5 @@
 import { ApiMethod, ApiMethods } from '../app/constants';
-import type { Handler, Middleware } from '../router/types';
+import type { Middleware } from '../router/types';
 
 interface CORSOptions {
   origin?: string | string[] | ((origin: string | null) => string | false);
@@ -10,7 +10,7 @@ interface CORSOptions {
   maxAge?: number;
 }
 
-export function cors(options: CORSOptions = {}): Middleware | Handler {
+export function cors(options: CORSOptions = {}): Middleware {
   const {
     origin = '*',
     allowMethods = ApiMethods,
