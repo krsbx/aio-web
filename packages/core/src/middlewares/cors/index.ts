@@ -1,14 +1,7 @@
-import { ApiMethod, ApiMethods } from '../app/constants';
-import type { Middleware } from '../router/types';
-
-interface CORSOptions {
-  origin?: string | string[] | ((origin: string | null) => string | false);
-  allowMethods?: (ApiMethod | (string & {}))[];
-  allowHeaders?: string[];
-  exposeHeaders?: string[];
-  credentials?: boolean;
-  maxAge?: number;
-}
+import { ApiMethods } from '../../app/constants';
+import type { Middleware } from '../../router/types';
+import type { CORSOptions } from './types';
+import { resolveOrigin } from './utilities';
 
 export function cors(options: CORSOptions = {}): Middleware {
   const {
@@ -22,17 +15,7 @@ export function cors(options: CORSOptions = {}): Middleware {
 
   return async (ctx, next) => {
     const reqOrigin = ctx.req.header('origin');
-    let resolvedOrigin: string | false = '*';
-
-    if (typeof origin === 'function') {
-      resolvedOrigin = origin(reqOrigin);
-    } else if (Array.isArray(origin)) {
-      resolvedOrigin = origin.includes(reqOrigin || '')
-        ? reqOrigin || ''
-        : false;
-    } else {
-      resolvedOrigin = origin;
-    }
+    const resolvedOrigin = resolveOrigin(origin, reqOrigin);
 
     if (resolvedOrigin) {
       ctx.header('Access-Control-Allow-Origin', resolvedOrigin);
@@ -51,10 +34,7 @@ export function cors(options: CORSOptions = {}): Middleware {
     }
 
     if (exposeHeaders.length) {
-      ctx.res!.headers.set(
-        'Access-Control-Expose-Headers',
-        exposeHeaders.join(',')
-      );
+      ctx.header('Access-Control-Expose-Headers', exposeHeaders.join(','));
     }
 
     if (typeof maxAge === 'number') {

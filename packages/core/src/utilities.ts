@@ -70,7 +70,3 @@ export function generateHeaderEntries(
 
   return entries;
 }
-
-export function getMimeType(filePath: string) {
-  return Bun.file(filePath).type || 'application/octet-stream';
-}
