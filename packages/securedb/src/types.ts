@@ -1,4 +1,4 @@
-import type { AesKeyOptions } from '@ignisia/encryption/dist/types';
+import type { AesKeyOptions } from '@ignisia/encryption/types';
 
 export interface DatabaseMeta {
   lastEncryptedAt: null | string | Date;

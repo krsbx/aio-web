@@ -1,5 +1,5 @@
-import type { Document, Field } from '@ignisia/nosql/dist/documents';
-import type { DatabaseOptions } from '@ignisia/nosql/dist/documents/database/types';
+import type { Document, Field } from '@ignisia/nosql/documents';
+import type { DatabaseOptions } from '@ignisia/nosql/documents/database/types';
 import type { DatabaseMeta, SetupSecureDbOptions } from '../types';
 
 export interface SecureDbOptions<
