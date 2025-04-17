@@ -10,7 +10,6 @@ import type {
 
 function resolveMiddlewares(options: ResolveMiddlewareOptions) {
   const combined = [
-    ...options.globalMiddlewares,
     ...options.pathMiddlewares.collect(options.parts),
     ...options.middlewares,
   ];
@@ -39,7 +38,6 @@ export function register<
     path: pathWithBase,
     handler,
     middlewares: resolveMiddlewares({
-      globalMiddlewares: this.middlewares,
       middlewares: middlewares,
       pathMiddlewares: this.pathMiddlewares,
       parts,

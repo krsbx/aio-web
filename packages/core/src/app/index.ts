@@ -1,10 +1,10 @@
-import type { BunRequest } from 'bun';
 import { Context } from '../context';
+import { InternalServerError, NotFound } from '../context/constants';
 import { Router } from '../router';
 import { extractRegisteredPathParts } from '../utilities';
-import { composer } from './composer';
+import { mwComposer } from './composer';
 import type { ApiMethod } from './constants';
-import type { ListenOptions, NativeRoutes, OnError, OnNotFound } from './types';
+import type { ListenOptions, OnError, OnNotFound } from './types';
 
 export class Ignisia<BasePath extends string> extends Router<BasePath> {
   protected _onError: OnError | null;
@@ -30,47 +30,48 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
   }
 
   public async handle(req: Request): Promise<Response> {
-    const parts = extractRegisteredPathParts(req.url);
-    const found = this.match(req.method as ApiMethod, parts);
+    const ctx = new Context(req, {});
 
-    if (!found) {
-      if (this._onNotFound) {
-        const ctx = new Context(req, {});
+    try {
+      const parts = extractRegisteredPathParts(req.url);
 
-        return this._onNotFound(ctx);
+      let mwRes = await mwComposer({
+        middlewares: this.middlewares,
+        ctx,
+      });
+
+      if (mwRes) return mwRes;
+
+      const found = this.match(req.method as ApiMethod, parts);
+
+      if (!found) {
+        if (this._onNotFound) {
+          return this._onNotFound(ctx);
+        }
+
+        return NotFound;
       }
 
-      return new Response('404 Not Found', { status: 404 });
+      ctx.setParams(found.params);
+
+      mwRes = await mwComposer({
+        middlewares: found.route.middlewares,
+        ctx,
+      });
+
+      if (mwRes) return mwRes;
+
+      const res = await found.route.handler(ctx);
+      ctx.res = res;
+
+      return ctx.res;
+    } catch (error) {
+      if (this._onError) {
+        return this._onError(error, ctx);
+      }
+
+      return InternalServerError;
     }
-
-    return composer({
-      request: req,
-      middlewares: found.route.middlewares,
-      onError: this._onError,
-      params: found.params,
-      route: found.route,
-    });
-  }
-
-  public bunRoutes() {
-    const routes: NativeRoutes = {};
-
-    for (const route of this.routes) {
-      const path = route.path.startsWith('/') ? route.path : `/${route.path}`;
-
-      if (!routes[path]) routes[path] = {};
-
-      routes[path][route.method] = async (req: BunRequest) =>
-        composer({
-          request: req,
-          middlewares: route.middlewares,
-          onError: this._onError,
-          params: req.params,
-          route: route,
-        });
-    }
-
-    return routes;
   }
 
   public fetch = (req: Request) => {
@@ -81,13 +82,9 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
    * Listen on the specified port, defaulting to 3000
    * By default will use Bun's routes instead of fetch
    */
-  public listen({
-    routes: isWithRoutes = true,
-    ...options
-  }: ListenOptions = {}) {
+  public listen(options: ListenOptions = {}) {
     return Bun.serve({
-      routes: isWithRoutes ? this.bunRoutes() : undefined,
-      fetch: isWithRoutes ? undefined : this.fetch,
+      fetch: this.fetch,
       ...options,
     });
   }

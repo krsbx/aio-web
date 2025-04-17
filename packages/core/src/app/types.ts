@@ -1,20 +1,15 @@
-import type { BunRequest, ServeOptions } from 'bun';
+import type { ServeOptions } from 'bun';
 import type { Context } from '../context';
 import type { Middleware, Route } from '../router/types';
-import type { ApiMethod } from './constants';
 
 export interface MatchResult {
   route: Route;
   params: Record<string, string>;
 }
 
-export interface ComposerOptions {
-  request: Request;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  route: Route<any, any, any, any>;
-  params: Record<string, string>;
+export interface MiddlewareComposerOptions {
+  ctx: Context;
   middlewares: Middleware[];
-  onError: OnError | null;
 }
 
 export interface OnError<
@@ -37,11 +32,4 @@ export interface OnNotFound<
   (ctx: Context<V, P, Q, S>): Response | Promise<Response>;
 }
 
-export type NativeRoutes = Record<
-  string,
-  Partial<Record<ApiMethod, (req: BunRequest) => Response | Promise<Response>>>
->;
-
-export interface ListenOptions extends Omit<ServeOptions, 'fetch' | 'routes'> {
-  routes?: boolean;
-}
+export type ListenOptions = Omit<ServeOptions, 'fetch' | 'routes'>;
