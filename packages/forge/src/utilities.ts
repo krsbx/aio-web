@@ -1,7 +1,7 @@
 import { Router } from '@ignisia/core';
+import { ApiMethod, ApiMethods } from '@ignisia/core/app/constants';
 import { fileURLToPath } from 'bun';
 import { renderToString } from 'react-dom/server';
-import { ForgeApiMethod, ForgeApiMethods } from './constants';
 import type { ForgeApi } from './types/api';
 import type { Page } from './types/page';
 
@@ -27,9 +27,9 @@ export async function apiLoader(relativePath: string) {
   const router = new Router(basePath);
 
   for (const [method, handler] of Object.entries(api)) {
-    if (!ForgeApiMethods.includes(method as ForgeApiMethod)) continue;
+    if (!ApiMethods.includes(method as ApiMethod)) continue;
 
-    router[method.toLowerCase() as Lowercase<ForgeApiMethods>]('/', handler);
+    router[method.toLowerCase() as Lowercase<ApiMethod>]('/', handler);
   }
 
   return router;
