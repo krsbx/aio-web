@@ -4,6 +4,21 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "version": "0.1.1",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    },
+    "./**/*": {
+      "import": "./dist/**/*.js",
+      "types": "./dist/**/*.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "build": "bun run build.ts"
   },

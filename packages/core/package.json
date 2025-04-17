@@ -4,6 +4,41 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "version": "0.1.0",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    },
+    "./**/*": {
+      "import": "./dist/**/*.js",
+      "types": "./dist/**/*.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./app": {
+      "import": "./dist/app/index.js",
+      "types": "./dist/app/index.d.ts"
+    },
+    "./context": {
+      "import": "./dist/context/index.js",
+      "types": "./dist/context/index.d.ts"
+    },
+    "./context/factory": {
+      "import": "./dist/context/factory/index.js",
+      "types": "./dist/context/factory/index.d.ts"
+    },
+    "./router": {
+      "import": "./dist/router/index.js",
+      "types": "./dist/router/index.d.ts"
+    },
+    "./router/trie": {
+      "import": "./dist/router/trie/index.js",
+      "types": "./dist/router/trie/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "bun run build.ts"
   },

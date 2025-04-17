@@ -4,8 +4,8 @@ import {
   type QueryBuilder,
   type Table,
 } from '@ignisia/sql';
-import type { DatabaseOptions } from '@ignisia/sql/dist/database/types';
-import { Dialect } from '@ignisia/sql/dist/table/constants';
+import type { DatabaseOptions } from '@ignisia/sql/database/types';
+import { Dialect } from '@ignisia/sql/table/constants';
 import { decrypt, encrypt, setupSecureDb, trackChanges } from '../helper';
 import type {
   DecryptDbParams,

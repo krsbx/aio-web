@@ -3,8 +3,8 @@ import {
   type Document,
   type Field,
   type QueryBuilder,
-} from '@ignisia/nosql/dist/documents';
-import type { DatabaseOptions } from '@ignisia/nosql/dist/documents/database/types';
+} from '@ignisia/nosql/documents';
+import type { DatabaseOptions } from '@ignisia/nosql/documents/database/types';
 import { decrypt, encrypt, setupSecureDb, trackChanges } from '../helper';
 import type {
   DecryptDbParams,

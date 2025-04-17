@@ -4,6 +4,45 @@
   "types": "./dist/index.d.ts",
   "version": "0.2.0",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
+    },
+    "./**/*": {
+      "import": "./dist/**/*.js",
+      "types": "./dist/**/*.d.ts"
+    },
+    "./package.json": "./package.json",
+    "./documents": {
+      "import": "./dist/documents/index.js",
+      "types": "./dist/documents/index.d.ts"
+    },
+    "./documents/database": {
+      "import": "./dist/documents/database/index.js",
+      "types": "./dist/documents/database/index.d.ts"
+    },
+    "./documents/document": {
+      "import": "./dist/documents/document/index.js",
+      "types": "./dist/documents/document/index.d.ts"
+    },
+    "./documents/field": {
+      "import": "./dist/documents/field/index.js",
+      "types": "./dist/documents/field/index.d.ts"
+    },
+    "./documents/query": {
+      "import": "./dist/documents/query/index.js",
+      "types": "./dist/documents/query/index.d.ts"
+    },
+    "./key-value": {
+      "import": "./dist/key-value/index.js",
+      "types": "./dist/key-value/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "bun run build.ts"
   },

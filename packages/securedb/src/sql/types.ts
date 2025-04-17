@@ -1,6 +1,6 @@
-import type { DatabaseOptions } from '@ignisia/sql/dist/database/types';
+import type { DatabaseOptions } from '@ignisia/sql/database/types';
 import type { Column, Table } from '@ignisia/sql';
-import type { Dialect } from '@ignisia/sql/dist/table/constants';
+import type { Dialect } from '@ignisia/sql/table/constants';
 import type { DatabaseMeta, SetupSecureDbOptions } from '../types';
 
 export interface SecureDbOptions<
