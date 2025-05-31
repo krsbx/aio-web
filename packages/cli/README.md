@@ -1,15 +1,13 @@
-# @ignisia/cli
+# @Ignisia/CLI
 
-To install dependencies:
+A lightweight command line interface for Bun with a focus on simplicity and ease of use.
+
+## Requirements
+
+- [Bun](https://bun.sh/)
+
+## Installation
 
 ```bash
-bun install
+bun add @ignisia/cli
 ```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.15. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
