@@ -6,41 +6,41 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     },
     "./**/*": {
-      "import": "./dist/**/*.js",
-      "types": "./dist/**/*.d.ts"
+      "types": "./dist/**/*.d.ts",
+      "import": "./dist/**/*.js"
     },
     "./package.json": "./package.json",
     "./documents": {
-      "import": "./dist/documents/index.js",
-      "types": "./dist/documents/index.d.ts"
+      "types": "./dist/documents/index.d.ts",
+      "import": "./dist/documents/index.js"
     },
     "./documents/database": {
-      "import": "./dist/documents/database/index.js",
-      "types": "./dist/documents/database/index.d.ts"
+      "types": "./dist/documents/database/index.d.ts",
+      "import": "./dist/documents/database/index.js"
     },
     "./documents/document": {
-      "import": "./dist/documents/document/index.js",
-      "types": "./dist/documents/document/index.d.ts"
+      "types": "./dist/documents/document/index.d.ts",
+      "import": "./dist/documents/document/index.js"
     },
     "./documents/field": {
-      "import": "./dist/documents/field/index.js",
-      "types": "./dist/documents/field/index.d.ts"
+      "types": "./dist/documents/field/index.d.ts",
+      "import": "./dist/documents/field/index.js"
     },
     "./documents/query": {
-      "import": "./dist/documents/query/index.js",
-      "types": "./dist/documents/query/index.d.ts"
+      "types": "./dist/documents/query/index.d.ts",
+      "import": "./dist/documents/query/index.js"
     },
     "./key-value": {
-      "import": "./dist/key-value/index.js",
-      "types": "./dist/key-value/index.d.ts"
+      "types": "./dist/key-value/index.d.ts",
+      "import": "./dist/key-value/index.js"
     }
   },
   "scripts": {

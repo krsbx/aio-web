@@ -3,8 +3,8 @@ import fs from 'node:fs/promises';
 
 type ExportJson =
   | {
-      import: string;
       types: string;
+      import: string;
     }
   | string;
 
@@ -23,8 +23,8 @@ function createExports(record: Record<string, ExportJson>, srcPath: string) {
 
         if (await Bun.file(index).exists()) {
           record[`./${relativeKey}`] = {
-            import: `./dist/${relativeKey}/index.js`,
             types: `./dist/${relativeKey}/index.d.ts`,
+            import: `./dist/${relativeKey}/index.js`,
           };
         }
 
@@ -42,16 +42,16 @@ export async function exports(source: string) {
 
   pkgJson.exports = {
     '.': {
-      import: './dist/index.js',
       types: './dist/index.d.ts',
+      import: './dist/index.js',
     },
     './*': {
-      import: './dist/*.js',
       types: './dist/*.d.ts',
+      import: './dist/*.js',
     },
     './**/*': {
-      import: './dist/**/*.js',
       types: './dist/**/*.d.ts',
+      import: './dist/**/*.js',
     },
     './package.json': './package.json',
   } as Record<string, ExportJson>;

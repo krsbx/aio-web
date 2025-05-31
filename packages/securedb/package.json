@@ -6,29 +6,29 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     },
     "./**/*": {
-      "import": "./dist/**/*.js",
-      "types": "./dist/**/*.d.ts"
+      "types": "./dist/**/*.d.ts",
+      "import": "./dist/**/*.js"
     },
     "./package.json": "./package.json",
     "./helper": {
-      "import": "./dist/helper/index.js",
-      "types": "./dist/helper/index.d.ts"
+      "types": "./dist/helper/index.d.ts",
+      "import": "./dist/helper/index.js"
     },
     "./nosql": {
-      "import": "./dist/nosql/index.js",
-      "types": "./dist/nosql/index.d.ts"
+      "types": "./dist/nosql/index.d.ts",
+      "import": "./dist/nosql/index.js"
     },
     "./sql": {
-      "import": "./dist/sql/index.js",
-      "types": "./dist/sql/index.d.ts"
+      "types": "./dist/sql/index.d.ts",
+      "import": "./dist/sql/index.js"
     }
   },
   "scripts": {

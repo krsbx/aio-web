@@ -6,45 +6,45 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     },
     "./**/*": {
-      "import": "./dist/**/*.js",
-      "types": "./dist/**/*.d.ts"
+      "types": "./dist/**/*.d.ts",
+      "import": "./dist/**/*.js"
     },
     "./package.json": "./package.json",
     "./app": {
-      "import": "./dist/app/index.js",
-      "types": "./dist/app/index.d.ts"
+      "types": "./dist/app/index.d.ts",
+      "import": "./dist/app/index.js"
     },
     "./context": {
-      "import": "./dist/context/index.js",
-      "types": "./dist/context/index.d.ts"
+      "types": "./dist/context/index.d.ts",
+      "import": "./dist/context/index.js"
     },
     "./middlewares": {
-      "import": "./dist/middlewares/index.js",
-      "types": "./dist/middlewares/index.d.ts"
+      "types": "./dist/middlewares/index.d.ts",
+      "import": "./dist/middlewares/index.js"
     },
     "./middlewares/cors": {
-      "import": "./dist/middlewares/cors/index.js",
-      "types": "./dist/middlewares/cors/index.d.ts"
+      "types": "./dist/middlewares/cors/index.d.ts",
+      "import": "./dist/middlewares/cors/index.js"
     },
     "./middlewares/serve-static": {
-      "import": "./dist/middlewares/serve-static/index.js",
-      "types": "./dist/middlewares/serve-static/index.d.ts"
+      "types": "./dist/middlewares/serve-static/index.d.ts",
+      "import": "./dist/middlewares/serve-static/index.js"
     },
     "./router": {
-      "import": "./dist/router/index.js",
-      "types": "./dist/router/index.d.ts"
+      "types": "./dist/router/index.d.ts",
+      "import": "./dist/router/index.js"
     },
     "./router/trie": {
-      "import": "./dist/router/trie/index.js",
-      "types": "./dist/router/trie/index.d.ts"
+      "types": "./dist/router/trie/index.d.ts",
+      "import": "./dist/router/trie/index.js"
     }
   },
   "scripts": {

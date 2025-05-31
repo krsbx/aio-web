@@ -6,37 +6,37 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
     },
     "./**/*": {
-      "import": "./dist/**/*.js",
-      "types": "./dist/**/*.d.ts"
+      "types": "./dist/**/*.d.ts",
+      "import": "./dist/**/*.js"
     },
     "./package.json": "./package.json",
     "./column": {
-      "import": "./dist/column/index.js",
-      "types": "./dist/column/index.d.ts"
+      "types": "./dist/column/index.d.ts",
+      "import": "./dist/column/index.js"
     },
     "./database": {
-      "import": "./dist/database/index.js",
-      "types": "./dist/database/index.d.ts"
+      "types": "./dist/database/index.d.ts",
+      "import": "./dist/database/index.js"
     },
     "./migration": {
-      "import": "./dist/migration/index.js",
-      "types": "./dist/migration/index.d.ts"
+      "types": "./dist/migration/index.d.ts",
+      "import": "./dist/migration/index.js"
     },
     "./query": {
-      "import": "./dist/query/index.js",
-      "types": "./dist/query/index.d.ts"
+      "types": "./dist/query/index.d.ts",
+      "import": "./dist/query/index.js"
     },
     "./table": {
-      "import": "./dist/table/index.js",
-      "types": "./dist/table/index.d.ts"
+      "types": "./dist/table/index.d.ts",
+      "import": "./dist/table/index.js"
     }
   },
   "scripts": {
