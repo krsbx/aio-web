@@ -7,9 +7,11 @@ app.get('/', (c) => c.text(''));
 app.get('/user/:id', (c) => c.text(c.req.param('id')));
 app.post('/user', (c) => c.text(''));
 
-console.log(`Ignisia server listening on port ${PORT_ALLOCATION.IGNISIA}`);
+console.log(
+  `Ignisia (Bun) server listening on port ${PORT_ALLOCATION.IGNISIA_BUN}`
+);
 
 app.listen({
-  port: PORT_ALLOCATION.IGNISIA,
-  routes: false,
+  port: PORT_ALLOCATION.IGNISIA_BUN,
+  routes: true,
 });

@@ -1,6 +1,7 @@
-import type { ServeOptions } from 'bun';
+import type { BunRequest, ServeOptions } from 'bun';
 import type { Context } from '../context';
 import type { Middleware, Route } from '../router/types';
+import type { ApiMethod } from './constants';
 
 export interface MatchResult {
   route: Route;
@@ -32,4 +33,18 @@ export interface OnNotFound<
   (ctx: Context<V, P, Q, S>): Response | Promise<Response>;
 }
 
-export type ListenOptions = Omit<ServeOptions, 'fetch' | 'routes'>;
+export type NativeRoutes = Record<
+  string,
+  Partial<Record<ApiMethod, (req: BunRequest) => Response | Promise<Response>>>
+>;
+
+export type ListenOptions = Omit<ServeOptions, 'fetch' | 'routes'> & {
+  routes?: boolean;
+};
+
+export interface ReqHandlerOptions {
+  req: Request | BunRequest;
+  method: ApiMethod;
+  route: Route | null;
+  extractParams: boolean;
+}
