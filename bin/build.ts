@@ -7,6 +7,7 @@ const parallels = [
   'packages/nosql',
   'packages/sql',
   'packages/core',
+  'packages/storage',
 ];
 
 const series = ['packages/securedb'];

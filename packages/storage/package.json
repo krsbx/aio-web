@@ -1,11 +1,38 @@
 {
   "name": "@ignisia/storage",
-  "module": "src/index.ts",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "version": "0.1.0",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    },
+    "./**/*": {
+      "types": "./dist/**/*.d.ts",
+      "import": "./dist/**/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bun run build.ts"
+  },
+  "dependencies": {
+    "@ignisia/encryption": "workspace:*"
+  },
   "devDependencies": {
+    "@ignisia/utils": "workspace:*",
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
