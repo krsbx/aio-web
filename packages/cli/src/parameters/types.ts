@@ -57,44 +57,49 @@ export interface BaseArrayParameter<
   allowedValue: T;
 }
 
-export type ArrayParameterFlags<
+export interface BaseArrayNonEnumParameter<
   T extends Exclude<
     CommandLineParameterType,
-    typeof CommandLineParameterType.ARRAY
+    typeof CommandLineParameterType.ARRAY | typeof CommandLineParameterType.ENUM
   >,
-  U extends T extends typeof CommandLineParameterType.ENUM
-    ? readonly string[]
-    : never,
-> = T extends typeof CommandLineParameterType.ENUM
-  ? {
-      enums: U;
-    }
-  : NonNullable<unknown>;
+> extends BaseParameter<CommandLineParameterTypeMap[T][]> {
+  type: typeof CommandLineParameterType.ARRAY;
+  allowedValue: T;
+}
 
-export type ArrayParameter<
-  T extends Exclude<
-    CommandLineParameterType,
-    typeof CommandLineParameterType.ARRAY
-  >,
-  U extends T extends typeof CommandLineParameterType.ENUM
-    ? readonly string[]
-    : never = T extends typeof CommandLineParameterType.ENUM
-    ? readonly string[]
-    : never,
-  V extends T extends typeof CommandLineParameterType.ENUM
-    ? U[number]
-    : CommandLineParameterTypeMap<U>[T] = T extends typeof CommandLineParameterType.ENUM
-    ? U[number]
-    : CommandLineParameterTypeMap<U>[T],
-> = ArrayParameterFlags<T, U> & BaseArrayParameter<T, V>;
+export type ArrayFlagParameter = BaseArrayNonEnumParameter<
+  typeof CommandLineParameterType.BOOLEAN
+>;
 
-export type ParameterDefinition<T, U> =
+export type ArrayStringParameter = BaseArrayNonEnumParameter<
+  typeof CommandLineParameterType.STRING
+>;
+
+export type ArrayNumberParameter = BaseArrayNonEnumParameter<
+  typeof CommandLineParameterType.NUMBER
+>;
+
+export interface ArrayEnumParameter<T extends readonly string[]>
+  extends BaseArrayParameter<typeof CommandLineParameterType.ENUM, T[number]> {
+  enums: T;
+}
+
+export type SingleParameterDefinition<T> =
   | FlagParameter
   | StringParamter
   | NumberParameter
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  | EnumParameter<T>
+  | EnumParameter<T>;
+
+export type MultipleParameterDefinition<T> =
+  | ArrayFlagParameter
+  | ArrayStringParameter
+  | ArrayNumberParameter
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
-  | ArrayParameter<T, U>;
+  | ArrayEnumParameter<T>;
+
+export type ParameterDefinition<T> =
+  | SingleParameterDefinition<T>
+  | MultipleParameterDefinition<T>;

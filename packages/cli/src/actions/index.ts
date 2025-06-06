@@ -6,10 +6,10 @@ import type { CommandLineActionOptions } from './types';
 
 export abstract class CommandLineAction<
   Values extends Record<string, unknown> = Record<string, unknown>,
-  Parameters extends Record<
+  Parameters extends Record<string, ParameterDefinition<unknown>> = Record<
     string,
-    ParameterDefinition<unknown, unknown>
-  > = Record<string, ParameterDefinition<unknown, unknown>>,
+    ParameterDefinition<unknown>
+  >,
 > extends CommandLineParameter<Parameters, Values> {
   public name: string;
   public summary: string;
