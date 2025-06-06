@@ -1,7 +1,13 @@
-import { parseArgs, type ParseArgsOptionDescriptor } from 'node:util';
+import { parseArgs } from 'node:util';
 import { CommandLineParameter } from '../parameters';
 import { CommandLineParameterType } from '../parameters/constants';
-import type { ParameterDefinition } from '../parameters/types';
+import type {
+  EnumParameter,
+  MultipleParameterDefinition,
+  ParameterDefinition,
+} from '../parameters/types';
+import { buildCommandLineParameters } from '../utils/builder';
+import { parseArgsValues } from '../utils/parser';
 import type { CommandLineActionOptions } from './types';
 
 export abstract class CommandLineAction<
@@ -24,35 +30,7 @@ export abstract class CommandLineAction<
   }
 
   public async parseAndExecute(args: string[]) {
-    const parameters: Record<string, ParseArgsOptionDescriptor> = {};
-
-    for (const [name, params] of Object.entries(this.parameters)) {
-      const parameter: ParseArgsOptionDescriptor = {
-        short: params.alias,
-        multiple: params.type === CommandLineParameterType.ARRAY,
-        default: params.default
-          ? Array.isArray(params.default)
-            ? params.default.map((d) => String(d))
-            : String(params.default)
-          : undefined,
-        type:
-          params.type === CommandLineParameterType.BOOLEAN
-            ? 'boolean'
-            : 'string',
-      };
-
-      if (typeof params.default !== 'undefined') {
-        if (params.type === CommandLineParameterType.BOOLEAN) {
-          parameter.default = params.default;
-        } else {
-          parameter.default = Array.isArray(params.default)
-            ? params.default.map((d) => String(d))
-            : String(params.default);
-        }
-      }
-
-      parameters[name] = parameter;
-    }
+    const parameters = buildCommandLineParameters(this.parameters);
 
     const { values } = parseArgs({
       args: args,
@@ -61,32 +39,46 @@ export abstract class CommandLineAction<
       allowPositionals: true,
     });
 
+    this.values = parseArgsValues(this.parameters, values, this.name);
+
+    await this.onExecute();
+  }
+
+  public generateHelp(): string {
+    let help = `\n  ${this.name}: ${this.summary}\n`;
+    help += `\n    ${this.description}\n`;
+    help += `\n    Parameters:\n`;
+
     for (const [name, params] of Object.entries(this.parameters)) {
-      let value: unknown = values[name];
+      const alias = params.alias ? `-${params.alias}, ` : '    ';
+      let typeDisplay: string = params.type;
 
-      if (value === undefined) {
-        if (typeof params.default !== 'undefined') {
-          value = params.default;
-        } else if (params.type === CommandLineParameterType.ARRAY) {
-          value = [];
+      if (params.type === CommandLineParameterType.ARRAY) {
+        const arrayParam = params as MultipleParameterDefinition<never[]>;
+
+        typeDisplay = `${arrayParam.allowedValue}[]`;
+
+        if (arrayParam.allowedValue === CommandLineParameterType.ENUM) {
+          typeDisplay += `<${arrayParam.enums.join('|')}>`;
         }
+      } else if (params.type === CommandLineParameterType.ENUM) {
+        const enumParam = params as EnumParameter<never[]>;
+
+        typeDisplay = `${params.type}<${enumParam.enums.join('|')}>`;
       }
 
-      if (
-        params.required &&
-        (value === undefined || (Array.isArray(value) && !value.length))
-      ) {
-        throw new Error(
-          `Parameter '--${name}' is required for action '${this.name}'.`
-        );
-      }
+      const defaultValue =
+        'default' in params && params.default !== undefined
+          ? ` (default: ${JSON.stringify(params.default)})`
+          : '';
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      this.values[name] = value;
+      const required = params.required ? ` (required)` : '';
 
-      await this.onExecute();
+      help += `      ${alias}--${name} (${typeDisplay})${required}${defaultValue}\n`;
+      help += `        ${params.description}\n`;
     }
+
+    return help;
   }
 
   public abstract onExecute(): Promise<void>;
