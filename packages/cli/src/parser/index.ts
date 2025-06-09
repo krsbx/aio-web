@@ -12,8 +12,8 @@ import { findPotentialCommand, parseArgsValues } from '../utils/parser';
 
 export abstract class CommandLineParser<
   Values extends Record<string, unknown> = Record<string, unknown> & {
-    help: boolean;
-    verbose: boolean;
+    help?: boolean;
+    verbose?: boolean;
   },
   Parameters extends Record<string, ParameterDefinition<unknown>> = Record<
     string,
@@ -31,10 +31,14 @@ export abstract class CommandLineParser<
     this.toolDescription = toolDescription;
     this.actions = new Map();
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     this.addFlagParameter('help', {
       alias: 'h',
       description: 'Show help information.',
     });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     this.addFlagParameter('verbose', {
       alias: 'v',
       description: 'Enable verbose logging.',
