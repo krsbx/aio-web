@@ -10,6 +10,7 @@ import type {
   MultipleParameterDefinition,
   NumberParameter,
   ParameterDefinition,
+  RequiredParameter,
   SingleParameterDefinition,
   StringParamter,
 } from './types';
@@ -51,7 +52,7 @@ export abstract class CommandLineParameter<
 
   protected addFlagParameter<Name extends (string & {}) | keyof Values>(
     name: Name,
-    definition: Omit<FlagParameter, 'type'>
+    definition: RequiredParameter<Omit<FlagParameter, 'type'>, Values, Name>
   ) {
     return this.addParameter(name, {
       ...definition,
@@ -61,7 +62,7 @@ export abstract class CommandLineParameter<
 
   protected addStringParameter<Name extends (string & {}) | keyof Values>(
     name: Name,
-    definition: Omit<StringParamter, 'type'>
+    definition: RequiredParameter<Omit<StringParamter, 'type'>, Values, Name>
   ) {
     return this.addParameter(name, {
       ...definition,
@@ -71,7 +72,7 @@ export abstract class CommandLineParameter<
 
   protected addNumberParameter<Name extends (string & {}) | keyof Values>(
     name: Name,
-    definition: Omit<NumberParameter, 'type'>
+    definition: RequiredParameter<Omit<NumberParameter, 'type'>, Values, Name>
   ) {
     return this.addParameter(name, {
       ...definition,
@@ -82,7 +83,14 @@ export abstract class CommandLineParameter<
   protected addEnumParameter<
     Name extends (string & {}) | keyof Values,
     Enum extends readonly string[],
-  >(name: Name, definition: Omit<EnumParameter<Enum>, 'type'>) {
+  >(
+    name: Name,
+    definition: RequiredParameter<
+      Omit<EnumParameter<Enum>, 'type'>,
+      Values,
+      Name
+    >
+  ) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     this.parameters[name] = {
@@ -125,7 +133,11 @@ export abstract class CommandLineParameter<
 
   protected addArrayFlagParameters<Name extends (string & {}) | keyof Values>(
     name: Name,
-    definition: Omit<ArrayFlagParameter, 'type' | 'allowedValue'>
+    definition: RequiredParameter<
+      Omit<ArrayFlagParameter, 'type' | 'allowedValue'>,
+      Values,
+      Name
+    >
   ) {
     return this.addArrayParameter(name, {
       ...definition,
@@ -135,7 +147,11 @@ export abstract class CommandLineParameter<
 
   protected addArrayStringParameters<Name extends (string & {}) | keyof Values>(
     name: Name,
-    definition: Omit<ArrayStringParameter, 'type' | 'allowedValue'>
+    definition: RequiredParameter<
+      Omit<ArrayStringParameter, 'type' | 'allowedValue'>,
+      Values,
+      Name
+    >
   ) {
     return this.addArrayParameter(name, {
       ...definition,
@@ -145,7 +161,11 @@ export abstract class CommandLineParameter<
 
   protected addArrayNumberParameters<Name extends (string & {}) | keyof Values>(
     name: Name,
-    definition: Omit<ArrayNumberParameter, 'type' | 'allowedValue'>
+    definition: RequiredParameter<
+      Omit<ArrayNumberParameter, 'type' | 'allowedValue'>,
+      Values,
+      Name
+    >
   ) {
     return this.addArrayParameter(name, {
       ...definition,
@@ -158,7 +178,11 @@ export abstract class CommandLineParameter<
     Enum extends readonly string[],
   >(
     name: Name,
-    definition: Omit<ArrayEnumParameter<Enum>, 'type' | 'allowedValue'>
+    definition: RequiredParameter<
+      Omit<ArrayEnumParameter<Enum>, 'type' | 'allowedValue'>,
+      Values,
+      Name
+    >
   ) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error

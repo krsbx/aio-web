@@ -103,3 +103,12 @@ export type MultipleParameterDefinition<T> =
 export type ParameterDefinition<T> =
   | SingleParameterDefinition<T>
   | MultipleParameterDefinition<T>;
+
+export type IsOptional<T, K extends keyof T> = undefined extends T[K]
+  ? NonNullable<unknown> extends Pick<T, K>
+    ? true
+    : false
+  : false;
+
+export type RequiredParameter<T, U, V extends keyof U> =
+  IsOptional<U, V> extends true ? T : T & { required: true };

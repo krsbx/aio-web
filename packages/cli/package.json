@@ -1,5 +1,5 @@
 {
-  "name": "@ignisia/cli",
+  "name": "@ignisia/cli-core",
   "module": "dist/index.js",
   "types": "./dist/index.d.ts",
   "version": "0.1.0",
