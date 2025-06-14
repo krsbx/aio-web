@@ -6,18 +6,31 @@
   "version": "0.1.0",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.cjs"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.cjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./build": {
+      "types": "./dist/esm/build/index.d.ts",
+      "import": "./dist/esm/build/index.js",
+      "require": "./dist/cjs/build/index.cjs"
+    },
+    "./exports": {
+      "types": "./dist/esm/exports/index.d.ts",
+      "import": "./dist/esm/exports/index.js",
+      "require": "./dist/cjs/exports/index.cjs"
+    }
   },
   "scripts": {
     "build": "bun run build.ts"
