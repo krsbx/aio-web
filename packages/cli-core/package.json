@@ -1,0 +1,55 @@
+{
+  "name": "@ignisia/cli-core",
+  "module": "dist/index.js",
+  "types": "./dist/index.d.ts",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    },
+    "./**/*": {
+      "types": "./dist/**/*.d.ts",
+      "import": "./dist/**/*.js"
+    },
+    "./package.json": "./package.json",
+    "./actions": {
+      "types": "./dist/actions/index.d.ts",
+      "import": "./dist/actions/index.js"
+    },
+    "./parameters": {
+      "types": "./dist/parameters/index.d.ts",
+      "import": "./dist/parameters/index.js"
+    },
+    "./parser": {
+      "types": "./dist/parser/index.d.ts",
+      "import": "./dist/parser/index.js"
+    },
+    "./utils/builder": {
+      "types": "./dist/utils/builder/index.d.ts",
+      "import": "./dist/utils/builder/index.js"
+    },
+    "./utils/parser": {
+      "types": "./dist/utils/parser/index.d.ts",
+      "import": "./dist/utils/parser/index.js"
+    }
+  },
+  "scripts": {
+    "build": "bun run build.ts"
+  },
+  "devDependencies": {
+    "@ignisia/utils": "workspace:*",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "files": [
+    "dist"
+  ]
+}
