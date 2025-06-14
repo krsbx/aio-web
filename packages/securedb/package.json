@@ -6,29 +6,35 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.cjs"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.cjs"
     },
     "./package.json": "./package.json",
     "./helper": {
-      "types": "./dist/helper/index.d.ts",
-      "import": "./dist/helper/index.js"
+      "types": "./dist/esm/helper/index.d.ts",
+      "import": "./dist/esm/helper/index.js",
+      "require": "./dist/cjs/helper/index.cjs"
     },
     "./nosql": {
-      "types": "./dist/nosql/index.d.ts",
-      "import": "./dist/nosql/index.js"
+      "types": "./dist/esm/nosql/index.d.ts",
+      "import": "./dist/esm/nosql/index.js",
+      "require": "./dist/cjs/nosql/index.cjs"
     },
     "./sql": {
-      "types": "./dist/sql/index.d.ts",
-      "import": "./dist/sql/index.js"
+      "types": "./dist/esm/sql/index.d.ts",
+      "import": "./dist/esm/sql/index.js",
+      "require": "./dist/cjs/sql/index.cjs"
     }
   },
   "scripts": {

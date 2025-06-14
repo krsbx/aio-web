@@ -6,41 +6,50 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.cjs"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.cjs"
     },
     "./package.json": "./package.json",
     "./documents": {
-      "types": "./dist/documents/index.d.ts",
-      "import": "./dist/documents/index.js"
+      "types": "./dist/esm/documents/index.d.ts",
+      "import": "./dist/esm/documents/index.js",
+      "require": "./dist/cjs/documents/index.cjs"
     },
     "./documents/database": {
-      "types": "./dist/documents/database/index.d.ts",
-      "import": "./dist/documents/database/index.js"
+      "types": "./dist/esm/documents/database/index.d.ts",
+      "import": "./dist/esm/documents/database/index.js",
+      "require": "./dist/cjs/documents/database/index.cjs"
     },
     "./documents/document": {
-      "types": "./dist/documents/document/index.d.ts",
-      "import": "./dist/documents/document/index.js"
+      "types": "./dist/esm/documents/document/index.d.ts",
+      "import": "./dist/esm/documents/document/index.js",
+      "require": "./dist/cjs/documents/document/index.cjs"
     },
     "./documents/field": {
-      "types": "./dist/documents/field/index.d.ts",
-      "import": "./dist/documents/field/index.js"
+      "types": "./dist/esm/documents/field/index.d.ts",
+      "import": "./dist/esm/documents/field/index.js",
+      "require": "./dist/cjs/documents/field/index.cjs"
     },
     "./documents/query": {
-      "types": "./dist/documents/query/index.d.ts",
-      "import": "./dist/documents/query/index.js"
+      "types": "./dist/esm/documents/query/index.d.ts",
+      "import": "./dist/esm/documents/query/index.js",
+      "require": "./dist/cjs/documents/query/index.cjs"
     },
     "./key-value": {
-      "types": "./dist/key-value/index.d.ts",
-      "import": "./dist/key-value/index.js"
+      "types": "./dist/esm/key-value/index.d.ts",
+      "import": "./dist/esm/key-value/index.js",
+      "require": "./dist/cjs/key-value/index.cjs"
     }
   },
   "scripts": {

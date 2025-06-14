@@ -6,45 +6,55 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.cjs"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.cjs"
     },
     "./package.json": "./package.json",
     "./app": {
-      "types": "./dist/app/index.d.ts",
-      "import": "./dist/app/index.js"
+      "types": "./dist/esm/app/index.d.ts",
+      "import": "./dist/esm/app/index.js",
+      "require": "./dist/cjs/app/index.cjs"
     },
     "./context": {
-      "types": "./dist/context/index.d.ts",
-      "import": "./dist/context/index.js"
+      "types": "./dist/esm/context/index.d.ts",
+      "import": "./dist/esm/context/index.js",
+      "require": "./dist/cjs/context/index.cjs"
     },
     "./middlewares": {
-      "types": "./dist/middlewares/index.d.ts",
-      "import": "./dist/middlewares/index.js"
+      "types": "./dist/esm/middlewares/index.d.ts",
+      "import": "./dist/esm/middlewares/index.js",
+      "require": "./dist/cjs/middlewares/index.cjs"
     },
     "./middlewares/cors": {
-      "types": "./dist/middlewares/cors/index.d.ts",
-      "import": "./dist/middlewares/cors/index.js"
+      "types": "./dist/esm/middlewares/cors/index.d.ts",
+      "import": "./dist/esm/middlewares/cors/index.js",
+      "require": "./dist/cjs/middlewares/cors/index.cjs"
     },
     "./middlewares/serve-static": {
-      "types": "./dist/middlewares/serve-static/index.d.ts",
-      "import": "./dist/middlewares/serve-static/index.js"
+      "types": "./dist/esm/middlewares/serve-static/index.d.ts",
+      "import": "./dist/esm/middlewares/serve-static/index.js",
+      "require": "./dist/cjs/middlewares/serve-static/index.cjs"
     },
     "./router": {
-      "types": "./dist/router/index.d.ts",
-      "import": "./dist/router/index.js"
+      "types": "./dist/esm/router/index.d.ts",
+      "import": "./dist/esm/router/index.js",
+      "require": "./dist/cjs/router/index.cjs"
     },
     "./router/trie": {
-      "types": "./dist/router/trie/index.d.ts",
-      "import": "./dist/router/trie/index.js"
+      "types": "./dist/esm/router/trie/index.d.ts",
+      "import": "./dist/esm/router/trie/index.js",
+      "require": "./dist/cjs/router/trie/index.cjs"
     }
   },
   "scripts": {

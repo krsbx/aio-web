@@ -2,15 +2,16 @@ import { $ } from 'bun';
 
 const prerequisites = ['packages/utils'];
 
-const parallels = [
+const series: `packages/${string & {}}`[] = [
   'packages/encryption',
   'packages/nosql',
   'packages/sql',
   'packages/core',
   'packages/cli-core',
+  'packages/securedb',
 ];
 
-const series = ['packages/securedb'];
+// const series: `packages/${string & {}}`[] = ['packages/securedb'];
 
 function logBuild(dir: string | string[]) {
   const dirs = (Array.isArray(dir) ? dir : [dir]).map((dir) =>
@@ -54,5 +55,5 @@ async function buildAll(
 }
 
 await buildAll(prerequisites, 'series', 'pre-requisites');
-await buildAll(parallels, 'parallel', 'parallel');
+// await buildAll(parallels, 'parallel', 'parallel');
 await buildAll(series, 'series', 'series');
