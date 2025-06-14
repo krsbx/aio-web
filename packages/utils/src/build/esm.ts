@@ -13,7 +13,7 @@ export async function build(source: string, options: BuildOptions = {}) {
     format: ['esm'],
     outDir: 'dist/esm',
     minify: false,
-    bundle: false,
+    bundle: true,
     treeshake: true,
     sourcemap: false,
     clean: true,
