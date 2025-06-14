@@ -1,42 +1,51 @@
 {
   "name": "@ignisia/sql",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "types": "./dist/index.d.ts",
   "version": "0.2.1",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./column": {
-      "types": "./dist/column/index.d.ts",
-      "import": "./dist/column/index.js"
+      "types": "./dist/esm/column/index.d.ts",
+      "import": "./dist/esm/column/index.js",
+      "require": "./dist/cjs/column/index.js"
     },
     "./database": {
-      "types": "./dist/database/index.d.ts",
-      "import": "./dist/database/index.js"
+      "types": "./dist/esm/database/index.d.ts",
+      "import": "./dist/esm/database/index.js",
+      "require": "./dist/cjs/database/index.js"
     },
     "./migration": {
-      "types": "./dist/migration/index.d.ts",
-      "import": "./dist/migration/index.js"
+      "types": "./dist/esm/migration/index.d.ts",
+      "import": "./dist/esm/migration/index.js",
+      "require": "./dist/cjs/migration/index.js"
     },
     "./query": {
-      "types": "./dist/query/index.d.ts",
-      "import": "./dist/query/index.js"
+      "types": "./dist/esm/query/index.d.ts",
+      "import": "./dist/esm/query/index.js",
+      "require": "./dist/cjs/query/index.js"
     },
     "./table": {
-      "types": "./dist/table/index.d.ts",
-      "import": "./dist/table/index.js"
+      "types": "./dist/esm/table/index.d.ts",
+      "import": "./dist/esm/table/index.js",
+      "require": "./dist/cjs/table/index.js"
     }
   },
   "scripts": {

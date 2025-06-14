@@ -1,16 +1,19 @@
 import { $ } from 'bun';
 
-const prerequisites = ['packages/utils'];
+type PackagePath = `packages/${string & {}}`;
 
-const parallels = [
+const prerequisites: PackagePath[] = ['packages/utils'];
+
+const series: PackagePath[] = [
   'packages/encryption',
   'packages/nosql',
   'packages/sql',
   'packages/core',
   'packages/cli-core',
+  'packages/securedb',
 ];
 
-const series = ['packages/securedb'];
+// const series: PackagePath[] = ['packages/securedb'];
 
 function logBuild(dir: string | string[]) {
   const dirs = (Array.isArray(dir) ? dir : [dir]).map((dir) =>
@@ -27,8 +30,20 @@ function logBuild(dir: string | string[]) {
   console.log(`\x1b[33mBuilding packages/{${dirs.join(', ')}}...\x1b[0m`);
 }
 
-function build(path: string) {
-  return $`cd ${path} && bun run build`.quiet();
+function build(
+  path: string,
+  retryCount: number = 0,
+  maxRetryCount: number = 3
+) {
+  try {
+    return $`cd ${path} && bun run build`.quiet();
+  } catch (err) {
+    if (retryCount < maxRetryCount) {
+      return build(path, retryCount + 1, maxRetryCount);
+    }
+
+    throw err;
+  }
 }
 
 async function buildAll(
@@ -45,7 +60,7 @@ async function buildAll(
       await build(dir);
     }
   } else {
-    await Promise.all(dirs.map(build));
+    await Promise.all(dirs.map((dir) => build(dir)));
   }
 
   console.log(
@@ -54,5 +69,5 @@ async function buildAll(
 }
 
 await buildAll(prerequisites, 'series', 'pre-requisites');
-await buildAll(parallels, 'parallel', 'parallel');
+// await buildAll(parallels, 'parallel', 'parallel');
 await buildAll(series, 'series', 'series');

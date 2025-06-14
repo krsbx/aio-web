@@ -1,23 +1,37 @@
 {
   "name": "@ignisia/utils",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "version": "0.1.0",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./build": {
+      "types": "./dist/esm/build/index.d.ts",
+      "import": "./dist/esm/build/index.js",
+      "require": "./dist/cjs/build/index.js"
+    },
+    "./exports": {
+      "types": "./dist/esm/exports/index.d.ts",
+      "import": "./dist/esm/exports/index.js",
+      "require": "./dist/cjs/exports/index.js"
+    }
   },
   "scripts": {
     "build": "bun run build.ts"

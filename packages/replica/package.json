@@ -1,23 +1,37 @@
 {
   "name": "@ignisia/replica",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "types": "./dist/index.d.ts",
   "version": "0.1.1",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
     },
     "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.cjs"
     },
     "./**/*": {
-      "import": "./dist/**/*.js",
-      "types": "./dist/**/*.d.ts"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.cjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./primary": {
+      "types": "./dist/esm/primary/index.d.ts",
+      "import": "./dist/esm/primary/index.js",
+      "require": "./dist/cjs/primary/index.cjs"
+    },
+    "./replica": {
+      "types": "./dist/esm/replica/index.d.ts",
+      "import": "./dist/esm/replica/index.js",
+      "require": "./dist/cjs/replica/index.cjs"
+    }
   },
   "scripts": {
     "build": "bun run build.ts"

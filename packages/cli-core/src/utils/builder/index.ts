@@ -1,14 +1,14 @@
-import { type ParseArgsOptionDescriptor } from 'node:util';
 import { CommandLineParameterType } from '../../parameters/constants';
 import type { ParameterDefinition } from '../../parameters/types';
+import type { ParseArgsOptionConfig } from './types';
 
 export function buildCommandLineParameters(
   parameters: Record<string, ParameterDefinition<unknown>>
 ) {
-  const finalParameters: Record<string, ParseArgsOptionDescriptor> = {};
+  const finalParameters: Record<string, ParseArgsOptionConfig> = {};
 
   for (const [name, params] of Object.entries(parameters)) {
-    const parameter: ParseArgsOptionDescriptor = {
+    const parameter: ParseArgsOptionConfig = {
       short: params.alias,
       multiple: params.type === CommandLineParameterType.ARRAY,
       default: params.default

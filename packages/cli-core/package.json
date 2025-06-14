@@ -1,42 +1,51 @@
 {
   "name": "@ignisia/cli-core",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "types": "./dist/index.d.ts",
   "version": "0.1.0",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.js"
+      "types": "./dist/esm/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
-      "types": "./dist/**/*.d.ts",
-      "import": "./dist/**/*.js"
+      "types": "./dist/esm/**/*.d.ts",
+      "import": "./dist/esm/**/*.js",
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./actions": {
-      "types": "./dist/actions/index.d.ts",
-      "import": "./dist/actions/index.js"
+      "types": "./dist/esm/actions/index.d.ts",
+      "import": "./dist/esm/actions/index.js",
+      "require": "./dist/cjs/actions/index.js"
     },
     "./parameters": {
-      "types": "./dist/parameters/index.d.ts",
-      "import": "./dist/parameters/index.js"
+      "types": "./dist/esm/parameters/index.d.ts",
+      "import": "./dist/esm/parameters/index.js",
+      "require": "./dist/cjs/parameters/index.js"
     },
     "./parser": {
-      "types": "./dist/parser/index.d.ts",
-      "import": "./dist/parser/index.js"
+      "types": "./dist/esm/parser/index.d.ts",
+      "import": "./dist/esm/parser/index.js",
+      "require": "./dist/cjs/parser/index.js"
     },
     "./utils/builder": {
-      "types": "./dist/utils/builder/index.d.ts",
-      "import": "./dist/utils/builder/index.js"
+      "types": "./dist/esm/utils/builder/index.d.ts",
+      "import": "./dist/esm/utils/builder/index.js",
+      "require": "./dist/cjs/utils/builder/index.js"
     },
     "./utils/parser": {
-      "types": "./dist/utils/parser/index.d.ts",
-      "import": "./dist/utils/parser/index.js"
+      "types": "./dist/esm/utils/parser/index.d.ts",
+      "import": "./dist/esm/utils/parser/index.js",
+      "require": "./dist/cjs/utils/parser/index.js"
     }
   },
   "scripts": {
