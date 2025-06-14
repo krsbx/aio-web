@@ -9,28 +9,28 @@
     ".": {
       "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
       "types": "./dist/esm/*.d.ts",
       "import": "./dist/esm/*.js",
-      "require": "./dist/cjs/*.cjs"
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
       "types": "./dist/esm/**/*.d.ts",
       "import": "./dist/esm/**/*.js",
-      "require": "./dist/cjs/**/*.cjs"
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./build": {
       "types": "./dist/esm/build/index.d.ts",
       "import": "./dist/esm/build/index.js",
-      "require": "./dist/cjs/build/index.cjs"
+      "require": "./dist/cjs/build/index.js"
     },
     "./exports": {
       "types": "./dist/esm/exports/index.d.ts",
       "import": "./dist/esm/exports/index.js",
-      "require": "./dist/cjs/exports/index.cjs"
+      "require": "./dist/cjs/exports/index.js"
     }
   },
   "scripts": {

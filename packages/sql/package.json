@@ -9,43 +9,43 @@
     ".": {
       "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
       "types": "./dist/esm/*.d.ts",
       "import": "./dist/esm/*.js",
-      "require": "./dist/cjs/*.cjs"
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
       "types": "./dist/esm/**/*.d.ts",
       "import": "./dist/esm/**/*.js",
-      "require": "./dist/cjs/**/*.cjs"
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./column": {
       "types": "./dist/esm/column/index.d.ts",
       "import": "./dist/esm/column/index.js",
-      "require": "./dist/cjs/column/index.cjs"
+      "require": "./dist/cjs/column/index.js"
     },
     "./database": {
       "types": "./dist/esm/database/index.d.ts",
       "import": "./dist/esm/database/index.js",
-      "require": "./dist/cjs/database/index.cjs"
+      "require": "./dist/cjs/database/index.js"
     },
     "./migration": {
       "types": "./dist/esm/migration/index.d.ts",
       "import": "./dist/esm/migration/index.js",
-      "require": "./dist/cjs/migration/index.cjs"
+      "require": "./dist/cjs/migration/index.js"
     },
     "./query": {
       "types": "./dist/esm/query/index.d.ts",
       "import": "./dist/esm/query/index.js",
-      "require": "./dist/cjs/query/index.cjs"
+      "require": "./dist/cjs/query/index.js"
     },
     "./table": {
       "types": "./dist/esm/table/index.d.ts",
       "import": "./dist/esm/table/index.js",
-      "require": "./dist/cjs/table/index.cjs"
+      "require": "./dist/cjs/table/index.js"
     }
   },
   "scripts": {

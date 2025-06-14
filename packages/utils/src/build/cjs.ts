@@ -1,8 +1,9 @@
 import { resolve } from 'node:path';
 import { build as tsup, type Options as BuildOptions } from 'tsup';
+import { fixCjsBuild } from './fix';
 
 export async function build(source: string, options: BuildOptions = {}) {
-  return tsup({
+  await tsup({
     splitting: false,
     entry: [
       resolve(source, 'src/**/*.ts'),
@@ -18,6 +19,9 @@ export async function build(source: string, options: BuildOptions = {}) {
     clean: true,
     skipNodeModulesBundle: true,
     dts: true,
+    legacyOutput: true,
     ...options,
   });
+
+  fixCjsBuild(source);
 }

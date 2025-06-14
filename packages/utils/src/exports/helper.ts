@@ -21,13 +21,13 @@ export function addExports(options: Options & { type: 'esm' | 'cjs' }) {
 
   if (!options.record[finalKey]) {
     options.record[finalKey] = {
-      types: `./dist/${options.type}/${finalValue}.d.ts`,
+      types: `./dist/${options.type}/${finalValue}.d.${isEsm ? 'ts' : 'cts'}`,
     };
   }
 
   (options.record[finalKey] as DetailedExportJson)[
     isEsm ? 'import' : 'require'
-  ] = `./dist/${options.type}/${finalValue}.${isEsm ? 'js' : 'cjs'}`;
+  ] = `./dist/${options.type}/${finalValue}.js`;
 
   return options.record;
 }

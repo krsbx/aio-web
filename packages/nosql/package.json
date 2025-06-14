@@ -9,48 +9,48 @@
     ".": {
       "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
       "types": "./dist/esm/*.d.ts",
       "import": "./dist/esm/*.js",
-      "require": "./dist/cjs/*.cjs"
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
       "types": "./dist/esm/**/*.d.ts",
       "import": "./dist/esm/**/*.js",
-      "require": "./dist/cjs/**/*.cjs"
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./documents": {
       "types": "./dist/esm/documents/index.d.ts",
       "import": "./dist/esm/documents/index.js",
-      "require": "./dist/cjs/documents/index.cjs"
+      "require": "./dist/cjs/documents/index.js"
     },
     "./documents/database": {
       "types": "./dist/esm/documents/database/index.d.ts",
       "import": "./dist/esm/documents/database/index.js",
-      "require": "./dist/cjs/documents/database/index.cjs"
+      "require": "./dist/cjs/documents/database/index.js"
     },
     "./documents/document": {
       "types": "./dist/esm/documents/document/index.d.ts",
       "import": "./dist/esm/documents/document/index.js",
-      "require": "./dist/cjs/documents/document/index.cjs"
+      "require": "./dist/cjs/documents/document/index.js"
     },
     "./documents/field": {
       "types": "./dist/esm/documents/field/index.d.ts",
       "import": "./dist/esm/documents/field/index.js",
-      "require": "./dist/cjs/documents/field/index.cjs"
+      "require": "./dist/cjs/documents/field/index.js"
     },
     "./documents/query": {
       "types": "./dist/esm/documents/query/index.d.ts",
       "import": "./dist/esm/documents/query/index.js",
-      "require": "./dist/cjs/documents/query/index.cjs"
+      "require": "./dist/cjs/documents/query/index.js"
     },
     "./key-value": {
       "types": "./dist/esm/key-value/index.d.ts",
       "import": "./dist/esm/key-value/index.js",
-      "require": "./dist/cjs/key-value/index.cjs"
+      "require": "./dist/cjs/key-value/index.js"
     }
   },
   "scripts": {

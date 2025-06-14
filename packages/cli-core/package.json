@@ -9,43 +9,43 @@
     ".": {
       "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
       "types": "./dist/esm/*.d.ts",
       "import": "./dist/esm/*.js",
-      "require": "./dist/cjs/*.cjs"
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
       "types": "./dist/esm/**/*.d.ts",
       "import": "./dist/esm/**/*.js",
-      "require": "./dist/cjs/**/*.cjs"
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./actions": {
       "types": "./dist/esm/actions/index.d.ts",
       "import": "./dist/esm/actions/index.js",
-      "require": "./dist/cjs/actions/index.cjs"
+      "require": "./dist/cjs/actions/index.js"
     },
     "./parameters": {
       "types": "./dist/esm/parameters/index.d.ts",
       "import": "./dist/esm/parameters/index.js",
-      "require": "./dist/cjs/parameters/index.cjs"
+      "require": "./dist/cjs/parameters/index.js"
     },
     "./parser": {
       "types": "./dist/esm/parser/index.d.ts",
       "import": "./dist/esm/parser/index.js",
-      "require": "./dist/cjs/parser/index.cjs"
+      "require": "./dist/cjs/parser/index.js"
     },
     "./utils/builder": {
       "types": "./dist/esm/utils/builder/index.d.ts",
       "import": "./dist/esm/utils/builder/index.js",
-      "require": "./dist/cjs/utils/builder/index.cjs"
+      "require": "./dist/cjs/utils/builder/index.js"
     },
     "./utils/parser": {
       "types": "./dist/esm/utils/parser/index.d.ts",
       "import": "./dist/esm/utils/parser/index.js",
-      "require": "./dist/cjs/utils/parser/index.cjs"
+      "require": "./dist/cjs/utils/parser/index.js"
     }
   },
   "scripts": {

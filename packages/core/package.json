@@ -9,53 +9,53 @@
     ".": {
       "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs"
+      "require": "./dist/cjs/index.js"
     },
     "./*": {
       "types": "./dist/esm/*.d.ts",
       "import": "./dist/esm/*.js",
-      "require": "./dist/cjs/*.cjs"
+      "require": "./dist/cjs/*.js"
     },
     "./**/*": {
       "types": "./dist/esm/**/*.d.ts",
       "import": "./dist/esm/**/*.js",
-      "require": "./dist/cjs/**/*.cjs"
+      "require": "./dist/cjs/**/*.js"
     },
     "./package.json": "./package.json",
     "./app": {
       "types": "./dist/esm/app/index.d.ts",
       "import": "./dist/esm/app/index.js",
-      "require": "./dist/cjs/app/index.cjs"
+      "require": "./dist/cjs/app/index.js"
     },
     "./context": {
       "types": "./dist/esm/context/index.d.ts",
       "import": "./dist/esm/context/index.js",
-      "require": "./dist/cjs/context/index.cjs"
+      "require": "./dist/cjs/context/index.js"
     },
     "./middlewares": {
       "types": "./dist/esm/middlewares/index.d.ts",
       "import": "./dist/esm/middlewares/index.js",
-      "require": "./dist/cjs/middlewares/index.cjs"
+      "require": "./dist/cjs/middlewares/index.js"
     },
     "./middlewares/cors": {
       "types": "./dist/esm/middlewares/cors/index.d.ts",
       "import": "./dist/esm/middlewares/cors/index.js",
-      "require": "./dist/cjs/middlewares/cors/index.cjs"
+      "require": "./dist/cjs/middlewares/cors/index.js"
     },
     "./middlewares/serve-static": {
       "types": "./dist/esm/middlewares/serve-static/index.d.ts",
       "import": "./dist/esm/middlewares/serve-static/index.js",
-      "require": "./dist/cjs/middlewares/serve-static/index.cjs"
+      "require": "./dist/cjs/middlewares/serve-static/index.js"
     },
     "./router": {
       "types": "./dist/esm/router/index.d.ts",
       "import": "./dist/esm/router/index.js",
-      "require": "./dist/cjs/router/index.cjs"
+      "require": "./dist/cjs/router/index.js"
     },
     "./router/trie": {
       "types": "./dist/esm/router/trie/index.d.ts",
       "import": "./dist/esm/router/trie/index.js",
-      "require": "./dist/cjs/router/trie/index.cjs"
+      "require": "./dist/cjs/router/trie/index.js"
     }
   },
   "scripts": {
