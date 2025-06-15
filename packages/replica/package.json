@@ -2,8 +2,8 @@
   "name": "@ignisia/replica",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "types": "./dist/index.d.ts",
-  "version": "0.1.1",
+  "types": "./dist/esm/index.d.ts",
+  "version": "0.1.2",
   "type": "module",
   "exports": {
     ".": {
@@ -51,5 +51,22 @@
   },
   "files": [
     "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krsbx/aio-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/krsbx/aio-web/issues"
+  },
+  "keywords": [
+    "bun",
+    "sql",
+    "nosql",
+    "database",
+    "primary",
+    "replica",
+    "replicator",
+    "replication"
   ]
 }
