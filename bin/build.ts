@@ -2,18 +2,15 @@ import { $ } from 'bun';
 
 type PackagePath = `packages/${string & {}}`;
 
-const prerequisites: PackagePath[] = ['packages/utils'];
-
 const series: PackagePath[] = [
+  'packages/utils',
+  'packages/cli-core',
   'packages/encryption',
   'packages/nosql',
   'packages/sql',
   'packages/core',
-  'packages/cli-core',
   'packages/securedb',
 ];
-
-// const series: PackagePath[] = ['packages/securedb'];
 
 function logBuild(dir: string | string[]) {
   const dirs = (Array.isArray(dir) ? dir : [dir]).map((dir) =>
@@ -30,7 +27,7 @@ function logBuild(dir: string | string[]) {
   console.log(`\x1b[33mBuilding packages/{${dirs.join(', ')}}...\x1b[0m`);
 }
 
-function build(
+async function build(
   path: string,
   retryCount: number = 0,
   maxRetryCount: number = 3
@@ -38,6 +35,8 @@ function build(
   try {
     return $`cd ${path} && bun run build`.quiet();
   } catch (err) {
+    await Bun.sleep(1000);
+
     if (retryCount < maxRetryCount) {
       return build(path, retryCount + 1, maxRetryCount);
     }
@@ -68,6 +67,4 @@ async function buildAll(
   );
 }
 
-await buildAll(prerequisites, 'series', 'pre-requisites');
-// await buildAll(parallels, 'parallel', 'parallel');
 await buildAll(series, 'series', 'series');

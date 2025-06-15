@@ -4,6 +4,8 @@ import type {
   GenerateEncryptedOptions,
 } from './types';
 
+type CryptoBuffer = Uint8Array<ArrayBuffer> | ArrayBuffer;
+
 export async function getFileChecksum(filePath: string): Promise<string> {
   const data = await Bun.file(filePath).arrayBuffer();
   const hash = await crypto.subtle.digest('SHA-256', data);
@@ -17,9 +19,12 @@ export function getEncryptionIv() {
 
 export async function getEncryptedData(options: GenerateEncryptedOptions) {
   const encrypted = await crypto.subtle.encrypt(
-    { name: 'AES-GCM', iv: options.iv },
+    {
+      name: 'AES-GCM',
+      iv: options.iv as CryptoBuffer,
+    },
     options.key,
-    options.data
+    options.data as CryptoBuffer
   );
 
   return encrypted;
@@ -27,9 +32,12 @@ export async function getEncryptedData(options: GenerateEncryptedOptions) {
 
 export async function getDecryptedData(options: GenerateDecryptedOptions) {
   const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: options.iv },
+    {
+      name: 'AES-GCM',
+      iv: options.iv as CryptoBuffer,
+    },
     options.key,
-    options.data
+    options.data as CryptoBuffer
   );
 
   return decrypted;
@@ -59,7 +67,7 @@ export async function getAesKey(options: AesKeyOptions) {
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: salt,
+      salt: salt as CryptoBuffer,
       iterations: 100000,
       hash: 'SHA-256',
     },

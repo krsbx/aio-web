@@ -2,7 +2,7 @@
   "name": "@ignisia/cli-core",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/esm/index.d.ts",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -60,5 +60,22 @@
   },
   "files": [
     "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krsbx/aio-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/krsbx/aio-web/issues"
+  },
+  "keywords": [
+    "cli",
+    "command",
+    "command line",
+    "scaffolder",
+    "scaffolding",
+    "terminal",
+    "bash",
+    "zsh"
   ]
 }
