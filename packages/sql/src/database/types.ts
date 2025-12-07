@@ -1,12 +1,13 @@
 import type { Column } from '../column';
 import type { Table } from '../table';
 import type { Dialect } from '../table/constants';
+import type { AcceptedSqlConfig } from './wrapper/constants';
 
 export interface SqliteConfig {
   filename: string;
 }
 
-export interface PostgresConfig {
+export interface SqlConfig {
   host: string;
   port: number;
   user: string;
@@ -14,14 +15,22 @@ export interface PostgresConfig {
   database: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PostgresConfig extends SqlConfig {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface MysqlConfig extends SqlConfig {}
+
 export interface DatabaseOptions<
   DbDialect extends Dialect,
   Tables extends Record<string, Table<string, Record<string, Column>>>,
 > {
   dialect: DbDialect;
-  config: DbDialect extends typeof Dialect.POSTGRES
-    ? PostgresConfig
-    : SqliteConfig;
+  config: DbDialect extends typeof Dialect.SQLITE
+    ? SqliteConfig
+    : DbDialect extends keyof AcceptedSqlConfig
+      ? AcceptedSqlConfig[DbDialect]
+      : never;
   tables?: Tables;
 }
 

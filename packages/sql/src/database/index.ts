@@ -20,10 +20,11 @@ import type {
   DatabaseDefinition,
   DatabaseDialect,
   DatabaseOptions,
+  MysqlConfig,
   PostgresConfig,
   SqliteConfig,
 } from './types';
-import { DatabasePsql, DatabaseSqlite } from './wrapper';
+import { DatabaseMysql, DatabasePsql, DatabaseSqlite } from './wrapper';
 
 export class Database<
   DbDialect extends Dialect,
@@ -107,10 +108,7 @@ export class Database<
       config: options.config,
     } as unknown as Definition;
 
-    this.client =
-      options.dialect === Dialect.POSTGRES
-        ? new DatabasePsql(options.config as PostgresConfig)
-        : new DatabaseSqlite(options.config as SqliteConfig);
+    this.client = this.createClient(options);
 
     if (options.tables) {
       for (const tableName in options.tables) {
@@ -143,6 +141,22 @@ export class Database<
     this.dropColumnNotNull = dropColumnNotNull.bind(
       this
     ) as this['dropColumnNotNull'];
+  }
+
+  private createClient(options: DatabaseOptions<DbDialect, Tables>) {
+    switch (options.dialect) {
+      case Dialect.SQLITE:
+        return new DatabaseSqlite(options.config as SqliteConfig);
+
+      case Dialect.POSTGRES:
+        return new DatabasePsql(options.config as PostgresConfig);
+
+      case Dialect.MYSQL:
+        return new DatabaseMysql(options.config as MysqlConfig);
+
+      default:
+        throw new Error(`Dialect ${options.dialect} is not supported`);
+    }
   }
 
   public table<
