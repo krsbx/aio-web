@@ -116,3 +116,45 @@ export const ColumnTypeMapping = {
     [Dialect.MYSQL]: 'INT',
   },
 } as const;
+
+export const ColumnProperties = {
+  NOT_NULL: 'NOT_NULL',
+  UNIQUE: 'UNIQUE',
+  DEFAULT: 'DEFAULT',
+  AUTO_INCREMENT: 'AUTO_INCREMENT',
+  PRIMARY_KEY: 'PRIMARY_KEY',
+} as const;
+
+export type ColumnProperties =
+  (typeof ColumnProperties)[keyof typeof ColumnProperties];
+
+export const ColumnPropertyMapping = {
+  [ColumnProperties.NOT_NULL]: {
+    [Dialect.SQLITE]: 'NOT NULL',
+    [Dialect.POSTGRES]: 'NOT NULL',
+    [Dialect.MYSQL]: 'NOT NULL',
+  },
+  [ColumnProperties.UNIQUE]: {
+    [Dialect.SQLITE]: 'UNIQUE',
+    [Dialect.POSTGRES]: 'UNIQUE',
+    [Dialect.MYSQL]: 'UNIQUE',
+  },
+  [ColumnProperties.DEFAULT]: {
+    [Dialect.SQLITE]: 'DEFAULT',
+    [Dialect.POSTGRES]: 'DEFAULT',
+    [Dialect.MYSQL]: 'DEFAULT',
+  },
+  [ColumnProperties.AUTO_INCREMENT]: {
+    // sqlite does not support AUTOINCREMENT
+    [Dialect.SQLITE]: 'AUTOINCREMENT',
+    // postgres does not support AUTOINCREMENT
+    [Dialect.POSTGRES]: 'AUTOINCREMENT',
+    // Exists only for mysql since mysql supports AUTOINCREMENT
+    [Dialect.MYSQL]: 'AUTO_INCREMENT',
+  },
+  [ColumnProperties.PRIMARY_KEY]: {
+    [Dialect.SQLITE]: 'PRIMARY KEY',
+    [Dialect.POSTGRES]: 'PRIMARY KEY',
+    [Dialect.MYSQL]: 'PRIMARY KEY',
+  },
+};

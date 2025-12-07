@@ -7,6 +7,7 @@ import type {
   EnumOptions,
   ValueSelector,
 } from './types';
+import { columnProperty } from './utils';
 
 export class Column<
   Type extends AcceptedColumnTypes = AcceptedColumnTypes,
@@ -155,12 +156,13 @@ export class Column<
       throw new Error('No DB Dialect defined');
     }
 
-    const correctType = ColumnTypeMapping[this.type][this.definition.dialect];
+    const type = ColumnTypeMapping[this.type][this.definition.dialect];
+    const properties = columnProperty(this.definition.dialect);
 
-    let sql = correctType + (this.length ? `(${this.length})` : '');
+    let sql = type + (this.length ? `(${this.length})` : '');
 
     if (this.definition.primaryKey) {
-      sql += ' PRIMARY KEY';
+      sql += ` ${properties.PRIMARY_KEY}`;
     }
 
     if (
@@ -168,16 +170,27 @@ export class Column<
       this.type === AcceptedColumnTypes.SERIAL
     ) {
       const isPrimaryKey = !!this.definition.primaryKey;
+      const sqls: string[] = [];
 
       if (this.definition.dialect === Dialect.POSTGRES) {
-        sql = `SERIAL${isPrimaryKey ? ' PRIMARY KEY' : ''}`;
+        sqls.push(type);
+
+        if (isPrimaryKey) {
+          sqls.push(properties.PRIMARY_KEY);
+        }
+
+        sql = sqls.join(' ');
       } else {
         if (this.type !== AcceptedColumnTypes.SERIAL) {
-          sql += ' AUTOINCREMENT';
+          sql += ` ${properties.AUTO_INCREMENT}`;
         } else {
-          const sqls = ['INTEGER', 'PRIMARY KEY', 'AUTOINCREMENT'];
+          sqls.push(type);
 
-          if (!isPrimaryKey) sqls.splice(1, 1);
+          if (isPrimaryKey) {
+            sqls.push(properties.PRIMARY_KEY);
+          }
+
+          sqls.push(properties.AUTO_INCREMENT);
 
           sql = sqls.join(' ');
         }
@@ -185,11 +198,11 @@ export class Column<
     }
 
     if (this.definition.notNull) {
-      sql += ' NOT NULL';
+      sql += ` ${properties.NOT_NULL}`;
     }
 
     if (this.definition.unique) {
-      sql += ' UNIQUE';
+      sql += ` ${properties.UNIQUE}`;
     }
 
     if (this.definition.default !== undefined) {
@@ -197,7 +210,7 @@ export class Column<
       const isString = typeof this.definition.default === 'string';
       const finalValue = isString ? `'${value}'` : value;
 
-      sql += ` DEFAULT ${finalValue}`;
+      sql += ` ${properties.DEFAULT} ${finalValue}`;
     }
 
     return { query: sql, params: [] };
