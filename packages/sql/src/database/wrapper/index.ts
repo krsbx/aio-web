@@ -1,2 +1,1 @@
-export { BaseSql, DatabaseMysql, DatabasePsql } from './sql';
-export { DatabaseSqlite } from './sqlite';
+export { BaseSql, DatabaseMysql, DatabasePsql, DatabaseSqlite } from './sql';

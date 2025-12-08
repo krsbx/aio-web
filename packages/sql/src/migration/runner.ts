@@ -51,7 +51,7 @@ export async function runMigration(filePath: string, direction: 'up' | 'down') {
     migrationTable.client = migration.db.client;
 
     // Create the migration table
-    await migrationTable.create();
+    await migrationTable.create({});
   }
 
   const fn = migration[direction];

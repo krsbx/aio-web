@@ -1,5 +1,7 @@
+import type { TransactionSQL } from 'bun';
 import type { Table } from '.';
 import type { Column } from '../column';
+import type { DatabaseDialect } from '../database/types';
 import type { Dialect } from './constants';
 import type { createdAt, deletedAt, updatedAt } from './utilities';
 
@@ -93,3 +95,8 @@ export type TableOutput<
 > = {
   [K in keyof TableRef['columns'] & string]: TableRef['columns'][K]['_output'];
 };
+
+export interface ExecOptions {
+  tx?: TransactionSQL | null;
+  db?: DatabaseDialect | null;
+}

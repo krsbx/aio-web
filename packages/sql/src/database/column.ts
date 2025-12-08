@@ -24,9 +24,9 @@ export async function addColumn<
   columnName: ColName,
   column: Column
 ) {
-  await this.client.exec(
-    `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${column.toString()};`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${column.toString()};`,
+  });
 
   if (!this.tables[tableName]) return this;
 
@@ -60,9 +60,9 @@ export async function renameColumn<
     throw new Error('SQLite does not support RENAME COLUMN natively.');
   }
 
-  await this.client.exec(
-    `ALTER TABLE ${tableName} RENAME COLUMN ${oldName} TO ${newName};`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} RENAME COLUMN ${oldName} TO ${newName};`,
+  });
 
   if (!this.tables[tableName]) return this;
 
@@ -95,7 +95,9 @@ export async function dropColumn<
     throw new Error('SQLite does not support DROP COLUMN natively.');
   }
 
-  await this.client.exec(`ALTER TABLE ${tableName} DROP COLUMN ${columnName};`);
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} DROP COLUMN ${columnName};`,
+  });
 
   if (!this.tables[tableName]) return this;
 

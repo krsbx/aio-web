@@ -32,9 +32,9 @@ export async function alterColumnType<
     throw new Error('SQLite does not support ALTER COLUMN TYPE directly.');
   }
 
-  await this.client.exec(
-    `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} TYPE ${newType}`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} TYPE ${newType}`,
+  });
 
   if (!this.tables[tableName]) return this;
 
@@ -79,9 +79,9 @@ export async function setColumnDefault<
     throw new Error('SQLite does not support ALTER COLUMN DEFAULT directly.');
   }
 
-  await this.client.exec(
-    `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DEFAULT ${value}`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET DEFAULT ${value}`,
+  });
 
   if (!this.tables[tableName]) return this;
 
@@ -133,9 +133,9 @@ export async function dropColumnDefault<
     throw new Error('SQLite does not support DROP DEFAULT directly.');
   }
 
-  await this.client.exec(
-    `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP DEFAULT`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP DEFAULT`,
+  });
 
   if (!this.tables[tableName]) return this;
 
@@ -188,9 +188,9 @@ export async function setColumnNotNull<
     );
   }
 
-  await this.client.exec(
-    `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET NOT NULL`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} SET NOT NULL`,
+  });
 
   if (!this.tables[tableName]) return this;
 
@@ -241,9 +241,9 @@ export async function dropColumnNotNull<
     );
   }
 
-  await this.client.exec(
-    `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP NOT NULL`
-  );
+  await this.client.exec({
+    sql: `ALTER TABLE ${tableName} ALTER COLUMN ${columnName} DROP NOT NULL`,
+  });
 
   if (!this.tables[tableName]) return this;
 

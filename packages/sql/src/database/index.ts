@@ -1,3 +1,4 @@
+import type { TransactionSQL } from 'bun';
 import type { Column } from '../column';
 import type { QueryBuilder } from '../query';
 import type { QueryHooksType } from '../query/constants';
@@ -196,7 +197,9 @@ export class Database<
     return this;
   }
 
-  public async transaction<T, U extends () => Promise<T>>(fn: U) {
+  public async transaction<T, U extends (tx: TransactionSQL) => Promise<T>>(
+    fn: U
+  ) {
     return this.client.transaction(fn);
   }
 

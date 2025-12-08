@@ -1,3 +1,4 @@
+import type { TransactionSQL } from 'bun';
 import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
@@ -70,7 +71,8 @@ export interface QueryTransformerContract<
     >,
     Output extends This['_output'] = This['_output'],
   >(
-    this: This
+    this: This,
+    tx?: TransactionSQL | null
   ): Promise<Output>;
 
   clone(

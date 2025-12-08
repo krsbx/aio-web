@@ -1,11 +1,16 @@
-import { SQL } from 'bun';
+import { SQL, type TransactionSQL } from 'bun';
 import { Dialect } from '../../table/constants';
-import type { DatabaseDialect, PostgresConfig } from '../types';
-import type { AcceptedSqlConfig, AcceptedSqlDialects } from './constants';
+import type {
+  DatabaseDialect,
+  DatabaseExecOptions,
+  PostgresConfig,
+  SqlConfigMapping,
+  SqliteConfig,
+} from '../types';
 
 export class BaseSql<
-  Dialect extends AcceptedSqlDialects,
-  Options extends AcceptedSqlConfig[Dialect],
+  DbDialect extends Dialect,
+  Options extends SqlConfigMapping[DbDialect],
 > implements DatabaseDialect
 {
   public readonly dialect: Dialect;
@@ -42,32 +47,20 @@ export class BaseSql<
     return this;
   }
 
-  public async exec<T>(sql: string): Promise<T>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async exec<T>(sql: string, values: any[]): Promise<T>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async exec<T>(sql: string, values?: any[]): Promise<T> {
-    if (!values) {
-      return this.client.unsafe(sql) as T;
+  public async exec<T>(options: DatabaseExecOptions): Promise<T> {
+    const client = options.tx || this.client;
+
+    if (!options.params) {
+      return client.unsafe(options.sql) as T;
     }
 
-    return this.client.unsafe(sql, values) as T;
+    return client.unsafe(options.sql, options.params) as T;
   }
 
-  public async transaction<T, U extends () => Promise<T>>(fn: U): Promise<T> {
-    try {
-      await this.exec('BEGIN');
-
-      const result = await fn();
-
-      await this.exec('COMMIT');
-
-      return result;
-    } catch (err) {
-      await this.exec('ROLLBACK');
-
-      throw err;
-    }
+  public async transaction<T, U extends (tx: TransactionSQL) => Promise<T>>(
+    fn: U
+  ): Promise<T> {
+    return this.client.transaction(fn);
   }
 }
 
@@ -86,5 +79,14 @@ export class DatabaseMysql extends BaseSql<
 > {
   constructor(options: PostgresConfig) {
     super(Dialect.MYSQL, options);
+  }
+}
+
+export class DatabaseSqlite extends BaseSql<
+  typeof Dialect.SQLITE,
+  SqliteConfig
+> {
+  constructor(options: SqliteConfig) {
+    super(Dialect.SQLITE, options);
   }
 }

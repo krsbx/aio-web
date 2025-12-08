@@ -2,7 +2,12 @@ import type { Column } from '../column';
 import type { DatabaseDialect } from '../database/types';
 import { QueryBuilder } from '../query';
 import type { Dialect } from './constants';
-import type { TableOptions, TableOutput, TimestampOptions } from './types';
+import type {
+  ExecOptions,
+  TableOptions,
+  TableOutput,
+  TimestampOptions,
+} from './types';
 import { defineColumns } from './utilities';
 
 export class Table<
@@ -87,7 +92,9 @@ export class Table<
     });
   }
 
-  public async create(db: DatabaseDialect | null = this.client) {
+  public async create(options: ExecOptions = {}) {
+    const db = options.db || this.client;
+
     if (!db) throw new Error('Database client not defined');
 
     const sql = `CREATE TABLE IF NOT EXISTS ${this.name} (${Object.entries(
@@ -96,17 +103,25 @@ export class Table<
       .map(([name, column]) => `${name} ${column.toQuery().query}`)
       .join(', ')});`;
 
-    await db.exec(sql);
+    await db.exec({
+      sql,
+      tx: options.tx,
+    });
 
     return this;
   }
 
-  public async drop(db: DatabaseDialect | null = this.client) {
+  public async drop(options: ExecOptions = {}) {
+    const db = options.db || this.client;
+
     if (!db) throw new Error('Database client not defined');
 
     const sql = `DROP TABLE IF EXISTS ${this.name};`;
 
-    await db.exec(sql);
+    await db.exec({
+      sql,
+      tx: options.tx,
+    });
 
     return this;
   }

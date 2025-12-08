@@ -63,7 +63,9 @@ export async function createTable<
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  await table.create(this.client);
+  await table.create({
+    db: this.client,
+  });
 
   return this as unknown as Database<DbDialect, NewTables, Definition>;
 }
@@ -82,7 +84,9 @@ export async function renameTable<
   oldName: OldName,
   newName: NewName
 ) {
-  await this.client.exec(`ALTER TABLE ${oldName} RENAME TO ${newName};`);
+  await this.client.exec({
+    sql: `ALTER TABLE ${oldName} RENAME TO ${newName};`,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (this.tables as any)[newName] = this.tables[oldName];
@@ -99,12 +103,16 @@ export async function dropTable<
   TableName extends (keyof Tables & string) | (string & {}),
 >(this: Database<DbDialect, Tables, Definition>, tableName: TableName) {
   if (!this.tables[tableName]) {
-    await this.client.exec(`DROP TABLE IF EXISTS ${tableName as string};`);
+    await this.client.exec({
+      sql: `DROP TABLE IF EXISTS ${tableName as string};`,
+    });
 
     return this;
   }
 
-  await this.tables[tableName].drop(this.client);
+  await this.tables[tableName].drop({
+    db: this.client,
+  });
 
   delete this.tables[tableName];
 

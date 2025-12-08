@@ -1,7 +1,13 @@
+import type { TransactionSQL } from 'bun';
 import type { Column } from '../column';
 import type { Table } from '../table';
 import type { Dialect } from '../table/constants';
-import type { AcceptedSqlConfig } from './wrapper/constants';
+
+export type SqlConfigMapping = {
+  [Dialect.POSTGRES]: PostgresConfig;
+  [Dialect.MYSQL]: MysqlConfig;
+  [Dialect.SQLITE]: SqliteConfig;
+};
 
 export interface SqliteConfig {
   filename: string;
@@ -26,12 +32,15 @@ export interface DatabaseOptions<
   Tables extends Record<string, Table<string, Record<string, Column>>>,
 > {
   dialect: DbDialect;
-  config: DbDialect extends typeof Dialect.SQLITE
-    ? SqliteConfig
-    : DbDialect extends keyof AcceptedSqlConfig
-      ? AcceptedSqlConfig[DbDialect]
-      : never;
+  config: SqlConfigMapping[DbDialect];
   tables?: Tables;
+}
+
+export interface DatabaseExecOptions {
+  sql: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: any;
+  tx?: TransactionSQL | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -46,9 +55,9 @@ export interface DatabaseDialect {
   connect(): Promise<this>;
   disconnect(): Promise<this>;
 
-  exec<T>(sql: string): Promise<T>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  exec<T>(sql: string, params: any): Promise<T>;
+  exec<T>(options: DatabaseExecOptions): Promise<T>;
 
-  transaction<T, U extends () => Promise<T>>(fn: U): Promise<T>;
+  transaction<T, U extends (tx: TransactionSQL) => Promise<T>>(
+    fn: U
+  ): Promise<T>;
 }
