@@ -1,4 +1,5 @@
 import { Dialect } from '../table/constants';
+import { deepClone } from '../utilities';
 import { AcceptedColumnTypes, ColumnTypeMapping } from './constants';
 import type {
   AcceptedColumnTypeMap,
@@ -149,6 +150,18 @@ export class Column<
       Value,
       Definition & { dialect: DbDialect }
     >;
+  }
+
+  public clone() {
+    const column = new Column<Type, Values, Options, ColumnValue, Value>({
+      type: this.type,
+      ...(this.length && { length: this.length }),
+      ...(this.enums.length && { values: this.enums }),
+    } as Options);
+
+    Object.assign(column.definition, deepClone(this.definition));
+
+    return column;
   }
 
   public toQuery() {

@@ -10,7 +10,7 @@ export type SqlConfigMapping = {
 };
 
 export interface SqliteConfig {
-  filename: string;
+  filename: ':memory:' | (string & {});
 }
 
 export interface SqlConfig {
