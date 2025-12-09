@@ -38,8 +38,7 @@ export interface DatabaseOptions<
 
 export interface DatabaseExecOptions {
   sql: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params?: any;
+  params?: unknown[] | null | undefined;
   tx?: TransactionSQL | null;
 }
 

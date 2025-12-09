@@ -475,14 +475,10 @@ export class QueryBuilder<
       values = values.map((row) => ({
         ...row,
         ...(isHasCreatedAt && {
-          [createdAt]:
-            row[createdAt as keyof typeof row]?.toString() ??
-            timestamp.toString(),
+          [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
         }),
         ...(isHasUpdatedAt && {
-          [updatedAt]:
-            row[updatedAt as keyof typeof row]?.toString() ??
-            timestamp.toString(),
+          [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
         }),
       })) as AcceptedInsertValues<TableRef['columns']>;
     }
@@ -511,9 +507,7 @@ export class QueryBuilder<
     if (isWithTimestamp && isHasUpdatedAt) {
       values = {
         ...values,
-        [updatedAt]:
-          values[updatedAt as keyof typeof values]?.toString() ??
-          timestamp.toString(),
+        [updatedAt]: values[updatedAt as keyof typeof values] ?? timestamp,
       };
     }
 
