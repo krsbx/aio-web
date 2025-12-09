@@ -90,4 +90,12 @@ export class DatabaseSqlite<
   ): Promise<T> {
     return this.client.transaction(fn);
   }
+
+  public async distributed<
+    T extends string,
+    U,
+    V extends (tx: TransactionSQL) => Promise<U>,
+  >(name: T, fn: V): Promise<U> {
+    return this.client.distributed(name, fn);
+  }
 }
