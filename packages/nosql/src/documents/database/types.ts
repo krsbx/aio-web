@@ -1,3 +1,4 @@
+import type { TransactionSQL } from 'bun';
 import type { Document } from '../document';
 import type { Field } from '../field';
 
@@ -11,15 +12,21 @@ export interface DatabaseOptions<
   docs: Docs;
 }
 
+export interface DatabaseExecOptions {
+  sql: string;
+  params?: unknown[] | null | undefined;
+  tx?: TransactionSQL | null;
+}
+
 export interface DatabaseDialect {
   status: 'connecting' | 'connected' | 'disconnected';
 
   connect(): Promise<this>;
   disconnect(): Promise<this>;
 
-  exec<T>(sql: string): Promise<T>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  exec<T>(sql: string, params: any): Promise<T>;
+  exec<T>(options: DatabaseExecOptions): Promise<T>;
 
-  transaction<T, U extends () => Promise<T>>(fn: U): Promise<T>;
+  transaction<T, U extends (tx: TransactionSQL) => Promise<T>>(
+    fn: U
+  ): Promise<T>;
 }

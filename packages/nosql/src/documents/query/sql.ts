@@ -1,3 +1,4 @@
+import type { TransactionSQL } from 'bun';
 import type { QueryBuilder } from '.';
 import type { Document } from '../document';
 import type { Field } from '../field';
@@ -161,7 +162,7 @@ export async function exec<
     StrictAllowedField
   >,
   Output extends Query['_output'] = Query['_output'],
->(this: Query) {
+>(this: Query, tx?: TransactionSQL | null) {
   if (!this.doc.client) throw new Error('Database client not defined');
 
   const { query, params } = this.toQuery();
@@ -177,7 +178,11 @@ export async function exec<
     }
   }
 
-  const result = await this.doc.client.exec<never[]>(query, params);
+  const result = await this.doc.client.exec<never[]>({
+    sql: query,
+    params,
+    tx,
+  });
 
   if (this.hooks?.after?.size) {
     for (const hook of this.hooks.after.values()) {

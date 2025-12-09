@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Database } from 'bun:sqlite';
-import type { Item, KeyValueConfig, RawItem, RawKey } from './types';
 import { getSql } from './sql';
+import type { Item, KeyValueConfig, RawItem, RawKey } from './types';
 
 export class KeyValue {
   public readonly filepath: string;
@@ -47,7 +47,9 @@ export class KeyValue {
   }
 
   protected decompress<Value = any>(buffer: Uint8Array): Value {
-    const decompressed = Bun.inflateSync(buffer).toString();
+    const decompressed = Bun.inflateSync(
+      buffer as Uint8Array<ArrayBuffer>
+    ).toString();
 
     return JSON.parse(decompressed);
   }

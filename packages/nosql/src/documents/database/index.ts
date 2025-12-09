@@ -26,20 +26,24 @@ export class Database<
     }
 
     // Create database
-    this.client.exec(`
+    this.client.exec({
+      sql: `
     CREATE TABLE IF NOT EXISTS documents (
       id TEXT PRIMARY KEY,
       collection TEXT NOT NULL,
       data JSON
     );
-    `);
+    `,
+    });
 
     // Create FTS5
-    this.client.exec(`
+    this.client.exec({
+      sql: `
     CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(
       id, collection, content
     );
-    `);
+    `,
+    });
   }
 
   public document<
