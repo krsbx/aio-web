@@ -6,8 +6,8 @@ import type { Dialect } from './constants';
 import type { createdAt, deletedAt, updatedAt } from './utilities';
 
 export interface TimestampOptions<
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
 > {
   createdAt?: CreatedAt;
   updatedAt?: UpdatedAt;
@@ -17,8 +17,8 @@ export interface TableOptions<
   TableName extends string,
   Columns extends Record<string, Column>,
   DbDialect extends Dialect,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
 > {
@@ -31,8 +31,8 @@ export interface TableOptions<
 
 export type MergeTimestampParanoid<
   Columns extends Record<string, Column>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
 > = Columns &
@@ -43,16 +43,28 @@ export type MergeTimestampParanoid<
       }
     : Timestamp extends TimestampOptions<CreatedAt, UpdatedAt>
       ? (Timestamp['createdAt'] extends CreatedAt
-          ? {
-              [K in Timestamp['createdAt']]: typeof createdAt;
-            }
+          ? Timestamp['createdAt'] extends true
+            ? {
+                createdAt: typeof createdAt;
+              }
+            : Timestamp['createdAt'] extends string
+              ? {
+                  [K in Timestamp['createdAt']]: typeof createdAt;
+                }
+              : NonNullable<unknown>
           : {
               createdAt: typeof createdAt;
             }) &
           (Timestamp['updatedAt'] extends UpdatedAt
-            ? {
-                [K in Timestamp['updatedAt']]: typeof updatedAt;
-              }
+            ? Timestamp['updatedAt'] extends true
+              ? {
+                  updatedAt: typeof updatedAt;
+                }
+              : Timestamp['updatedAt'] extends string
+                ? {
+                    [K in Timestamp['updatedAt']]: typeof updatedAt;
+                  }
+                : NonNullable<unknown>
             : {
                 updatedAt: typeof updatedAt;
               })
@@ -71,8 +83,8 @@ export type TableOutput<
   TableName extends string,
   Columns extends Record<string, Column>,
   DbDialect extends Dialect,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
   TableRef extends Table<

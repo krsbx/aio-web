@@ -111,18 +111,28 @@ export function getTimestamp<
 >(table: TableRef) {
   const isWithTimestamp = !!table.timestamp;
   const timestamp = new Date();
+  let isHasCreatedAt = true;
+  let isHasUpdatedAt = true;
   let createdAt = 'createdAt';
   let updatedAt = 'updatedAt';
 
   if (isWithTimestamp) {
     const isCustomTimestamp = typeof table.timestamp === 'object';
 
-    if (isCustomTimestamp && table.timestamp.createdAt) {
-      createdAt = table.timestamp.createdAt;
+    if (isCustomTimestamp) {
+      if (typeof table.timestamp.createdAt === 'string') {
+        createdAt = table.timestamp.createdAt;
+      }
+
+      isHasCreatedAt = table.timestamp.createdAt === false;
     }
 
-    if (isCustomTimestamp && table.timestamp.updatedAt) {
-      updatedAt = table.timestamp.updatedAt;
+    if (isCustomTimestamp) {
+      if (typeof table.timestamp.updatedAt === 'string') {
+        updatedAt = table.timestamp.updatedAt;
+      }
+
+      isHasUpdatedAt = table.timestamp.updatedAt === false;
     }
   }
 
@@ -131,6 +141,8 @@ export function getTimestamp<
     timestamp,
     createdAt,
     updatedAt,
+    isHasUpdatedAt,
+    isHasCreatedAt,
   };
 }
 

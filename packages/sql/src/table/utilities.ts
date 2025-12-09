@@ -21,8 +21,8 @@ export const deletedAt = Column.define({
 export function defineColumns<
   TableName extends string,
   Columns extends Record<string, Column>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
   FinalColumns extends MergeTimestampParanoid<

@@ -14,8 +14,8 @@ export class Table<
   TableName extends string,
   Columns extends Record<string, Column>,
   DbDialect extends Dialect = Dialect,
-  CreatedAt extends string = string,
-  UpdatedAt extends string = string,
+  CreatedAt extends string | boolean = string | boolean,
+  UpdatedAt extends string | boolean = string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean =
     | TimestampOptions<CreatedAt, UpdatedAt>
     | boolean,
@@ -69,8 +69,8 @@ export class Table<
     TableName extends string,
     Columns extends Record<string, Column>,
     DbDialect extends Dialect,
-    CreatedAt extends string,
-    UpdatedAt extends string,
+    CreatedAt extends string | boolean,
+    UpdatedAt extends string | boolean,
     Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
     Paranoid extends string | boolean,
   >(

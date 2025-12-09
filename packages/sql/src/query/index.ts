@@ -462,15 +462,28 @@ export class QueryBuilder<
 
     if (!this.definition.insertValues) this.definition.insertValues = [];
 
-    const { isWithTimestamp, createdAt, updatedAt, timestamp } = getTimestamp(
-      this.table
-    );
+    const {
+      isWithTimestamp,
+      isHasCreatedAt,
+      isHasUpdatedAt,
+      createdAt,
+      updatedAt,
+      timestamp,
+    } = getTimestamp(this.table);
 
     if (isWithTimestamp) {
       values = values.map((row) => ({
         ...row,
-        [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
-        [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
+        ...(isHasCreatedAt && {
+          [createdAt]:
+            row[createdAt as keyof typeof row]?.toString() ??
+            timestamp.toString(),
+        }),
+        ...(isHasUpdatedAt && {
+          [updatedAt]:
+            row[updatedAt as keyof typeof row]?.toString() ??
+            timestamp.toString(),
+        }),
       })) as AcceptedInsertValues<TableRef['columns']>;
     }
 
@@ -492,12 +505,15 @@ export class QueryBuilder<
   public update<Values extends AcceptedUpdateValues<TableRef['columns']>>(
     values: Values
   ) {
-    const { isWithTimestamp, updatedAt, timestamp } = getTimestamp(this.table);
+    const { isWithTimestamp, isHasUpdatedAt, updatedAt, timestamp } =
+      getTimestamp(this.table);
 
-    if (isWithTimestamp) {
+    if (isWithTimestamp && isHasUpdatedAt) {
       values = {
         ...values,
-        [updatedAt]: values[updatedAt as keyof typeof values] ?? timestamp,
+        [updatedAt]:
+          values[updatedAt as keyof typeof values]?.toString() ??
+          timestamp.toString(),
       };
     }
 
