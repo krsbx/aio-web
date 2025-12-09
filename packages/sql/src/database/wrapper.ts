@@ -25,6 +25,7 @@ export class BaseSql<
     this.status = 'connecting';
     this.client = new SQL({
       ...options,
+      adapter: dialect,
       onconnect: () => {
         this.status = 'connected';
       },
