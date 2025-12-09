@@ -86,6 +86,6 @@ export class Ignisia<BasePath extends string> extends Router<BasePath> {
     return Bun.serve({
       fetch: this.fetch,
       ...options,
-    });
+    } as Bun.Serve.Options<undefined, never>);
   }
 }

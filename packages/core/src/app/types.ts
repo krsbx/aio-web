@@ -1,4 +1,3 @@
-import type { ServeOptions } from 'bun';
 import type { Context } from '../context';
 import type { Middleware, Route } from '../router/types';
 
@@ -32,4 +31,7 @@ export interface OnNotFound<
   (ctx: Context<V, P, Q, S>): Response | Promise<Response>;
 }
 
-export type ListenOptions = Omit<ServeOptions, 'fetch' | 'routes'>;
+export type ListenOptions = Omit<
+  Bun.Serve.Options<undefined, never>,
+  'fetch' | 'routes'
+>;
