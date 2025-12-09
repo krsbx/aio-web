@@ -17,7 +17,10 @@ export function onPrimaryQueryListener(
       if (data.action !== '@ignisia/replica' || data.payload.type === 'SELECT')
         return;
 
-      await db.client.exec(data.payload.query, data.payload.params);
+      await db.client.exec({
+        sql: data.payload.query,
+        params: data.payload.params,
+      });
     } catch {
       // Ignore the JSON parsing error or other errors
     }

@@ -38,10 +38,10 @@ export class PrimaryDatabaseReplica implements Disposable {
       if (options.hook !== 'after') return;
 
       if (replica.type === ReplicaInstanceType.FILE) {
-        (replica.instance as AcceptedPrimaryInstance).client.exec(
-          options.query,
-          options.params
-        );
+        (replica.instance as AcceptedPrimaryInstance).client.exec({
+          sql: options.query,
+          params: options.params,
+        });
 
         return;
       }
