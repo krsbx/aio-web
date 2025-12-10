@@ -63,7 +63,14 @@ export function clone<
     StrictAllowedColumn
   >
 ) {
-  const query = new QueryBuilder<Alias, TableRef, JoinedTables>(this.table);
+  const query = new QueryBuilder<
+    Alias,
+    TableRef,
+    JoinedTables,
+    Definition,
+    AllowedColumn,
+    StrictAllowedColumn
+  >(this.table);
 
   Object.assign(query.definition, deepClone(this.definition));
 

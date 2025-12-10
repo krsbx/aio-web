@@ -2,6 +2,7 @@ import type { TransactionSQL } from 'bun';
 import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
+import type { Dialect } from '../table/constants';
 import type { addCondition, addRawCondition } from './condition';
 import type {
   AcceptedOperator,
@@ -36,7 +37,8 @@ export interface QueryTransformerContract<
       Definition,
       AllowedColumn,
       StrictAllowedColumn
-    >
+    >,
+    dialect?: Dialect | null
   ): {
     query: string;
     params: unknown[] | null | undefined;

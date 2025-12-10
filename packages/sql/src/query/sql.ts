@@ -2,6 +2,7 @@ import type { TransactionSQL } from 'bun';
 import type { QueryBuilder } from '.';
 import type { Column } from '../column';
 import type { Table } from '../table';
+import { Dialect } from '../table/constants';
 import {
   buildDeleteQuery,
   buildInsertQuery,
@@ -49,7 +50,7 @@ export function toQuery<
     AllowedColumn,
     StrictAllowedColumn
   >,
->(this: Query) {
+>(this: Query, dialect?: Dialect | null) {
   let sql = '';
 
   switch (this.definition.queryType) {
@@ -119,7 +120,9 @@ export function toQuery<
     this.definition.queryType === QueryType.UPDATE ||
     this.definition.queryType === QueryType.DELETE
   ) {
-    sql += ` RETURNING *`;
+    if (dialect !== Dialect.MYSQL) {
+      sql += ` RETURNING *`;
+    }
   }
 
   sql = buildQuery(sql);
@@ -171,44 +174,60 @@ export async function exec<
   >,
   Output extends Query['_output'] = Query['_output'],
 >(this: Query, tx?: TransactionSQL | null) {
-  if (!this.table.client) {
+  const client = this.table.client;
+  const dialect = this.table.dialect;
+  const queryType = this.definition.queryType;
+  const isUpdate = queryType === QueryType.UPDATE;
+  const isDelete = queryType === QueryType.DELETE;
+  const isReturning = isUpdate || isDelete;
+  const isMySQL = dialect === Dialect.MYSQL;
+
+  if (!client) {
     throw new Error('Database client not defined');
   }
 
-  if (!this.definition.queryType) {
+  if (!queryType) {
     throw new Error('No query type defined');
   }
 
-  const queryObject = this.toQuery();
-  const query =
-    this.table.dialect === 'mysql'
-      ? queryObject.query.replace(' RETURNING *;', ';')
-      : queryObject.query;
-  const params = queryObject.params;
+  const { query, params } = this.toQuery(dialect);
 
   if (this.hooks?.before?.size) {
     for (const hook of this.hooks.before.values()) {
       hook({
         query,
         params,
-        type: this.definition.queryType,
+        type: queryType,
         hook: QueryHooksType.BEFORE,
       });
     }
   }
 
-  const result = await this.table.client.exec<never[]>({
+  let result = await client.exec<never[]>({
     sql: query,
     params,
     tx,
   });
+
+  // Workaround for MySQL to make UPDATE and DELETE queries behave the same across dialects
+  if (isMySQL && isReturning) {
+    // Clone the query object
+    const query = this.clone();
+    query.definition.queryType = QueryType.SELECT;
+
+    result = await client.exec({
+      sql: query.toQuery().query,
+      params,
+      tx,
+    });
+  }
 
   if (this.hooks?.after?.size) {
     for (const hook of this.hooks.after.values()) {
       hook({
         query,
         params,
-        type: this.definition.queryType,
+        type: queryType,
         hook: QueryHooksType.AFTER,
       });
     }

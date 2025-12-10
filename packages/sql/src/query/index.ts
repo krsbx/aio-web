@@ -453,8 +453,7 @@ export class QueryBuilder<
     this.definition.select = columns;
     this.definition.queryType = QueryType.SELECT;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this as any;
+    return this as never;
   }
 
   public insert(...values: AcceptedInsertValues<TableRef['columns']>) {
