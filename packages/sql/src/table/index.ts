@@ -22,7 +22,7 @@ export class Table<
   Paranoid extends string | boolean = string | boolean,
 > {
   public client: DatabaseDialect | null;
-  public readonly dialect: DbDialect;
+  private _dialect: DbDialect | null;
   public readonly name: TableName;
   public readonly columns: Columns;
   public readonly timestamp: Timestamp | null;
@@ -48,17 +48,16 @@ export class Table<
       Paranoid
     >
   ) {
-    this.dialect = options.dialect;
+    this._dialect = options.dialect || null;
     this.name = options.name;
     this.columns = options.columns;
     this.paranoid = options.paranoid || null;
     this.timestamp = options.timestamp || null;
     this.client = null;
 
-    for (const column of Object.values(this.columns)) {
-      // Set dialect for each column
-      column.dialect(options.dialect);
-    }
+    if (!this._dialect) return;
+
+    this.setColumnDialect(this._dialect);
   }
 
   public infer(): this['_output'] {
@@ -90,6 +89,33 @@ export class Table<
       ...options,
       columns,
     });
+  }
+
+  public setColumnDialect<DbDialect extends Dialect>(dialect: DbDialect) {
+    for (const column of Object.values(this.columns)) {
+      // Set dialect for each column
+      column.dialect(dialect);
+    }
+  }
+
+  public get dialect() {
+    return this._dialect;
+  }
+
+  public setDialect<DbDialect extends Dialect>(dialect: DbDialect) {
+    this._dialect = dialect as never;
+
+    this.setColumnDialect(dialect);
+
+    return this as unknown as Table<
+      TableName,
+      Columns,
+      DbDialect,
+      CreatedAt,
+      UpdatedAt,
+      Timestamp,
+      Paranoid
+    >;
   }
 
   public async create(options: ExecOptions = {}) {

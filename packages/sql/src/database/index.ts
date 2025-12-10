@@ -114,6 +114,7 @@ export class Database<
     if (options.tables) {
       for (const tableName in options.tables) {
         options.tables[tableName].client = this.client;
+        options.tables[tableName].setDialect(this.dialect);
       }
     }
 

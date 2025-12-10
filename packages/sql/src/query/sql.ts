@@ -171,16 +171,27 @@ export async function exec<
   >,
   Output extends Query['_output'] = Query['_output'],
 >(this: Query, tx?: TransactionSQL | null) {
-  if (!this.table.client) throw new Error('Database client not defined');
+  if (!this.table.client) {
+    throw new Error('Database client not defined');
+  }
 
-  const { query, params } = this.toQuery();
+  if (!this.definition.queryType) {
+    throw new Error('No query type defined');
+  }
+
+  const queryObject = this.toQuery();
+  const query =
+    this.table.dialect === 'mysql'
+      ? queryObject.query.replace(' RETURNING *;', ';')
+      : queryObject.query;
+  const params = queryObject.params;
 
   if (this.hooks?.before?.size) {
     for (const hook of this.hooks.before.values()) {
       hook({
         query,
         params,
-        type: this.definition.queryType!,
+        type: this.definition.queryType,
         hook: QueryHooksType.BEFORE,
       });
     }
@@ -197,7 +208,7 @@ export async function exec<
       hook({
         query,
         params,
-        type: this.definition.queryType!,
+        type: this.definition.queryType,
         hook: QueryHooksType.AFTER,
       });
     }

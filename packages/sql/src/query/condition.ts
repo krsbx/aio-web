@@ -214,6 +214,10 @@ export function addCondition<
   value: Value,
   logical: Logical
 ) {
+  if (!query.table.dialect) {
+    throw new Error('No DB Dialect defined');
+  }
+
   const validClause = clause.toLowerCase() as ValidClause;
   const condition = getCondition(query.table.dialect, column, operator, value);
 
@@ -287,14 +291,14 @@ export function where<
   >,
   column: ColName,
   operator: Operator,
-  value: Value
+  value?: Value
 ) {
   return addCondition(
     this,
     ConditionClause.WHERE,
     column,
     operator,
-    value,
+    (value || null) as Value,
     LogicalOperator.AND
   );
 }
@@ -329,14 +333,14 @@ export function or<
   >,
   column: ColName,
   operator: Operator,
-  value: Value
+  value?: Value
 ) {
   return addCondition(
     this,
     ConditionClause.WHERE,
     column,
     operator,
-    value,
+    (value || null) as Value,
     LogicalOperator.OR
   );
 }

@@ -22,7 +22,7 @@ export interface TableOptions<
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
 > {
-  dialect: DbDialect;
+  dialect?: DbDialect;
   name: TableName;
   columns: Columns;
   paranoid?: Paranoid;
