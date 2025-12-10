@@ -1,6 +1,6 @@
 import type { QueryBuilder } from '.';
-import type { Field } from '../field';
 import type { Document } from '../document';
+import type { Field } from '../field';
 import {
   AcceptedOperator,
   ConditionClause,
@@ -263,14 +263,14 @@ export function where<
   >,
   column: ColName,
   operator: Operator,
-  value: Value
+  value?: Value
 ) {
   return addCondition(
     this,
     ConditionClause.WHERE,
     column,
     operator,
-    value,
+    (value || null) as Value,
     LogicalOperator.AND
   );
 }
@@ -301,14 +301,14 @@ export function or<
   >,
   column: ColName,
   operator: Operator,
-  value: Value
+  value?: Value
 ) {
   return addCondition(
     this,
     ConditionClause.WHERE,
     column,
     operator,
-    value,
+    (value || null) as Value,
     LogicalOperator.OR
   );
 }

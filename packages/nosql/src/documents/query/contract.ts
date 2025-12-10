@@ -183,6 +183,49 @@ export interface QueryConditionContract<
         ? DocRef['fields'][TableColumn]
         : JoinedDocs[TableAlias]['fields'][TableColumn]
       : never,
+    Operator extends
+      | typeof AcceptedOperator.IS_NULL
+      | typeof AcceptedOperator.IS_NOT_NULL,
+    Value extends WhereValue<Col>[Operator],
+  >(
+    this: QueryBuilder<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Definition,
+      AllowedField,
+      StrictAllowedField
+    >,
+    column: ColName,
+    operator: Operator
+  ): ReturnType<
+    typeof addCondition<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Definition,
+      AllowedField,
+      StrictAllowedField,
+      typeof ConditionClause.WHERE,
+      ColName,
+      ColName extends `${infer TableAlias}.${infer TableColumn}`
+        ? TableAlias extends Alias
+          ? DocRef['fields'][TableColumn]
+          : JoinedDocs[TableAlias]['fields'][TableColumn]
+        : never,
+      Operator,
+      Value,
+      typeof LogicalOperator.AND,
+      Lowercase<typeof ConditionClause.WHERE>
+    >
+  >;
+  where<
+    ColName extends StrictAllowedField,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? DocRef['fields'][TableColumn]
+        : JoinedDocs[TableAlias]['fields'][TableColumn]
+      : never,
     Operator extends AcceptedOperator,
     Value extends WhereValue<Col>[Operator],
   >(
@@ -219,6 +262,50 @@ export interface QueryConditionContract<
     >
   >;
 
+  or<
+    ColName extends StrictAllowedField,
+    Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
+      ? TableAlias extends Alias
+        ? DocRef['fields'][TableColumn]
+        : JoinedDocs[TableAlias]['fields'][TableColumn]
+      : never,
+    Operator extends
+      | typeof AcceptedOperator.IS_NULL
+      | typeof AcceptedOperator.IS_NOT_NULL,
+    Value extends WhereValue<Col>[Operator],
+  >(
+    this: QueryBuilder<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Definition,
+      AllowedField,
+      StrictAllowedField
+    >,
+    column: ColName,
+    operator: Operator,
+    value: Value
+  ): ReturnType<
+    typeof addCondition<
+      Alias,
+      DocRef,
+      JoinedDocs,
+      Definition,
+      AllowedField,
+      StrictAllowedField,
+      typeof ConditionClause.WHERE,
+      ColName,
+      ColName extends `${infer TableAlias}.${infer TableColumn}`
+        ? TableAlias extends Alias
+          ? DocRef['fields'][TableColumn]
+          : JoinedDocs[TableAlias]['fields'][TableColumn]
+        : never,
+      Operator,
+      Value,
+      typeof LogicalOperator.OR,
+      Lowercase<typeof ConditionClause.WHERE>
+    >
+  >;
   or<
     ColName extends StrictAllowedField,
     Col extends ColName extends `${infer TableAlias}.${infer TableColumn}`
