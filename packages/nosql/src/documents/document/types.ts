@@ -1,10 +1,10 @@
-import type { Field } from '../field';
 import type { Document } from '.';
+import type { Field } from '../field';
 import type { _id, createdAt, deletedAt, updatedAt } from './utilities';
 
 export interface TimestampOptions<
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
 > {
   createdAt?: CreatedAt;
   updatedAt?: UpdatedAt;
@@ -13,8 +13,8 @@ export interface TimestampOptions<
 export interface DocumentOptions<
   DocName extends string,
   Fields extends Record<string, Field>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
 > {
@@ -26,8 +26,8 @@ export interface DocumentOptions<
 
 export type MergeTimestampParanoid<
   Fields extends Record<string, Field>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
 > = Fields & { _id: typeof _id } & (Timestamp extends true
@@ -37,16 +37,28 @@ export type MergeTimestampParanoid<
       }
     : Timestamp extends TimestampOptions<CreatedAt, UpdatedAt>
       ? (Timestamp['createdAt'] extends CreatedAt
-          ? {
-              [K in Timestamp['createdAt']]: typeof createdAt;
-            }
+          ? Timestamp['createdAt'] extends true
+            ? {
+                createdAt: typeof createdAt;
+              }
+            : Timestamp['createdAt'] extends string
+              ? {
+                  [K in Timestamp['createdAt']]: typeof createdAt;
+                }
+              : NonNullable<unknown>
           : {
               createdAt: typeof createdAt;
             }) &
           (Timestamp['updatedAt'] extends UpdatedAt
-            ? {
-                [K in Timestamp['updatedAt']]: typeof updatedAt;
-              }
+            ? Timestamp['updatedAt'] extends true
+              ? {
+                  updatedAt: typeof updatedAt;
+                }
+              : Timestamp['updatedAt'] extends string
+                ? {
+                    [K in Timestamp['updatedAt']]: typeof updatedAt;
+                  }
+                : NonNullable<unknown>
             : {
                 updatedAt: typeof updatedAt;
               })
@@ -64,8 +76,8 @@ export type MergeTimestampParanoid<
 export type DocumentOutput<
   DocName extends string,
   Fields extends Record<string, Field>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
   Doc extends Document<

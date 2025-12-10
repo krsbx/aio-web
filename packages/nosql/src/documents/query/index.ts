@@ -464,9 +464,14 @@ export class QueryBuilder<
 
     if (!this.definition.insertValues) this.definition.insertValues = [];
 
-    const { isWithTimestamp, createdAt, updatedAt, timestamp } = getTimestamp(
-      this.doc
-    );
+    const {
+      isWithTimestamp,
+      isHasCreatedAt,
+      isHasUpdatedAt,
+      createdAt,
+      updatedAt,
+      timestamp,
+    } = getTimestamp(this.doc);
 
     values = values.map((row) => ({
       ...row,
@@ -476,8 +481,12 @@ export class QueryBuilder<
     if (isWithTimestamp) {
       values = values.map((row) => ({
         ...row,
-        [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
-        [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
+        ...(isHasCreatedAt && {
+          [createdAt]: row[createdAt as keyof typeof row] ?? timestamp,
+        }),
+        ...(isHasUpdatedAt && {
+          [updatedAt]: row[updatedAt as keyof typeof row] ?? timestamp,
+        }),
       })) as AcceptedInsertValues<DocRef['fields']>;
     }
 
@@ -499,9 +508,10 @@ export class QueryBuilder<
   public update<Values extends AcceptedUpdateValues<DocRef['fields']>>(
     values: Values
   ) {
-    const { isWithTimestamp, updatedAt, timestamp } = getTimestamp(this.doc);
+    const { isWithTimestamp, isHasUpdatedAt, updatedAt, timestamp } =
+      getTimestamp(this.doc);
 
-    if (isWithTimestamp) {
+    if (isWithTimestamp && isHasUpdatedAt) {
       values = {
         ...values,
         [updatedAt]: values[updatedAt as keyof typeof values] ?? timestamp,

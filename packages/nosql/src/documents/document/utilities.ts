@@ -24,8 +24,8 @@ export const deletedAt = Field.define({
 export function defineFields<
   DocName extends string,
   Fields extends Record<string, Field>,
-  CreatedAt extends string,
-  UpdatedAt extends string,
+  CreatedAt extends string | boolean,
+  UpdatedAt extends string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
   Paranoid extends string | boolean,
   FinalFields extends MergeTimestampParanoid<

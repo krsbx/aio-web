@@ -11,8 +11,8 @@ import { defineFields } from './utilities';
 export class Document<
   DocName extends string = string,
   Fields extends Record<string, Field> = Record<string, Field>,
-  CreatedAt extends string = string,
-  UpdatedAt extends string = string,
+  CreatedAt extends string | boolean = string | boolean,
+  UpdatedAt extends string | boolean = string | boolean,
   Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean =
     | TimestampOptions<CreatedAt, UpdatedAt>
     | boolean,
@@ -60,8 +60,8 @@ export class Document<
   public static define<
     DocName extends string,
     Fields extends Record<string, Field>,
-    CreatedAt extends string,
-    UpdatedAt extends string,
+    CreatedAt extends string | boolean,
+    UpdatedAt extends string | boolean,
     Timestamp extends TimestampOptions<CreatedAt, UpdatedAt> | boolean,
     Paranoid extends string | boolean,
   >(

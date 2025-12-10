@@ -1,5 +1,6 @@
-import type { Field } from '../field';
+import type { QueryBuilder } from '.';
 import type { Document } from '../document';
+import type { Field } from '../field';
 import { AcceptedOperator, QueryType } from './constants';
 import type {
   AliasedField,
@@ -9,7 +10,6 @@ import type {
   StrictFieldSelector,
   WhereValue,
 } from './types';
-import type { QueryBuilder } from '.';
 
 export function getCondition<
   ColName extends string,
@@ -78,18 +78,28 @@ export function getTimestamp<
 >(doc: DocRef) {
   const isWithTimestamp = !!doc.timestamp;
   const timestamp = new Date();
+  let isHasCreatedAt = true;
+  let isHasUpdatedAt = true;
   let createdAt = 'createdAt';
   let updatedAt = 'updatedAt';
 
   if (isWithTimestamp) {
     const isCustomTimestamp = typeof doc.timestamp === 'object';
 
-    if (isCustomTimestamp && doc.timestamp.createdAt) {
-      createdAt = doc.timestamp.createdAt;
+    if (isCustomTimestamp) {
+      if (typeof doc.timestamp.createdAt === 'string') {
+        createdAt = doc.timestamp.createdAt;
+      }
+
+      isHasCreatedAt = doc.timestamp.createdAt === false;
     }
 
-    if (isCustomTimestamp && doc.timestamp.updatedAt) {
-      updatedAt = doc.timestamp.updatedAt;
+    if (isCustomTimestamp) {
+      if (typeof doc.timestamp.updatedAt === 'string') {
+        updatedAt = doc.timestamp.updatedAt;
+      }
+
+      isHasUpdatedAt = doc.timestamp.updatedAt === false;
     }
   }
 
@@ -98,6 +108,8 @@ export function getTimestamp<
     timestamp,
     createdAt,
     updatedAt,
+    isHasCreatedAt,
+    isHasUpdatedAt,
   };
 }
 
