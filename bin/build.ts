@@ -8,7 +8,7 @@ const series: PackagePath[] = [
   'packages/encryption',
   'packages/nosql',
   'packages/sql',
-  'packages/core',
+  'packages/ignisia',
   'packages/securedb',
 ];
 

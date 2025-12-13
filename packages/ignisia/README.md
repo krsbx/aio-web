@@ -1,4 +1,4 @@
-# @Ignisia/Core
+# Ignisia
 
 Blazing fast web framework for [**Bun**](https://bun.sh).
 
@@ -9,13 +9,13 @@ Blazing fast web framework for [**Bun**](https://bun.sh).
 ## Installation
 
 ```bash
-bun add @ignisia/core
+bun add ignisia
 ```
 
 ## Usage
 
 ```ts
-import { Ignisia } from '@ignisia/core';
+import { Ignisia } from 'ignisia';
 
 const app = new Ignisia();
 // ^ You can also use `const app = new Ignisia('/api');` to define a base path

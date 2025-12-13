@@ -1,9 +1,9 @@
 {
-  "name": "@ignisia/core",
+  "name": "ignisia",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "exports": {
     ".": {
