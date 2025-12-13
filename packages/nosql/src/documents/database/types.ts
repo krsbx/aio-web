@@ -32,16 +32,4 @@ export interface DatabaseDialect {
   transaction<T, U extends (tx: TransactionSQL) => Promise<T>>(
     fn: U
   ): Promise<T>;
-
-  /**
-   * Begins a distributed transaction
-   */
-  distributed<
-    T extends string,
-    U,
-    V extends (tx: TransactionSQL) => Promise<U>,
-  >(
-    name: T,
-    fn: V
-  ): Promise<U>;
 }
