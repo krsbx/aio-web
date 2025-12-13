@@ -16,7 +16,7 @@ An all-in-one tooling for your web development needs. Everything you need in one
 
 > Bun File Storage adapter, built on top of Bun File System and S3.
 
-- [x] [@ignisia/core](./packages/core)
+- [x] [ignisia](./packages/ignisia)
 
 > Web Framework built on top of [**Bun**](https://bun.sh) HTTP Server and WebSocket Server.
 
