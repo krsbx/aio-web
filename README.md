@@ -32,6 +32,10 @@ An all-in-one tooling for your web development needs. Everything you need in one
 
 > Replica-Set mechanism for [@ignisia/sql](./packages/sql), [@ignisia/nosql](./packages/nosql), and [@ignisia/securedb](./packages/securedb).
 
+- [ ] [@ignisia/mongodb](./packages/mongodb)
+
+> Database Query Builder for [**MongoDB**](https://www.mongodb.com/).
+
 ## Plan
 
 - [x] Add support for replica-set mechanism for the NoSQL adapters.
@@ -41,5 +45,7 @@ An all-in-one tooling for your web development needs. Everything you need in one
 - [x] Add support for password protected database for the NoSQL adapters.
 
 - [x] Add support for password protected database for the SQL (SQLite) adapters.
+
+- [ ] Add support for mongodb database for the NoSQL adapters.
 
 - [ ] Add support for full-stack web framework.
