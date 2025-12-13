@@ -1,4 +1,4 @@
-import { Ignisia } from '../../../Ignisia/src';
+import { Ignisia } from '../../../ignisia/src';
 import { PORT_ALLOCATION } from '../utilities/config';
 
 const app = new Ignisia();
