@@ -6,6 +6,7 @@ Type-safe SQL query builder for Bun SQL and SQLite.
 
 - [Bun](https://bun.sh/)
 - [PostgreSQL](https://www.postgresql.org/) (optional, only for PostgreSQL dialect)
+- [MySQL](https://www.mysql.com/) (optional, only for MySQL dialect)
 
 ## Installation
 
@@ -21,7 +22,6 @@ import { Table, Column, Database } from '@ignisia/sql';
 // Define a table
 const users = Table.define({
   name: 'users',
-  dialect: 'postgres',
   columns: {
     // Define a column called "id"
     id: Column.define({

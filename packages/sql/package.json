@@ -73,6 +73,7 @@
     "sql",
     "database",
     "sqlite",
-    "postgres"
+    "postgres",
+    "mysql"
   ]
 }
