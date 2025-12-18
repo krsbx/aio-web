@@ -70,15 +70,26 @@ export class Context<
   /**
    * Append response headers by default
    */
-  public header(key: string, value: string): Context;
+  public header(
+    key: string,
+    value: string
+  ): Context<Values, Params, Query, State>;
   /**
    * Specify to append the response headers
    */
-  public header(key: string, value: string, append: true): Context;
+  public header(
+    key: string,
+    value: string,
+    append: true
+  ): Context<Values, Params, Query, State>;
   /**
    * Prevent appending the response headers
    */
-  public header(key: string, value: string, append: false): Context;
+  public header(
+    key: string,
+    value: string,
+    append: false
+  ): Context<Values, Params, Query, State>;
   public header(key: string, value: string, append = true) {
     if (!this._headers) {
       this._headers = {};
@@ -103,15 +114,15 @@ export class Context<
 
   public set<
     Key extends string,
-    Value,
-    FinalState extends State & { [K in Key]: Value },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unnecessary-type-constraint
+    Value extends any = any,
+    FinalState extends State & { [K in Key]: Value } = State & {
+      [K in Key]: Value;
+    },
   >(key: Key, value: Value) {
-    this._state = {
-      ...this._state,
-      [key]: value,
-    } as FinalState;
+    (this._state as Record<string, unknown>)[key] = value;
 
-    return this as unknown as Context<FinalState, Params>;
+    return this as unknown as Context<Values, Params, Query, FinalState>;
   }
 
   public get<Key extends keyof State, Value extends State[Key]>(key: Key) {
@@ -144,17 +155,13 @@ export class Context<
   }
 
   public noContent() {
-    this.status(StatusCode.NO_CONTENT);
-
-    return this.body(null);
+    return this.status(StatusCode.NO_CONTENT).body(null);
   }
 
   public notFound(): Response;
   public notFound(message: string): Response;
   public notFound(message?: string) {
-    this.status(StatusCode.NOT_FOUND);
-
-    return this.json({
+    return this.status(StatusCode.NOT_FOUND).json({
       message: message ?? 'Not Found',
     });
   }
@@ -162,9 +169,7 @@ export class Context<
   public forbidden(): Response;
   public forbidden(message: string): Response;
   public forbidden(message?: string) {
-    this.status(StatusCode.FORBIDDEN);
-
-    return this.json({
+    return this.status(StatusCode.FORBIDDEN).json({
       message: message ?? 'Forbidden',
     });
   }
@@ -172,9 +177,8 @@ export class Context<
   public redirect(url: string): Response;
   public redirect(url: string, statusCode: StatusCode): Response;
   public redirect(url: string, statusCode?: StatusCode) {
-    this.status(statusCode ?? StatusCode.MOVED_PERMANENTLY);
-    this.header('Location', url);
-
-    return this.body(null);
+    return this.status(statusCode ?? StatusCode.MOVED_PERMANENTLY)
+      .header('Location', url)
+      .body(null);
   }
 }

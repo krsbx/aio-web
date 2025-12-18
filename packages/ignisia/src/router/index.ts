@@ -25,19 +25,21 @@ export class Router<BasePath extends string> {
 
   public use<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(...mws: Middleware<Values, Params, Query, State>[]): this;
   public use<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, ...mws: Middleware<Values, Params, Query, State>[]): this;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public use(...args: any[]) {
@@ -56,19 +58,21 @@ export class Router<BasePath extends string> {
 
   public get<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public get<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -78,11 +82,12 @@ export class Router<BasePath extends string> {
   ): this;
   public get<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -98,19 +103,21 @@ export class Router<BasePath extends string> {
 
   public post<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public post<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -120,11 +127,12 @@ export class Router<BasePath extends string> {
   ): this;
   public post<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -140,19 +148,21 @@ export class Router<BasePath extends string> {
 
   public put<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public put<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -162,11 +172,12 @@ export class Router<BasePath extends string> {
   ): this;
   public put<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -182,19 +193,21 @@ export class Router<BasePath extends string> {
 
   public patch<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public patch<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -204,11 +217,12 @@ export class Router<BasePath extends string> {
   ): this;
   public patch<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -224,19 +238,21 @@ export class Router<BasePath extends string> {
 
   public delete<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public delete<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -246,11 +262,12 @@ export class Router<BasePath extends string> {
   ): this;
   public delete<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -266,19 +283,21 @@ export class Router<BasePath extends string> {
 
   public options<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public options<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -288,11 +307,12 @@ export class Router<BasePath extends string> {
   ): this;
   public options<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -308,19 +328,21 @@ export class Router<BasePath extends string> {
 
   public all<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(path: Path, handler: Handler<Values, Params, Query, State>): this;
   public all<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -330,11 +352,12 @@ export class Router<BasePath extends string> {
   ): this;
   public all<
     Path extends string,
-    FullPath extends `${BasePath}${Path}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${Path}` = `${BasePath}${Path}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: Path,
     ...mws: [
@@ -383,11 +406,12 @@ export class Router<BasePath extends string> {
   >(path: GroupPath, router: (router: Router<FullPath>) => void): this;
   public group<
     GroupPath extends string,
-    FullPath extends `${BasePath}${GroupPath}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${GroupPath}` = `${BasePath}${GroupPath}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: GroupPath,
     ...mws: [
@@ -397,11 +421,12 @@ export class Router<BasePath extends string> {
   ): this;
   public group<
     GroupPath extends string,
-    FullPath extends `${BasePath}${GroupPath}`,
-    Values,
-    Params extends ExtractPathParams<FullPath>,
-    Query extends Record<string, string>,
-    State extends Record<string, unknown>,
+    FullPath extends `${BasePath}${GroupPath}` = `${BasePath}${GroupPath}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Values = any,
+    Params extends ExtractPathParams<FullPath> = ExtractPathParams<FullPath>,
+    Query extends Record<string, string> = Record<string, string>,
+    State extends Record<string, unknown> = Record<string, unknown>,
   >(
     path: GroupPath,
     ...mws: [
