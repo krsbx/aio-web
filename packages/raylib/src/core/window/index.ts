@@ -1,10 +1,10 @@
 import { ptr } from 'bun:ffi';
-import type { RayLib } from '../types';
-import type { ImageValue } from '../types/image';
-import type { Vector2Value } from '../types/vector';
-import type { WidthHeight } from '../types/window';
-import { Image } from '../utils/image';
-import { Vector2 } from '../utils/vector';
+import type { RayLib } from '../../types';
+import type { ImageValue } from '../../types/image';
+import type { Vector2Value } from '../../types/vector';
+import type { WidthHeight } from '../../types/window';
+import { Image } from '../../utils/image';
+import { Vector2 } from '../../utils/vector';
 import type { ConfigFlags } from './constants';
 
 export function initWindow(
@@ -13,209 +13,209 @@ export function initWindow(
     title: string;
   }
 ) {
-  this.symbol.InitWindow(
+  this.symbols.InitWindow(
     options.width,
     options.height,
-    ptr(Buffer.from(options.title, 'utf-8'))
+    Buffer.from(options.title, 'utf-8')
   );
 }
 
 export function closeWindow(this: RayLib) {
-  this.symbol.CloseWindow();
+  this.symbols.CloseWindow();
 }
 
 export function windowShouldClose(this: RayLib) {
-  return this.symbol.WindowShouldClose();
+  return this.symbols.WindowShouldClose();
 }
 
 export function isWindowReady(this: RayLib) {
-  return this.symbol.IsWindowReady();
+  return this.symbols.IsWindowReady();
 }
 
 export function isWindowFullscreen(this: RayLib) {
-  return this.symbol.IsWindowFullscreen();
+  return this.symbols.IsWindowFullscreen();
 }
 
 export function isWindowHidden(this: RayLib) {
-  return this.symbol.IsWindowHidden();
+  return this.symbols.IsWindowHidden();
 }
 
 export function isWindowMinimized(this: RayLib) {
-  return this.symbol.IsWindowMinimized();
+  return this.symbols.IsWindowMinimized();
 }
 
 export function isWindowMaximized(this: RayLib) {
-  return this.symbol.IsWindowMaximized();
+  return this.symbols.IsWindowMaximized();
 }
 
 export function isWindowFocused(this: RayLib) {
-  return this.symbol.IsWindowFocused();
+  return this.symbols.IsWindowFocused();
 }
 
 export function isWindowResized(this: RayLib) {
-  return this.symbol.IsWindowResized();
+  return this.symbols.IsWindowResized();
 }
 
 export function isWindowState(this: RayLib, flag: ConfigFlags) {
-  return this.symbol.IsWindowState(flag);
+  return this.symbols.IsWindowState(flag);
 }
 
 export function setWindowState(this: RayLib, flags: ConfigFlags) {
-  this.symbol.SetWindowState(flags);
+  this.symbols.SetWindowState(flags);
 }
 
 export function clearWindowState(this: RayLib, flags: ConfigFlags) {
-  this.symbol.ClearWindowState(flags);
+  this.symbols.ClearWindowState(flags);
 }
 
 export function toggleFullscreen(this: RayLib) {
-  this.symbol.ToggleFullscreen();
+  this.symbols.ToggleFullscreen();
 }
 
 export function toggleBorderlessWindowed(this: RayLib) {
-  this.symbol.ToggleBorderlessWindowed();
+  this.symbols.ToggleBorderlessWindowed();
 }
 
 export function maximizeWindow(this: RayLib) {
-  this.symbol.MaximizeWindow();
+  this.symbols.MaximizeWindow();
 }
 
 export function minimizeWindow(this: RayLib) {
-  this.symbol.MinimizeWindow();
+  this.symbols.MinimizeWindow();
 }
 
 export function restoreWindow(this: RayLib) {
-  this.symbol.RestoreWindow();
+  this.symbols.RestoreWindow();
 }
 
 export function setWindowIcon(this: RayLib, image: ImageValue) {
   const chunks = Image.pack(image);
 
-  this.symbol.SetWindowIcon(chunks);
+  this.symbols.SetWindowIcon(chunks);
 }
 
 export function setWindowIcons(this: RayLib, images: ImageValue[]) {
   const count = images.length;
   const buffer = Image.packs(images);
 
-  this.symbol.SetWindowIcons(ptr(buffer), count);
+  this.symbols.SetWindowIcons(ptr(buffer), count);
 }
 
 export function setWindowTitle(this: RayLib, title: string) {
-  this.symbol.SetWindowTitle(ptr(Buffer.from(title, 'utf-8')));
+  this.symbols.SetWindowTitle(ptr(Buffer.from(title, 'utf-8')));
 }
 
 export function setWindowPosition(this: RayLib, options: Vector2Value) {
-  this.symbol.SetWindowPosition(options.x, options.y);
+  this.symbols.SetWindowPosition(options.x, options.y);
 }
 
 export function setWindowMonitor(this: RayLib, monitor: number) {
-  this.symbol.SetWindowMonitor(monitor);
+  this.symbols.SetWindowMonitor(monitor);
 }
 
 export function setWindowMinSize(this: RayLib, options: WidthHeight) {
-  this.symbol.SetWindowMinSize(options.width, options.height);
+  this.symbols.SetWindowMinSize(options.width, options.height);
 }
 
 export function setWindowMaxSize(this: RayLib, options: WidthHeight) {
-  this.symbol.SetWindowMaxSize(options.width, options.height);
+  this.symbols.SetWindowMaxSize(options.width, options.height);
 }
 
 export function setWindowSize(this: RayLib, options: WidthHeight) {
-  this.symbol.SetWindowSize(options.width, options.height);
+  this.symbols.SetWindowSize(options.width, options.height);
 }
 
 export function setWindowOpacity(this: RayLib, opacity: number) {
-  this.symbol.SetWindowOpacity(opacity);
+  this.symbols.SetWindowOpacity(opacity);
 }
 
 export function setWindowFocused(this: RayLib) {
-  this.symbol.SetWindowFocused();
+  this.symbols.SetWindowFocused();
 }
 
 export function getWindowHandle(this: RayLib) {
-  return this.symbol.GetWindowHandle();
+  return this.symbols.GetWindowHandle();
 }
 
 export function getScreenWidth(this: RayLib) {
-  return this.symbol.GetScreenWidth();
+  return this.symbols.GetScreenWidth();
 }
 export function getScreenHeight(this: RayLib) {
-  return this.symbol.GetScreenHeight();
+  return this.symbols.GetScreenHeight();
 }
 export function getRenderWidth(this: RayLib) {
-  return this.symbol.GetRenderWidth();
+  return this.symbols.GetRenderWidth();
 }
 export function getRenderHeight(this: RayLib) {
-  return this.symbol.GetRenderHeight();
+  return this.symbols.GetRenderHeight();
 }
 export function getMonitorCount(this: RayLib) {
-  return this.symbol.GetMonitorCount();
+  return this.symbols.GetMonitorCount();
 }
 export function getCurrentMonitor(this: RayLib) {
-  return this.symbol.GetCurrentMonitor();
+  return this.symbols.GetCurrentMonitor();
 }
 
 export function getMonitorPosition(this: RayLib, monitor: number) {
-  const chunk = this.symbol.GetMonitorPosition(monitor);
+  const chunk = this.symbols.GetMonitorPosition(monitor);
 
   return Vector2.unpack(chunk);
 }
 
 export function getMonitorWidth(this: RayLib, monitor: number) {
-  return this.symbol.GetMonitorWidth(monitor);
+  return this.symbols.GetMonitorWidth(monitor);
 }
 
 export function getMonitorHeight(this: RayLib, monitor: number) {
-  return this.symbol.GetMonitorHeight(monitor);
+  return this.symbols.GetMonitorHeight(monitor);
 }
 
 export function getMonitorPhysicalWidth(this: RayLib, monitor: number) {
-  return this.symbol.GetMonitorPhysicalWidth(monitor);
+  return this.symbols.GetMonitorPhysicalWidth(monitor);
 }
 
 export function getMonitorPhysicalHeight(this: RayLib, monitor: number) {
-  return this.symbol.GetMonitorPhysicalHeight(monitor);
+  return this.symbols.GetMonitorPhysicalHeight(monitor);
 }
 
 export function getMonitorRefreshRate(this: RayLib, monitor: number) {
-  return this.symbol.GetMonitorRefreshRate(monitor);
+  return this.symbols.GetMonitorRefreshRate(monitor);
 }
 
-export function GetWindowPosition(this: RayLib) {
-  const chunk = this.symbol.GetWindowPosition();
+export function getWindowPosition(this: RayLib) {
+  const chunk = this.symbols.GetWindowPosition();
 
   return Vector2.unpack(chunk);
 }
 
 export function getWindowScaleDPI(this: RayLib) {
-  const chunk = this.symbol.GetWindowScaleDPI();
+  const chunk = this.symbols.GetWindowScaleDPI();
 
   return Vector2.unpack(chunk);
 }
 
 export function getMonitorName(this: RayLib, monitor: number) {
-  return this.symbol.GetMonitorName(monitor);
+  return this.symbols.GetMonitorName(monitor);
 }
 
 export function setClipboardText(this: RayLib, text: string) {
-  this.symbol.SetClipboardText(ptr(Buffer.from(text, 'utf-8')));
+  this.symbols.SetClipboardText(ptr(Buffer.from(text, 'utf-8')));
 }
 
 export function getClipboardText(this: RayLib) {
-  return this.symbol.GetClipboardText();
+  return this.symbols.GetClipboardText();
 }
 
 export function getClipboardImage(this: RayLib) {
-  const chunks = this.symbol.GetClipboardImage();
+  const chunks = this.symbols.GetClipboardImage();
 
   return Image.unpackFromPointer(chunks);
 }
 
 export function enableEventWaiting(this: RayLib) {
-  this.symbol.EnableEventWaiting();
+  this.symbols.EnableEventWaiting();
 }
 
 export function disableEventWaiting(this: RayLib) {
-  this.symbol.DisableEventWaiting();
+  this.symbols.DisableEventWaiting();
 }
