@@ -1,8 +1,8 @@
 import { dlopen, type ConvertFns, type Library } from 'bun:ffi';
 import { CoreDefinition } from './core/definition';
-import * as coreFns from './core/index';
+import { RayLibCore, type RayLibCore as RayLibCoreType } from './core/index';
 
-export class RayLibClient {
+class RayLibClientBase {
   public client: Library<CoreDefinition>;
   public symbols: ConvertFns<CoreDefinition>;
 
@@ -14,8 +14,16 @@ export class RayLibClient {
     this.client = client;
     this.symbols = client.symbols;
 
-    Object.entries(coreFns).forEach(([name, fn]) => {
+    // Bind all RayLibCore methods to this instance
+    Object.entries(RayLibCore).forEach(([name, fn]) => {
       (this as Record<string, unknown>)[name] = fn.bind(this as never);
     });
   }
 }
+
+interface RayLibClient extends RayLibClientBase, RayLibCoreType {}
+
+// Export the constructor
+export const RayLibClient = RayLibClientBase as new (
+  ...args: ConstructorParameters<typeof RayLibClientBase>
+) => RayLibClient;
